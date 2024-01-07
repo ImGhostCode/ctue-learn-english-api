@@ -1,0 +1,30 @@
+@urlDev=http://localhost:8000/apis/irregular-verb
+
+### Create comunication phrase
+POST  {{urlDev}}/
+Content-Type: application/json
+
+{
+    "v1": "lm02",
+    "v2": "argerdf",
+    "v3": "hg",
+    "mean": "reecvr"
+}
+
+### Get all comunication phrases
+GET   {{urlDev}}/
+
+### Get comunication phrase
+GET   {{urlDev}}/2
+
+### Update comunication phrase
+PATCH {{urlDev}}/2
+Content-Type: application/json
+
+{
+    "content": "test3",
+    "mean": "test1"
+}
+
+### Delete comunication phrase
+DELETE  {{urlDev}}/2

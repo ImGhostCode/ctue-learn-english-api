@@ -1,0 +1,19 @@
+version: '3.8'
+services:
+  ctue-dev-database:
+    image: postgres
+    container_name: ctue-dev-database
+    ports:
+      - 5434:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: test123456
+      POSTGRES_DB: ctue
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - ctue-network
+networks:
+  ctue-network:
+volumes:
+  pgdata:

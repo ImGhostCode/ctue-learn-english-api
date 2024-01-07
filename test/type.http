@@ -1,0 +1,54 @@
+@urlDev=http://localhost:8000/apis/type
+
+### Create level
+POST  {{urlDev}}/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjUsImVtYWlsIjoidGVzdEBnbWFpbC5jb20iLCJpYXQiOjE3MDAxMjIwMTMsImV4cCI6MTcwMDEyOTIxM30.Bk2atfgkKQ27p74vbqPRaO8zH41v_vzpmU9VUfpeJgE
+Content-Type: application/json
+
+{
+    //"name": "Noun - Danh từ",
+    //"isWord": true
+    //"name": "Adjective - Tính từ",
+    //"isWord": true
+
+    //"name": "Câu đơn",
+    //"isWord": false
+
+    //"name": "Câu ghép",
+    //"isWord": false 
+
+    //"name": "Câu phức" ,
+    //"isWord": false
+
+//"Danh từ (Noun)"
+//"Đại từ (Pronoun)"
+//"Tính từ (Adjective)"
+//"Động Từ (Verb)"
+//"Trạng Từ (Adverb)"
+//"Từ hạn định (Determiner)"
+//"Giới từ (Preposition)"
+//"Liên từ (Conjunction)"
+
+
+
+//"Câu phức tổng hợp"
+//"Câu trần thuật"
+//"Câu nghi vấn"
+//"Câu hỏi có - không bắt đầu bằng trợ động từ"
+//"Câu hỏi wh-"
+}
+
+### Get all levels
+GET   {{urlDev}}/false
+
+### Update level
+PATCH {{urlDev}}/3
+Content-Type: application/json
+
+{
+    "name": "test 2",
+    "isWord": true
+}
+
+### Delete level
+DELETE  {{urlDev}}/2

@@ -1,0 +1,44 @@
+@urlDev=http://localhost:8000/apis/specialization
+
+### Create specialization### Create specialization
+POST  {{urlDev}}/
+Content-Type: application/json
+
+{
+   //"name": "Công nghệ sinh học (Biotechnology)"
+    //"name": "Công nghệ thông tin (Information Technology)"
+   // "name": "Công nghệ thực phẩm (Food Technology)"
+    //"name": "Giải trí (Entertainment)"
+    //"name": "Kinh tế học (Economics)"
+    //"name": "Kế toán (Accounting)"
+   //"name": "Kỹ thuật hoá học (Chemical Engineering)"
+   //"name": "Mỹ thuật (Fine Arts Industry)"
+    //"name": "Quản trị khách sạn (Hotel Management)"
+   // "name": "Quản trị kinh doanh (Business Adminstration)"
+    //"name": "Quản trị nhân lực (Human Resource Management)"
+   // "name": "Thiết kế (Design UI/UX)"
+    //"name": "Thương mại quốc tế (International Trade)"
+   // "name": "Thương mại điện tử (E-Commerce)"
+    //"name": "Tiếng Anh thương mại (Business English)"
+    //"name": "Tài chính ngân hàng (Finance & Banking)"
+    //"name": "Văn hoá học (Culturology)"
+   //"name": "Xây dựng (Construction Industry)"
+   //"name": "Xã hội học (Sociology)"
+//"name": "Không"
+   
+}
+
+### Get all specializations
+GET   {{urlDev}}/
+
+### Update specialization
+PATCH {{urlDev}}/2
+Content-Type: application/json
+
+{
+    "name": "test31"
+}
+
+### Delete specialization
+DELETE  {{urlDev}}/2
+

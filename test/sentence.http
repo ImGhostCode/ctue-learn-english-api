@@ -1,0 +1,31 @@
+@urlDev=http://localhost:8000/apis/sentence
+
+### Create sentence
+POST  {{urlDev}}/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjUsImVtYWlsIjoidGVzdEBnbWFpbC5jb20iLCJpYXQiOjE2OTk3OTU0MjQsImV4cCI6MTY5OTgwMjYyNH0.mpyrIaj4J8XI3e-k--iHLrPqS5b-5GHS7-1Hmx9k-nw
+Content-Type: application/json
+
+{
+    "typeId": 2,
+    "topicId": [2],
+    "content": "content test 6",
+    "mean": "mean test",
+    "note": ""
+}
+
+### Get all sentences
+GET   {{urlDev}}?topic=1&&topic=2
+
+### Get one sentence
+GET   {{urlDev}}/2
+
+### Update sentenced
+PATCH {{urlDev}}/3
+Content-Type: application/json
+
+{
+    "typeId": 2
+}
+
+### Delete sentence
+DELETE  {{urlDev}}/2

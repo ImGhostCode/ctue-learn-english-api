@@ -1,0 +1,46 @@
+@urlDev=http://localhost:8000/contribution
+
+### create contribution
+POST  {{urlDev}}/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidGVzdEBnbWFpbC5jb20iLCJpYXQiOjE2OTc3MTY5MDEsImV4cCI6MTY5NzcyNDEwMX0.Xj4_X8qdA5L28p0MrllFcUAFleBj0EDNe_MiLfck7zc
+Content-Type: application/json
+
+{
+    "type": "sentence",
+    "content": {
+        "typeId": 1,
+        "topicId":[1],
+        "levelId": 1,
+        "specializationId": 1,
+        "content": "test 3",
+        "mean":"test 1" ,
+        "note": "", 
+        "phonetic":"", 
+        "examples": [], 
+        "picture": "",
+        "synonyms": "",
+        "antonyms": ""
+    }
+}
+
+### get all contributions
+GET  {{urlDev}}/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidGVzdEBnbWFpbC5jb20iLCJpYXQiOjE2OTc3MTY5MDEsImV4cCI6MTY5NzcyNDEwMX0.Xj4_X8qdA5L28p0MrllFcUAFleBj0EDNe_MiLfck7zc
+
+###  get contribution
+GET  {{urlDev}}/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidGVzdEBnbWFpbC5jb20iLCJpYXQiOjE2OTc3MTc5MjEsImV4cCI6MTY5NzcyNTEyMX0.hzqgOC5L6LLAUqDCoebzFAyhZCvP78yDpuhMOjC9X-M
+
+
+### verify contribute
+PATCH  {{urlDev}}/4
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidGVzdEBnbWFpbC5jb20iLCJpYXQiOjE2OTc3MTY5MDEsImV4cCI6MTY5NzcyNDEwMX0.Xj4_X8qdA5L28p0MrllFcUAFleBj0EDNe_MiLfck7zc
+Content-Type: application/json
+
+{
+    "status": "Phê duyệt"
+}
+
+### delete contribution
+DELETE {{urlDev}}/2
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidGVzdEBnbWFpbC5jb20iLCJpYXQiOjE2OTc3MTY5MDEsImV4cCI6MTY5NzcyNDEwMX0.Xj4_X8qdA5L28p0MrllFcUAFleBj0EDNe_MiLfck7zc

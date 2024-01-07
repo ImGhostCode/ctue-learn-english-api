@@ -1,0 +1,59 @@
+@urlDev=http://localhost:8000/apis/level
+
+### Create level### Create level
+POST  {{urlDev}}/
+Content-Type: application/json
+
+{
+    "name": "A1"
+}
+### Create level
+POST  {{urlDev}}/
+Content-Type: application/json
+
+{
+    "name": "A2"
+}
+### Create level
+POST  {{urlDev}}/
+Content-Type: application/json
+
+{
+    "name": "B1"
+}
+### Create level
+POST  {{urlDev}}/
+Content-Type: application/json
+
+{
+    "name": "B2"
+}
+### Create level
+POST  {{urlDev}}/
+Content-Type: application/json
+
+{
+    "name": "C1"
+}
+### Create level
+POST  {{urlDev}}/
+Content-Type: application/json
+
+{
+    "name": "C2"
+}
+
+### Get all levels
+GET   {{urlDev}}/
+
+### Update level
+PATCH {{urlDev}}/2
+Content-Type: application/json
+
+{
+    "name": "A1"
+}
+
+### Delete level
+DELETE  {{urlDev}}/2
+

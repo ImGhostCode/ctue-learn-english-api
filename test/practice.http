@@ -1,0 +1,4 @@
+@urlDev=http://localhost:8000/apis/practice
+
+
+GET   {{urlDev}}/

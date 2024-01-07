@@ -1,0 +1,137 @@
+@urlDev=http://localhost:8000/apis/topic
+
+### Create topic
+POST  {{urlDev}}/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjUsImVtYWlsIjoidGVzdEBnbWFpbC5jb20iLCJpYXQiOjE3MDAxMjIwMTMsImV4cCI6MTcwMDEyOTIxM30.Bk2atfgkKQ27p74vbqPRaO8zH41v_vzpmU9VUfpeJgE
+Content-Type: application/json
+
+{
+
+    //"name": "Giao tiếp thông dụng" ,
+    //"isWord": false,
+    //"image": ""
+ 
+    // "name": "Chào hỏi",
+    // "isWord": false,
+    // "image": ""
+
+    //"name": "Du lịch - phương hướng",
+    //"isWord": false,
+    //"image": ""
+
+    //"name": "Con số - tiền bạc",
+    // "isWord": false,
+    // "image": ""
+
+    //"name": "Địa điểm",
+    // "isWord": false,
+    // "image": ""
+
+    //"name": "Thời gian, ngày tháng"
+    // "isWord": false,
+    // "image": ""
+
+    //"name": "Điện thoại - Internet - Thư"
+    // "isWord": false,
+    // "image": ""
+
+    //"name": "Chỗ ăn ở"
+    // "isWord": false,
+    // "image": ""
+
+    //"name": "Ăn uống"
+    // "isWord": false,
+    // "image": ""
+
+    //"name": "Kết bạn"
+    // "isWord": false,
+    // "image": ""
+
+    //"name": "Giải trí"
+    // "isWord": false,
+    // "image": ""
+
+    //"name": "Mua sắm"
+    // "isWord": false,
+    // "image": ""
+
+    //"name": "Khó khăn giao tiếp"
+    // "isWord": false,
+    // "image": ""
+
+    //"name": "Khẩn cấp, Sức khoẻ"
+    // "isWord": false,
+    // "image": ""
+
+    //"name": "Câu hỏi thông thường"
+    // "isWord": false,
+    // "image": ""
+
+    //"name": "Việc làm"
+    // "isWord": false,
+    // "image": ""
+
+    //"name": "Thời tiết"
+    // "isWord": false,
+    // "image": ""
+
+    //"name": "Khác",
+    // "isWord": false,
+    // "image": ""
+
+    //"name": "Thực vật",
+    // "isWord": true,
+    // "image": "tree"
+
+    //"name": "Đời sống",
+    // "isWord": true,
+    // "image": "social"
+    
+    //"name": "Sức khoẻ",
+    // "isWord": true,
+    // "image": "health"
+    
+    //"name": "Ẩm thực",
+    // "isWord": true,
+    // "image": "food"
+    
+
+
+//
+//"Sự vật"
+//"Động vật"
+//"Kỹ năng"
+//"Công nghệ"
+//"Con người"
+//"Công việc"
+//"Giải trí"
+//"Sở thích"
+//"Thể thao"
+//"Du lịch"
+//"Quốc gia"
+//"Màu sắc"
+//"Tín ngưỡng"
+//"Thú vị"
+//"TOEIC"
+//"IELTS"
+//"Thiên nhiên"
+//"Mối quan hệ"
+//"Trang phục"
+//"Giáo dục"
+//"Khác"
+//
+}
+### Get all topics
+GET   {{urlDev}}/
+
+### Update topic
+PATCH {{urlDev}}/3
+Content-Type: application/json
+
+{
+    "name": "test31"
+}
+
+### Delete topic
+DELETE  {{urlDev}}/2
+

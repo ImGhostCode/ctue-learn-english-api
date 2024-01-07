@@ -1,0 +1,48 @@
+@urlDev=http://localhost:8000/apis/word
+
+### Create word
+POST  {{urlDev}}/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjUsImVtYWlsIjoidGVzdEBnbWFpbC5jb20iLCJpYXQiOjE3MDAxMjIwMTMsImV4cCI6MTcwMDEyOTIxM30.Bk2atfgkKQ27p74vbqPRaO8zH41v_vzpmU9VUfpeJgE
+Content-Type: application/json
+
+{
+    "typeId": 2,
+    "topicId": [2],          
+    "levelId": 2,
+    "specializationId": 2,
+    "content": "76ffffdf",
+    "mean": " f cdsd",
+    "note": "test",
+    "examples": ["test", "test1"]
+}
+
+### Get all words
+GET   {{urlDev}}?sort=desc
+
+### Get word pack
+
+GET  {{urlDev}}/words-pack?topic=13&&numSentence=50
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsImVtYWlsIjoidGVzdDJAZ21haWwuY29tIiwiaWF0IjoxNzAwMjA4Mzc2LCJleHAiOjE3MDAyMTU1NzZ9.a44CRL0lfuyeteLXgjge6ohfpOFTmIqZzIPh4NHLzKA
+
+### Get one word
+GET   {{urlDev}}/3
+
+### Update wordd
+PATCH {{urlDev}}/3
+Content-Type: application/json
+
+{
+    "typeId": 1,
+    "topicId": [1],          
+    "levelId": 1,
+    "specializationId": 1,
+    "content": "hello world 56",
+    "mean": "test 1",
+    "note": "test 1",
+    "phonetic": "test 1",
+    "examples": ["test"],
+    "picture": "test"
+}
+
+### Delete word
+DELETE  {{urlDev}}/2

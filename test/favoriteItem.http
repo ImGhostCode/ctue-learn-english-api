@@ -1,0 +1,23 @@
+@urlDev=http://localhost:8000/favorite-item
+
+### add to favorite item
+PATCH  {{urlDev}}/add
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidGVzdEBnbWFpbC5jb20iLCJpYXQiOjE2OTgwNjkwMjksImV4cCI6MTY5ODA3NjIyOX0.C9cFI1nPix3uHXTMoAdHkMIrI9ERJqp1ki51svMPgU0
+Content-Type: application/json
+
+{
+    "sentenceId": 7
+}
+
+### remove to favorite item
+PATCH  {{urlDev}}/remove
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidGVzdEBnbWFpbC5jb20iLCJpYXQiOjE2OTgwNjkwMjksImV4cCI6MTY5ODA3NjIyOX0.C9cFI1nPix3uHXTMoAdHkMIrI9ERJqp1ki51svMPgU0
+Content-Type: application/json
+
+{
+    "sentenceId": 7
+}
+
+### Get all favorites item by userId
+GET   {{urlDev}}/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidGVzdEBnbWFpbC5jb20iLCJpYXQiOjE2OTgwNjkwMjksImV4cCI6MTY5ODA3NjIyOX0.C9cFI1nPix3uHXTMoAdHkMIrI9ERJqp1ki51svMPgU0

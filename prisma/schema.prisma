@@ -1,0 +1,204 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// psql -h localhost -p 5432 -U postgres
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model FavoriteItem {
+  id Int @id @default(autoincrement())
+
+  userId Int?
+
+  Word     Word[]
+  Sentence Sentence[]
+  User     User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String?
+  avt       String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Account      Account[]
+  Sentence     Sentence[]
+  Word         Word[]
+  FavoriteList FavoriteItem[]
+  Contribution Contribution[]
+  Practice     Practice[]
+
+  @@map("users")
+}
+
+model Account {
+  email String @unique
+
+  userId Int
+
+  password    String
+  authType    String
+  accountType String
+  isBan       Boolean @default(false)
+  feedback    String?
+
+  User User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("accounts")
+}
+
+model VerifyCode {
+  id        Int      @id @default(autoincrement())
+  email     String
+  code      Int
+  createdAt DateTime @default(now())
+
+  @@map("verifyCodes")
+}
+
+model Contribution {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  type      String
+  content   Json
+  status    Int?
+  feedback  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  User User @relation(fields: [userId], references: [id])
+
+  @@map("contributions")
+}
+
+model Sentence {
+  id      Int     @id @default(autoincrement())
+  typeId  Int
+  userId  Int?
+  content String
+  mean    String
+  note    String?
+
+  Topic        Topic[]
+  FavoriteItem FavoriteItem[]
+  Practice     Practice[]
+  User         User?          @relation(fields: [userId], references: [id])
+  Type         Type           @relation(fields: [typeId], references: [id])
+
+  @@map("sentences")
+}
+
+model Word {
+  id Int @id @default(autoincrement())
+
+  typeId           Int
+  levelId          Int
+  specializationId Int
+  userId           Int?
+
+  content  String
+  mean     String
+  note     String?
+  phonetic String?
+  picture  String?
+  examples String[]
+  synonyms String[]
+  antonyms String[]
+
+  FavoriteItem   FavoriteItem[]
+  Topic          Topic[]
+  Practice       Practice[]
+  Type           Type           @relation(fields: [typeId], references: [id])
+  Level          Level          @relation(fields: [levelId], references: [id])
+  Specialization Specialization @relation(fields: [specializationId], references: [id])
+  User           User?          @relation(fields: [userId], references: [id])
+
+  @@map("words")
+}
+
+model Topic {
+  id     Int     @id @default(autoincrement())
+  name   String
+  isWord Boolean
+  image  String
+
+  Sentence Sentence[]
+  Word     Word[]
+  Practice Practice[]
+
+  @@map("topics")
+}
+
+model Level {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  Word     Word[]
+  Practice Practice[]
+
+  @@map("levels")
+}
+
+model Specialization {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  Word     Word[]
+  Practice Practice[]
+
+  @@map("specializations")
+}
+
+model Type {
+  id     Int     @id @default(autoincrement())
+  name   String
+  isWord Boolean
+
+  Sentence Sentence[]
+  Word     Word[]
+  Practice Practice[]
+
+  @@map("types")
+}
+
+model IrregularVerb {
+  id   Int    @id @default(autoincrement())
+  v1   String
+  v2   String
+  v3   String
+  mean String
+
+  @@map("irregularVerbs")
+}
+
+model Practice {
+  id Int @id @default(autoincrement())
+
+  userId           Int
+  typeId           Int?
+  levelId          Int?
+  specializationId Int?
+
+  nRight            Int
+  nWrong            Int
+  nRightConsecutive Int
+  numOfSentence     Int
+  createdAt         DateTime @default(now())
+
+  Words          Word[]
+  Sentences      Sentence[]
+  Topic          Topic[]
+  User           User?           @relation(fields: [userId], references: [id])
+  Type           Type?           @relation(fields: [typeId], references: [id])
+  Level          Level?          @relation(fields: [levelId], references: [id])
+  Specialization Specialization? @relation(fields: [specializationId], references: [id])
+
+  @@map("practices")
+}

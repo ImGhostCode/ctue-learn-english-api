@@ -1,0 +1,21 @@
+@urlDev=http://localhost:8000/apis/auth
+
+### Register
+POST  {{urlDev}}/register
+Content-Type: application/json
+
+{
+    "email": "test8@gmail.com",
+    "password": "123456",
+    "name": "test"
+}
+
+
+### Login
+POST  {{urlDev}}/login
+Content-Type: application/json
+
+{
+    "email": "test25@gmail.com",
+    "password": "123456"
+}
