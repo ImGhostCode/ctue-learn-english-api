@@ -1,19 +1,48 @@
 version: '3.8'
 services:
-  ctue-dev-database:
+  postgres:
     image: postgres
-    container_name: ctue-dev-database
+    container_name: ctuedb
+    restart: always
     ports:
-      - 5434:5432
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: test123456
-      POSTGRES_DB: ctue
+      - "5432:5432"
+    env_file:
+      - .env
     volumes:
       - pgdata:/var/lib/postgresql/data
-    networks:
-      - ctue-network
-networks:
-  ctue-network:
+    # networks:
+    #   - ctue-network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nestjs-app
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - '${PORT}:${PORT}'
+    depends_on:
+      - postgres
+      - pgadmin
+    volumes:
+      - ./src:/app/src
+    # networks:
+    #   - ctue-network
+
+  pgadmin:
+    container_name: pgadmin4_container
+    image: dpage/pgadmin4
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+
+# networks:
+#   ctue-network:
 volumes:
   pgdata:
