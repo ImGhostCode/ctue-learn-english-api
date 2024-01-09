@@ -1,60 +1,81 @@
-import { IsArray, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength } from "class-validator"
-import { CONSTANTS_MAX } from "../../global"
-import { Transform, TransformFnParams, Type } from "class-transformer"
+import {
+  IsArray,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  MaxLength,
+} from 'class-validator';
+import { CONSTANTS_MAX } from '../../global';
+import { Transform, TransformFnParams, Type } from 'class-transformer';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateWordDto {
-    @IsOptional()
-    @IsNumber()
-    userId?: number
+  @ApiProperty()
+  @IsOptional()
+  @IsNumber()
+  userId?: number;
 
-    @IsNumber()
-    @IsNotEmpty()
-    typeId: number
+  @ApiProperty()
+  @IsNumber()
+  @IsNotEmpty()
+  typeId: number;
 
-    @IsOptional()
-    @IsArray()
-    topicId: number[]
+  @ApiProperty()
+  @IsOptional()
+  @IsArray()
+  topicId: number[];
 
-    @IsNumber()
-    @IsNotEmpty()
-    levelId: number
+  @ApiProperty()
+  @IsNumber()
+  @IsNotEmpty()
+  levelId: number;
 
-    @IsNumber()
-    @IsNotEmpty()
-    specializationId: number
+  @ApiProperty()
+  @IsNumber()
+  @IsNotEmpty()
+  specializationId: number;
 
-    @IsString()
-    @IsNotEmpty()
-    @MaxLength(CONSTANTS_MAX.WORD_CONTENT_LEN)
-    content: string
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(CONSTANTS_MAX.WORD_CONTENT_LEN)
+  content: string;
 
-    @IsString()
-    @IsNotEmpty()
-    @MaxLength(CONSTANTS_MAX.WORD_MEAN_LEN)
-    mean: string
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(CONSTANTS_MAX.WORD_MEAN_LEN)
+  mean: string;
 
-    @IsOptional()
-    @IsString()
-    @MaxLength(CONSTANTS_MAX.WORD_NOTE_LEN)
-    note?: string
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  @MaxLength(CONSTANTS_MAX.WORD_NOTE_LEN)
+  note?: string;
 
-    @IsOptional()
-    @IsString()
-    phonetic?: string
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  phonetic?: string;
 
-    @IsOptional()
-    @IsArray()
-    examples?: string[]
+  @ApiProperty()
+  @IsOptional()
+  @IsArray()
+  examples?: string[];
 
-    @IsOptional()
-    @IsArray()
-    synonyms?: string[]
+  @ApiProperty()
+  @IsOptional()
+  @IsArray()
+  synonyms?: string[];
 
-    @IsOptional()
-    @IsArray()
-    antonyms?: string[]
+  @ApiProperty()
+  @IsOptional()
+  @IsArray()
+  antonyms?: string[];
 
-    @IsOptional()
-    @IsString()
-    picture?: string
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  picture?: string;
 }

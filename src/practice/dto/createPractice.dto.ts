@@ -1,36 +1,45 @@
-import { Optional } from "@nestjs/common"
-import { IsArray, IsNotEmpty, IsNumber, IsOptional } from "class-validator"
+import { Optional } from '@nestjs/common';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsArray, IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
 
 export class CreatePraticeDto {
-    @IsOptional()
-    @IsNumber()
-    typeId: number
+  @ApiProperty()
+  @IsOptional()
+  @IsNumber()
+  typeId: number;
 
-    @IsOptional()
-    @IsNumber()
-    levelId: number
+  @ApiProperty()
+  @IsOptional()
+  @IsNumber()
+  levelId: number;
 
-    @IsOptional()
-    @IsNumber()
-    specializationId: number
+  @ApiProperty()
+  @IsOptional()
+  @IsNumber()
+  specializationId: number;
 
-    @IsNotEmpty()
-    @IsNumber()
-    nRight: number
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsNumber()
+  nRight: number;
 
-    @IsNotEmpty()
-    @IsNumber()
-    nWrong: number
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsNumber()
+  nWrong: number;
 
-    @IsNotEmpty()
-    @IsNumber()
-    nRightConsecutive: number
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsNumber()
+  nRightConsecutive: number;
 
-    @IsNotEmpty()
-    @IsNumber()
-    numOfSentence: number
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsNumber()
+  numOfSentence: number;
 
-    @IsNotEmpty()
-    @IsArray()
-    words: []
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsArray()
+  words: [];
 }

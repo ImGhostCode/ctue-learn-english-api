@@ -1,13 +1,25 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  ParseIntPipe,
+  UseGuards,
+} from '@nestjs/common';
 import { LevelService } from './level.service';
 import { CreateLevelDto, UpdateLevelDto } from './dto';
 import { MyJWTGuard, RolesGuard } from '../auth/guard';
 import { Roles } from '../auth/decorator';
 import { ACCOUNT_TYPES } from '../global';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Level')
 @Controller('level')
 export class LevelController {
-  constructor(private levelService: LevelService) { }
+  constructor(private levelService: LevelService) {}
 
   @Post()
   @UseGuards(MyJWTGuard, RolesGuard)
@@ -24,7 +36,10 @@ export class LevelController {
   @Patch(':id')
   @UseGuards(MyJWTGuard, RolesGuard)
   @Roles(ACCOUNT_TYPES.ADMIN)
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateLevelDto: UpdateLevelDto) {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateLevelDto: UpdateLevelDto,
+  ) {
     return this.levelService.update(id, updateLevelDto);
   }
 

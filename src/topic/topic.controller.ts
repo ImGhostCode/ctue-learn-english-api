@@ -1,13 +1,25 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  ParseIntPipe,
+  UseGuards,
+} from '@nestjs/common';
 import { TopicService } from './topic.service';
 import { CreateTopicDto, UpdateTopicDto } from './dto';
 import { MyJWTGuard, RolesGuard } from '../auth/guard';
 import { Roles } from '../auth/decorator';
 import { ACCOUNT_TYPES } from '../global';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Topic')
 @Controller('topic')
 export class TopicController {
-  constructor(private topicService: TopicService) { }
+  constructor(private topicService: TopicService) {}
 
   @Post()
   @UseGuards(MyJWTGuard, RolesGuard)
@@ -24,7 +36,10 @@ export class TopicController {
   @Patch(':id')
   @UseGuards(MyJWTGuard, RolesGuard)
   @Roles(ACCOUNT_TYPES.ADMIN)
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateTopicDto: UpdateTopicDto) {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateTopicDto: UpdateTopicDto,
+  ) {
     return this.topicService.update(id, updateTopicDto);
   }
 

@@ -1,13 +1,25 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  ParseIntPipe,
+  UseGuards,
+} from '@nestjs/common';
 import { SpecializationService } from './specialization.service';
 import { CreateSpecializationDto, UpdateSpecializationDto } from './dto';
 import { MyJWTGuard, RolesGuard } from '../auth/guard';
 import { Roles } from '../auth/decorator';
 import { ACCOUNT_TYPES } from '../global';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Specialization')
 @Controller('specialization')
 export class SpecializationController {
-  constructor(private readonly specializationService: SpecializationService) { }
+  constructor(private readonly specializationService: SpecializationService) {}
 
   @Post()
   @UseGuards(MyJWTGuard, RolesGuard)
@@ -24,7 +36,10 @@ export class SpecializationController {
   @Patch(':id')
   @UseGuards(MyJWTGuard, RolesGuard)
   @Roles(ACCOUNT_TYPES.ADMIN)
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateSpecializationDto: UpdateSpecializationDto) {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateSpecializationDto: UpdateSpecializationDto,
+  ) {
     return this.specializationService.update(id, updateSpecializationDto);
   }
 

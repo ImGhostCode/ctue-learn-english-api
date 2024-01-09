@@ -1,7 +1,9 @@
-import { IsNotEmpty, IsNumber, IsOptional } from "class-validator";
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
 
 export class ToggleFavoritesListDto {
-    @IsNotEmpty()
-    @IsNumber()
-    wordId?: number
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsNumber()
+  wordId?: number;
 }

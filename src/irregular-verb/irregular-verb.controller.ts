@@ -1,13 +1,26 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseGuards, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  ParseIntPipe,
+  UseGuards,
+  Query,
+} from '@nestjs/common';
 import { IrregularVerbService } from './irregular-verb.service';
 import { CreateIrregularVerbDto, UpdateIrregularVerbDto } from './dto';
 import { MyJWTGuard, RolesGuard } from '../auth/guard';
 import { Roles } from '../auth/decorator';
 import { ACCOUNT_TYPES } from '../global';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Irregular Verb')
 @Controller('irregular-verb')
 export class IrregularVerbController {
-  constructor(private irregularVerbService: IrregularVerbService) { }
+  constructor(private irregularVerbService: IrregularVerbService) {}
 
   @Post()
   @UseGuards(MyJWTGuard, RolesGuard)
@@ -17,7 +30,7 @@ export class IrregularVerbController {
   }
 
   @Get()
-  findAll(@Query() option: { page: number, sort: any, key: string }) {
+  findAll(@Query() option: { page: number; sort: any; key: string }) {
     return this.irregularVerbService.findAll(option);
   }
 
@@ -29,7 +42,10 @@ export class IrregularVerbController {
   @Patch(':id')
   @UseGuards(MyJWTGuard, RolesGuard)
   @Roles(ACCOUNT_TYPES.ADMIN)
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateIrregularVerbDto: UpdateIrregularVerbDto) {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateIrregularVerbDto: UpdateIrregularVerbDto,
+  ) {
     return this.irregularVerbService.update(id, updateIrregularVerbDto);
   }
 

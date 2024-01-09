@@ -1,19 +1,29 @@
-import { IsEmail, IsNotEmpty, IsString, MaxLength, MinLength } from "class-validator"
-import { CONSTANTS_MAX, CONSTANTS_MIN } from '../../global'
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
+import { CONSTANTS_MAX, CONSTANTS_MIN } from '../../global';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class RegisterDto {
-    @IsEmail()
-    @IsNotEmpty()
-    @MaxLength(CONSTANTS_MAX.EMAIL_LEN)
-    email: string
+  @ApiProperty()
+  @IsEmail()
+  @IsNotEmpty()
+  @MaxLength(CONSTANTS_MAX.EMAIL_LEN)
+  email: string;
 
-    @IsString()
-    @MaxLength(CONSTANTS_MAX.NAME_LEN)
-    @IsNotEmpty()
-    name: string
+  @ApiProperty()
+  @IsString()
+  @MaxLength(CONSTANTS_MAX.NAME_LEN)
+  @IsNotEmpty()
+  name: string;
 
-    @IsString()
-    @MinLength(CONSTANTS_MIN.PASSWORD_LEN)
-    @IsNotEmpty()
-    password: string
+  @ApiProperty()
+  @IsString()
+  @MinLength(CONSTANTS_MIN.PASSWORD_LEN)
+  @IsNotEmpty()
+  password: string;
 }
