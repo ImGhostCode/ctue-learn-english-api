@@ -3,7 +3,7 @@ services:
   postgres:
     image: postgres
     container_name: ctuedb
-    restart: always
+    # restart: always
     ports:
       - "5432:5432"
     env_file:
@@ -18,7 +18,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: nestjs-app
-    restart: always
+    # restart: always
     env_file:
       - .env
     ports:
@@ -34,7 +34,7 @@ services:
   pgadmin:
     container_name: pgadmin4_container
     image: dpage/pgadmin4
-    restart: always
+    # restart: always
     env_file:
       - .env
     ports:

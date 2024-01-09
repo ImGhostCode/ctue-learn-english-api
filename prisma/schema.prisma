@@ -28,12 +28,15 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  Account      Account[]
-  Sentence     Sentence[]
-  Word         Word[]
-  FavoriteList FavoriteItem[]
-  Contribution Contribution[]
-  Practice     Practice[]
+  Account              Account[]
+  Sentence             Sentence[]
+  Word                 Word[]
+  FavoriteList         FavoriteItem[]
+  Contribution         Contribution[]
+  Practice             Practice[]
+  PhoneticProEval      PhoneticProEval[]
+  UserLearnedWords     UserLearnedWord[]
+  UserLearnedSentences UserLearnedSentence[]
 
   @@map("users")
 }
@@ -86,11 +89,12 @@ model Sentence {
   mean    String
   note    String?
 
-  Topic        Topic[]
-  FavoriteItem FavoriteItem[]
-  Practice     Practice[]
-  User         User?          @relation(fields: [userId], references: [id])
-  Type         Type           @relation(fields: [typeId], references: [id])
+  Topic               Topic[]
+  FavoriteItem        FavoriteItem[]
+  Practice            Practice[]
+  User                User?                 @relation(fields: [userId], references: [id])
+  Type                Type                  @relation(fields: [typeId], references: [id])
+  UserLearnedSentence UserLearnedSentence[]
 
   @@map("sentences")
 }
@@ -112,13 +116,14 @@ model Word {
   synonyms String[]
   antonyms String[]
 
-  FavoriteItem   FavoriteItem[]
-  Topic          Topic[]
-  Practice       Practice[]
-  Type           Type           @relation(fields: [typeId], references: [id])
-  Level          Level          @relation(fields: [levelId], references: [id])
-  Specialization Specialization @relation(fields: [specializationId], references: [id])
-  User           User?          @relation(fields: [userId], references: [id])
+  FavoriteItem    FavoriteItem[]
+  Topic           Topic[]
+  Practice        Practice[]
+  Type            Type              @relation(fields: [typeId], references: [id])
+  Level           Level             @relation(fields: [levelId], references: [id])
+  Specialization  Specialization    @relation(fields: [specializationId], references: [id])
+  User            User?             @relation(fields: [userId], references: [id])
+  UserLearnedWord UserLearnedWord[]
 
   @@map("words")
 }
@@ -201,4 +206,35 @@ model Practice {
   Specialization Specialization? @relation(fields: [specializationId], references: [id])
 
   @@map("practices")
+}
+
+model PhoneticProEval {
+  id       Int    @id @default(autoincrement())
+  userId   Int?
+  accuracy Float
+  phoneme  String
+
+  User User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("phoneticProEval")
+}
+
+model UserLearnedWord {
+  id     Int    @id @default(autoincrement())
+  status String
+  userId Int?
+  Word   Word[]
+  User   User?  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("userLearndWords")
+}
+
+model UserLearnedSentence {
+  id       Int        @id @default(autoincrement())
+  status   String
+  userId   Int?
+  Sentence Sentence[]
+  User     User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("userLearndSentences")
 }

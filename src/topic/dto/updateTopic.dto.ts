@@ -1,16 +1,20 @@
-import { Optional } from "@nestjs/common";
-import { IsBoolean, IsOptional, IsString } from "class-validator";
+import { Optional } from '@nestjs/common';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsBoolean, IsOptional, IsString } from 'class-validator';
 
 export class UpdateTopicDto {
-    @IsString()
-    @IsOptional()
-    name?: string
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  name?: string;
 
-    @IsBoolean()
-    @IsOptional()
-    isWord?: boolean
+  @ApiProperty()
+  @IsBoolean()
+  @IsOptional()
+  isWord?: boolean;
 
-    @Optional()
-    @IsString()
-    image?: string
+  @ApiProperty()
+  @Optional()
+  @IsString()
+  image?: string;
 }

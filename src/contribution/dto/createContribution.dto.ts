@@ -1,71 +1,96 @@
-import { IsArray, IsNotEmpty, IsNotEmptyObject, IsNumber, IsObject, IsOptional, IsString, MaxLength, ValidateNested } from "class-validator"
-import { Transform, TransformFnParams, Type } from 'class-transformer'
-import { CONSTANTS_MAX } from "src/global"
+import {
+  IsArray,
+  IsNotEmpty,
+  IsNotEmptyObject,
+  IsNumber,
+  IsObject,
+  IsOptional,
+  IsString,
+  MaxLength,
+  ValidateNested,
+} from 'class-validator';
+import { Transform, TransformFnParams, Type } from 'class-transformer';
+import { CONSTANTS_MAX } from 'src/global';
+import { ApiProperty } from '@nestjs/swagger';
 
 class Content {
-    @IsNotEmpty()
-    @IsNumber()
-    typeId?: number
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsNumber()
+  typeId?: number;
 
-    @IsNotEmpty()
-    @IsArray()
-    @Transform((params: TransformFnParams) => {
-        return params.value.map(item => parseInt(item, 10));
-    })
-    @IsNumber({}, { each: true })
-    topicId?: number[]
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsArray()
+  @Transform((params: TransformFnParams) => {
+    return params.value.map((item) => parseInt(item, 10));
+  })
+  @IsNumber({}, { each: true })
+  topicId?: number[];
 
-    @IsOptional()
-    @IsNumber()
-    levelId?: number
+  @ApiProperty()
+  @IsOptional()
+  @IsNumber()
+  levelId?: number;
 
-    @IsOptional()
-    @IsNumber()
-    specializationId?: number
+  @ApiProperty()
+  @IsOptional()
+  @IsNumber()
+  specializationId?: number;
 
-    @IsNotEmpty()
-    @IsString()
-    content?: string
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  content?: string;
 
-    @IsNotEmpty()
-    @IsString()
-    mean?: string
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  mean?: string;
 
-    @IsOptional()
-    @IsString()
-    @MaxLength(CONSTANTS_MAX.SENTENCE_NOTE_LEN)
-    note?: string
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  @MaxLength(CONSTANTS_MAX.SENTENCE_NOTE_LEN)
+  note?: string;
 
-    @IsOptional()
-    @IsString()
-    phonetic?: string
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  phonetic?: string;
 
-    @IsOptional()
-    @IsArray()
-    examples?: string[]
+  @ApiProperty()
+  @IsOptional()
+  @IsArray()
+  examples?: string[];
 
-    @IsOptional()
-    @IsString()
-    synonyms?: string
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  synonyms?: string;
 
-    @IsOptional()
-    @IsString()
-    antonyms?: string
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  antonyms?: string;
 
-    @IsOptional()
-    @IsString()
-    picture?: string
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  picture?: string;
 }
 
 export class CreateContributionDto {
-    @IsNotEmpty()
-    @IsString()
-    type: string
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  type: string;
 
-    // @IsNotEmptyObject()
-    // @IsObject() 
-    // @IsNotEmpty()
-    // @ValidateNested()
-    @Type(() => Content)
-    content: Content
+  // @IsNotEmptyObject()
+  // @IsObject()
+  // @IsNotEmpty()
+  // @ValidateNested()
+  @ApiProperty()
+  @Type(() => Content)
+  content: Content;
 }
