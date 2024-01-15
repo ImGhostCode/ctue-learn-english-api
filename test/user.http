@@ -1,4 +1,4 @@
-@urlDev=http://localhost:8000/users
+@urlDev=http://localhost:8000/apis/users
 
 ### get me
 GET {{urlDev}}/me
@@ -6,15 +6,15 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsI
 
 ### get all users
 GET {{urlDev}}/
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidGVzdEBnbWFpbC5jb20iLCJpYXQiOjE2OTgwNjE2MjYsImV4cCI6MTY5ODA2ODgyNn0.Boz68wFblIbETROX9GFDrtMy-8af6YFrlChCD2efJV0
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidGVzdDFAZ21haWwuY29tIiwiaWF0IjoxNzA1MzIzNDQ0LCJleHAiOjE3MDU0MDk4NDR9.BSYn4XxQZfbKSPzmVQkS_BAGIDX-6WPnORVxbRMQN2c
 
 ### is ban user
 PATCH  {{urlDev}}/toggle-ban/2
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsImVtYWlsIjoidGVzdEBnbWFpbC5jb20iLCJpYXQiOjE2OTcyNDkwMDEsImV4cCI6MTY5NzI0OTYwMX0.KUe8vXsktbwlosOCVlsBpJsbDn5x8r4Ez-dx-pyuonA
 
 ### delete user
-DELETE {{urlDev}}/14
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIyLCJlbWFpbCI6InRlc3RAZ21haWwuY29tIiwiaWF0IjoxNjk3MjY5NzkzLCJleHAiOjE2OTcyNzY5OTN9.c2PiP7TqE43RYz5t5e2RyRe4sNamvR5zFXUeP8e0zhc
+DELETE {{urlDev}}/7
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidGVzdDFAZ21haWwuY29tIiwiaWF0IjoxNzA1MzIzNDQ0LCJleHAiOjE3MDU0MDk4NDR9.BSYn4XxQZfbKSPzmVQkS_BAGIDX-6WPnORVxbRMQN2c
 
 ### change user
 PATCH  {{urlDev}}/update-profile/2

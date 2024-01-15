@@ -2,17 +2,18 @@
 
 ### Create comunication phrase
 POST  {{urlDev}}/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidGVzdDFAZ21haWwuY29tIiwiaWF0IjoxNzA1MzIzNDQ0LCJleHAiOjE3MDU0MDk4NDR9.BSYn4XxQZfbKSPzmVQkS_BAGIDX-6WPnORVxbRMQN2c
 Content-Type: application/json
 
 {
-    "v1": "lm02",
-    "v2": "argerdf",
-    "v3": "hg",
-    "mean": "reecvr"
+    "v1": "test1",
+    "v2": "test2",
+    "v3": "test3",
+    "mean": "testthoi"
 }
 
 ### Get all comunication phrases
-GET   {{urlDev}}/
+GET   {{urlDev}}/25
 
 ### Get comunication phrase
 GET   {{urlDev}}/2
@@ -27,4 +28,5 @@ Content-Type: application/json
 }
 
 ### Delete comunication phrase
-DELETE  {{urlDev}}/2
+DELETE  {{urlDev}}/32
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidGVzdDFAZ21haWwuY29tIiwiaWF0IjoxNzA1MzIzNDQ0LCJleHAiOjE3MDU0MDk4NDR9.BSYn4XxQZfbKSPzmVQkS_BAGIDX-6WPnORVxbRMQN2c
