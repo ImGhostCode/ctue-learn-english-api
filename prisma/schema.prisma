@@ -25,6 +25,7 @@ model User {
   id        Int      @id @default(autoincrement())
   name      String?
   avt       String?
+  isDeleted Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -51,6 +52,7 @@ model Account {
   accountType String
   isBan       Boolean @default(false)
   feedback    String?
+  isDeleted   Boolean @default(false)
 
   User User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -82,12 +84,13 @@ model Contribution {
 }
 
 model Sentence {
-  id      Int     @id @default(autoincrement())
-  typeId  Int
-  userId  Int?
-  content String
-  mean    String
-  note    String?
+  id        Int     @id @default(autoincrement())
+  typeId    Int
+  userId    Int?
+  content   String
+  mean      String
+  note      String?
+  isDeleted Boolean @default(false)
 
   Topic                Topic[]
   FavoriteItem         FavoriteItem[]
@@ -107,14 +110,15 @@ model Word {
   specializationId Int
   userId           Int?
 
-  content  String
-  mean     String
-  note     String?
-  phonetic String?
-  picture  String?
-  examples String[]
-  synonyms String[]
-  antonyms String[]
+  content   String
+  mean      String
+  note      String?
+  phonetic  String?
+  picture   String?
+  examples  String[]
+  synonyms  String[]
+  antonyms  String[]
+  isDeleted Boolean  @default(false)
 
   FavoriteItem     FavoriteItem[]
   Topic            Topic[]
@@ -174,11 +178,12 @@ model Type {
 }
 
 model IrregularVerb {
-  id   Int    @id @default(autoincrement())
-  v1   String
-  v2   String
-  v3   String
-  mean String
+  id        Int     @id @default(autoincrement())
+  v1        String
+  v2        String
+  v3        String
+  mean      String
+  isDeleted Boolean @default(false)
 
   @@map("irregularVerbs")
 }
