@@ -46,7 +46,7 @@ export class AuthService {
     async login(loginDto: LoginDto) {
         try {
             const account = await this.prismaService.account.findUnique({
-                where: { email: loginDto.email }
+                where: { email: loginDto.email, isDeleted: false }
             })
             if (!account) return new ResponseData<string>(null, 400, 'Tài khoản không tồn tại')
             const passwordMatched = await argon2.verify(account.password, loginDto.password)

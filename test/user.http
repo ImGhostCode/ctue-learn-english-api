@@ -2,38 +2,40 @@
 
 ### get me
 GET {{urlDev}}/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidGVzdEBnbWFpbC5jb20iLCJpYXQiOjE2OTgwNjE2MjYsImV4cCI6MTY5ODA2ODgyNn0.Boz68wFblIbETROX9GFDrtMy-8af6YFrlChCD2efJV0
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjE0LCJlbWFpbCI6InRlc3QxMjM0NTY3QGdtYWlsLmNvbSIsImlhdCI6MTcwNTQ5ODMxMSwiZXhwIjoxNzA1NTg0NzExfQ.KgJz8s1A-fjU1PchkKWGF9G8JMQSbOjBH3YTb_MKaHI
 
 ### get all users
 GET {{urlDev}}/
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidGVzdDFAZ21haWwuY29tIiwiaWF0IjoxNzA1MzIzNDQ0LCJleHAiOjE3MDU0MDk4NDR9.BSYn4XxQZfbKSPzmVQkS_BAGIDX-6WPnORVxbRMQN2c
-
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidGVzdDFAZ21haWwuY29tIiwiaWF0IjoxNzA1NDk0NTY1LCJleHAiOjE3MDU1ODA5NjV9.-Ltlj3J_SlUT6BDatoyPfcOmej-o6-rMIPfv1kMTu9I
 ### is ban user
-PATCH  {{urlDev}}/toggle-ban/2
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsImVtYWlsIjoidGVzdEBnbWFpbC5jb20iLCJpYXQiOjE2OTcyNDkwMDEsImV4cCI6MTY5NzI0OTYwMX0.KUe8vXsktbwlosOCVlsBpJsbDn5x8r4Ez-dx-pyuonA
-
-### delete user
-DELETE {{urlDev}}/7
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidGVzdDFAZ21haWwuY29tIiwiaWF0IjoxNzA1MzIzNDQ0LCJleHAiOjE3MDU0MDk4NDR9.BSYn4XxQZfbKSPzmVQkS_BAGIDX-6WPnORVxbRMQN2c
-
-### change user
-PATCH  {{urlDev}}/update-profile/2
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIyLCJlbWFpbCI6InRlc3RAZ21haWwuY29tIiwiaWF0IjoxNjk3MjY1Njk2LCJleHAiOjE2OTcyNzI4OTZ9.63NyTqkfiKITJ04-7Z71y-hq7BqW8Ajwv18kcFzscDM
+PATCH  {{urlDev}}/toggle-ban/9
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidGVzdDFAZ21haWwuY29tIiwiaWF0IjoxNzA1NDkzMTE3LCJleHAiOjE3MDU1Nzk1MTd9.4IrqaJkkleiJzaYuVQQhZRjREEV-DsCVuKLRyL21kUo
 Content-Type: application/json
 
 {
-    "name": "test",
+    "feedback": "test"
+}
+### delete user
+DELETE {{urlDev}}/14
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidGVzdDFAZ21haWwuY29tIiwiaWF0IjoxNzA1NDk1NjcyLCJleHAiOjE3MDU1ODIwNzJ9.SBkQNGAnQfnMFuZSfN8OFHTE5IoSIiY8CMkZrUADv_E
+### Update profile
+PATCH  {{urlDev}}/update-profile/12
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEyLCJlbWFpbCI6InRlc3QxMjM0NUBnbWFpbC5jb20iLCJpYXQiOjE3MDU0OTUyMjAsImV4cCI6MTcwNTU4MTYyMH0.VOt5unsKWkmDfUOO9yO-bp0Qu3gPn_0hcbWz1RJeRUE
+Content-Type: application/json
+
+{
+    "name": "test12345",
     "avt": "1234"
 }
 
 ### change password
-PATCH  {{urlDev}}/update-password/2
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIyLCJlbWFpbCI6InRlc3RAZ21haWwuY29tIiwiaWF0IjoxNjk3MjY5NzkzLCJleHAiOjE2OTcyNzY5OTN9.c2PiP7TqE43RYz5t5e2RyRe4sNamvR5zFXUeP8e0zhc
+PATCH  {{urlDev}}/update-password/13
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEzLCJlbWFpbCI6InRlc3QxMjM0NTZAZ21haWwuY29tIiwiaWF0IjoxNzA1NDk1NDAwLCJleHAiOjE3MDU1ODE4MDB9.rdGdM8v7iB6vEO_UYGpK5mPIzD_LCjLT8dTAnbG6bzY
 Content-Type: application/json
 
 {
-    "oldpassword": "1234567",
-    "newpassword": "123456"
+    "oldPassword": "12345678",
+    "newPassword": "123456789"
 }
 
 ### verify Code
@@ -41,7 +43,7 @@ POST {{urlDev}}/verify-code
 Content-Type: application/json
 
 {
-   "email": "test@gmail.com"
+   "email": "test123456@gmail.com"
 }
 
 ### reset password
@@ -49,7 +51,7 @@ PATCH  {{urlDev}}/reset-password
 Content-Type: application/json
 
 {
-   "email": "test@gmail.com",
+   "email": "test123456@gmail.com",
    "code": 939843,
    "newPassword": "123456"
 }

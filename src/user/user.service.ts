@@ -25,7 +25,8 @@ export class UserService {
             let { page } = option
             const totalCount = await this.prismaService.account.count({
                 where: {
-                    accountType: 'user'
+                    accountType: 'user',
+                    isDeleted: false
                 }
             })
             const totalPages = Math.ceil(totalCount / pageSize)
@@ -44,7 +45,8 @@ export class UserService {
                     User: true
                 },
                 where: {
-                    accountType: 'user'
+                    accountType: 'user',
+                    isDeleted: false
                 },
                 orderBy: {
                     userId: 'asc'
@@ -80,7 +82,7 @@ export class UserService {
             const data: { name?: string, avt?: string } = { ...updateProfileDto }
 
             const account = await this.prismaService.account.findFirst({
-                where: { userId: id }
+                where: { userId: id, isDeleted: false }
             })
             if (!account) new ResponseData<any>(null, 400, 'Tài khoản không tồn tại')
             if (avt) {
@@ -101,7 +103,7 @@ export class UserService {
     async updatePassword(id: number, updatePasswordDto: UpdatePasswordDto) {
         try {
             const account = await this.prismaService.account.findFirst({
-                where: { userId: id }
+                where: { userId: id, isDeleted: false }
             })
             if (!account) new ResponseData<any>(null, 400, 'Tài khoản không tồn tại')
             const passwordMatched = await argon2.verify(account.password, updatePasswordDto.oldPassword)
@@ -150,12 +152,12 @@ export class UserService {
             createdAt.setMinutes(createdAt.getMinutes() + 5)
             if (createdAt <= currentDate) return new ResponseData<string>(null, 400, 'Quá thời gian của mã xác minh')
             const account = await this.prismaService.account.findUnique({
-                where: { email }
+                where: { email, isDeleted: false }
             })
             if (!account) return new ResponseData<string>(null, 400, 'Tài khoản không tồn tại')
             const hashedPassword = await argon2.hash(newPassword)
             await this.prismaService.account.update({
-                where: { email },
+                where: { email, isDeleted: false },
                 data: { password: hashedPassword }
             })
             await this.prismaService.verifyCode.deleteMany({
@@ -170,8 +172,8 @@ export class UserService {
     async sendVerifyCode(verifyCodeDto: VerifyCodeDto) {
         try {
             const { email } = verifyCodeDto
-            const account = await this.prismaService.account.findUnique({ where: { email }, include: { User: true } })
-            if (!account) return new ResponseData<any>(null, 400, 'Email này chưa đăng ký')
+            const account = await this.prismaService.account.findUnique({ where: { email, isDeleted: false }, include: { User: true } })
+            if (!account) return new ResponseData<any>(null, 400, 'Tài khoản không tồn tại')
             await this.prismaService.verifyCode.deleteMany({ where: { email: email } })
             const code = this.random6DigitNumber()
             const verifyCode = await this.prismaService.verifyCode.create({

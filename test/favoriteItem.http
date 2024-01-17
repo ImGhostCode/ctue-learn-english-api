@@ -1,8 +1,8 @@
-@urlDev=http://localhost:8000/favorite-item
+@urlDev=http://localhost:8000/apis/favorite-item
 
 ### add to favorite item
 PATCH  {{urlDev}}/add
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidGVzdEBnbWFpbC5jb20iLCJpYXQiOjE2OTgwNjkwMjksImV4cCI6MTY5ODA3NjIyOX0.C9cFI1nPix3uHXTMoAdHkMIrI9ERJqp1ki51svMPgU0
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjE0LCJlbWFpbCI6InRlc3QxMjM0NTY3QGdtYWlsLmNvbSIsImlhdCI6MTcwNTQ5NTkzNywiZXhwIjoxNzA1NTgyMzM3fQ.75-LDNffW6MVifMtbC3xNEJfE8q9xsEbW4HDGmqROTI
 Content-Type: application/json
 
 {
@@ -19,5 +19,5 @@ Content-Type: application/json
 }
 
 ### Get all favorites item by userId
-GET   {{urlDev}}/
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidGVzdEBnbWFpbC5jb20iLCJpYXQiOjE2OTgwNjkwMjksImV4cCI6MTY5ODA3NjIyOX0.C9cFI1nPix3uHXTMoAdHkMIrI9ERJqp1ki51svMPgU0
+GET   {{urlDev}}/user
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjE0LCJlbWFpbCI6InRlc3QxMjM0NTY3QGdtYWlsLmNvbSIsImlhdCI6MTcwNTQ5NTkzNywiZXhwIjoxNzA1NTgyMzM3fQ.75-LDNffW6MVifMtbC3xNEJfE8q9xsEbW4HDGmqROTI
