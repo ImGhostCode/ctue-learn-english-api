@@ -25,7 +25,7 @@ import { ApiTags } from '@nestjs/swagger';
 @UseGuards(MyJWTGuard, RolesGuard)
 @Controller('contribution')
 export class ContributionController {
-  constructor(private readonly contributionService: ContributionService) {}
+  constructor(private readonly contributionService: ContributionService) { }
 
   @Post()
   @Roles(ACCOUNT_TYPES.USER, ACCOUNT_TYPES.ADMIN)
@@ -60,14 +60,14 @@ export class ContributionController {
     return this.contributionService.findOne(id);
   }
 
-  @Patch(':id')
-  @Roles(ACCOUNT_TYPES.ADMIN)
-  verifyContribute(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() body: { status: number; feedback: string },
-  ) {
-    return this.contributionService.verifyContribute(id, body);
-  }
+  // @Patch(':id')
+  // @Roles(ACCOUNT_TYPES.ADMIN)
+  // verifyContribute(
+  //   @Param('id', ParseIntPipe) id: number,
+  //   @Body() body: { status: number; feedback: string },
+  // ) {
+  //   return this.contributionService.verifyContribute(id, body);
+  // }
 
   @Delete(':id')
   @Roles(ACCOUNT_TYPES.ADMIN, ACCOUNT_TYPES.USER)

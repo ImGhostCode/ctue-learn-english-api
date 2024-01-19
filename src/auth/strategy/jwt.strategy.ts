@@ -18,7 +18,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 
 
         const user = await this.prismaService.account.findFirst({
-            where: { userId: payload.sub },
+            where: { userId: payload.sub, isBan: false, isDeleted: false },
             include: { User: true }
         })
 

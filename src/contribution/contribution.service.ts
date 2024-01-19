@@ -81,38 +81,38 @@ export class ContributionService {
     }
   }
 
-  async verifyContribute(id: number, body: { status: number, feedback: string }) {
-    try {
-      const contribution = await this.findById(id)
-      if (!contribution) {
-        return new ResponseData<string>(null, 400, 'Đóng góp không tồn tại')
-      }
-      if (contribution.status !== -1) {
-        return new ResponseData<string>(null, 400, "Từ đã được xác minh")
-      }
-      if (body.status === 1) {
-        const { typeId, topicId, levelId, specializationId, content, mean, note, phonetic, examples, synonyms, antonyms, picture } = JSON.parse(JSON.stringify(contribution.content))
-        const { userId } = contribution
-        let value: any
-        if (contribution.type === 'word') {
-          value = await this.wordService.create({ typeId, topicId: topicId.length ? topicId.map(id => Number(id)) : [], levelId, specializationId, content, mean, note, phonetic, synonyms: synonyms.split('\r\n'), antonyms: antonyms.split('\r\n'), userId, examples: examples.split('\r\n'), picture }, null)
-        } else {
-          value = await this.sentenceService.create({ typeId, topicId: topicId.map(id => Number(id)), content, mean, note, userId })
-        }
-        if (value.statusCode === 200) {
-          await this.prismaService.contribution.update({ where: { id }, data: { status: body.status, feedback: '' } })
-          return new ResponseData<string>(null, 200, 'Duyệt thành công')
-        }
-        return value
-      } else if (body.status === 0) {
-        await this.prismaService.contribution.update({ where: { id }, data: { status: body.status, feedback: body.feedback } })
-        return new ResponseData<string>(null, 200, 'Từ chối thành công')
-      }
-      return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
-    } catch (error) {
-      return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
-    }
-  }
+  // async verifyContribute(id: number, body: { status: number, feedback: string }) {
+  //   try {
+  //     const contribution = await this.findById(id)
+  //     if (!contribution) {
+  //       return new ResponseData<string>(null, 400, 'Đóng góp không tồn tại')
+  //     }
+  //     if (contribution.status !== -1) {
+  //       return new ResponseData<string>(null, 400, "Từ đã được xác minh")
+  //     }
+  //     if (body.status === 1) {
+  //       const { typeId, topicId, levelId, specializationId, content, mean, note, phonetic, examples, synonyms, antonyms, picture } = JSON.parse(JSON.stringify(contribution.content))
+  //       const { userId } = contribution
+  //       let value: any
+  //       if (contribution.type === 'word') {
+  //         value = await this.wordService.create({ typeId, topicId: topicId.length ? topicId.map(id => Number(id)) : [], levelId, specializationId, content, mean, note, phonetic, synonyms: synonyms.split('\r\n'), antonyms: antonyms.split('\r\n'), userId, examples: examples.split('\r\n'), picture }, null)
+  //       } else {
+  //         value = await this.sentenceService.create({ typeId, topicId: topicId.map(id => Number(id)), content, mean, note, userId })
+  //       }
+  //       if (value.statusCode === 200) {
+  //         await this.prismaService.contribution.update({ where: { id }, data: { status: body.status, feedback: '' } })
+  //         return new ResponseData<string>(null, 200, 'Duyệt thành công')
+  //       }
+  //       return value
+  //     } else if (body.status === 0) {
+  //       await this.prismaService.contribution.update({ where: { id }, data: { status: body.status, feedback: body.feedback } })
+  //       return new ResponseData<string>(null, 200, 'Từ chối thành công')
+  //     }
+  //     return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+  //   } catch (error) {
+  //     return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+  //   }
+  // }
 
   async remove(id: number, account: Account) {
     try {

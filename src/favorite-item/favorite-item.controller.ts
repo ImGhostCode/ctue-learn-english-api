@@ -19,7 +19,7 @@ import { ApiTags } from '@nestjs/swagger';
 @UseGuards(MyJWTGuard, RolesGuard)
 @Controller('favorite-item')
 export class FavoriteItemController {
-  constructor(private favoriteItemService: FavoriteItemService) {}
+  constructor(private favoriteItemService: FavoriteItemService) { }
 
   @Patch()
   @Roles(ACCOUNT_TYPES.USER, ACCOUNT_TYPES.ADMIN)
@@ -33,25 +33,25 @@ export class FavoriteItemController {
     );
   }
 
-  @Get()
-  @Roles(ACCOUNT_TYPES.USER, ACCOUNT_TYPES.ADMIN)
-  findAllByUserId(
-    @GetAccount() accout: Account,
-    @Query('sort') sort: string,
-    @Query('key') key: string,
-    @Query('page', ParseIntPipe) page: number,
-  ) {
-    return this.favoriteItemService.findAllByUserId(
-      accout.userId,
-      sort,
-      key,
-      page,
-    );
-  }
+  // @Get()
+  // @Roles(ACCOUNT_TYPES.USER, ACCOUNT_TYPES.ADMIN)
+  // findAllByUserId(
+  //   @GetAccount() accout: Account,
+  //   @Query('sort') sort: string,
+  //   @Query('key') key: string,
+  //   @Query('page', ParseIntPipe) page: number,
+  // ) {
+  //   return this.favoriteItemService.findAllByUserId(
+  //     accout.userId,
+  //     sort,
+  //     key,
+  //     page,
+  //   );
+  // }
 
-  @Get('user')
-  @Roles(ACCOUNT_TYPES.USER, ACCOUNT_TYPES.ADMIN)
-  findAllByUser(@GetAccount() accout: Account) {
-    return this.favoriteItemService.findAllByUser(accout.userId);
-  }
+  // @Get('user')
+  // @Roles(ACCOUNT_TYPES.USER, ACCOUNT_TYPES.ADMIN)
+  // findAllByUser(@GetAccount() accout: Account) {
+  //   return this.favoriteItemService.findAllByUser(accout.userId);
+  // }
 }

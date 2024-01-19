@@ -38,7 +38,10 @@ export class PracticeService {
 
             const totalCount = await this.prismaService.practice.count({
                 where: {
-                    userId: userId
+                    userId: userId,
+                    User: {
+                        isDeleted: false
+                    }
                 }
             })
             let totalPages = Math.ceil(totalCount / pageSize)
@@ -53,7 +56,10 @@ export class PracticeService {
                     createdAt: 'desc'
                 },
                 where: {
-                    userId: userId
+                    userId: userId,
+                    User: {
+                        isDeleted: false
+                    }
                 },
                 include: {
                     // Topic: true,
@@ -64,7 +70,7 @@ export class PracticeService {
                 }
             })
             return new ResponseData<any>({ practices, totalPages }, 200, 'Tìm thành công')
-           } catch (error) {
+        } catch (error) {
             return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
         }
     }
@@ -76,14 +82,18 @@ export class PracticeService {
             const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
             const groupByNRight = await this.prismaService.practice.groupBy({
                 by: ['userId'],
-                where: { createdAt: { gte: firstDayOfMonth } },
+                where: {
+                    createdAt: { gte: firstDayOfMonth }, User: {
+                        isDeleted: false
+                    }
+                },
                 _sum: { nRight: true },
                 orderBy: { _sum: { nRight: 'desc' } },
                 take: take
             })
             const userIds = groupByNRight.map(entry => entry.userId);
             const users = await this.prismaService.user.findMany({
-                where: { id: { in: userIds } }
+                where: { id: { in: userIds }, isDeleted: false }
             });
             let topNRight = users.map(user => {
                 const correspondingSumEntry = groupByNRight.find(entry => entry.userId === user.id);
@@ -92,7 +102,11 @@ export class PracticeService {
             topNRight = topNRight.sort((a, b) => b._sum.nRight - a._sum.nRight)
 
             const topNRightConsecutive = await this.prismaService.practice.findMany({
-                where: { createdAt: { gte: firstDayOfMonth } },
+                where: {
+                    createdAt: { gte: firstDayOfMonth }, User: {
+                        isDeleted: false
+                    }
+                },
                 orderBy: { nRightConsecutive: 'desc' },
                 take: take,
                 include: { User: true }
@@ -100,7 +114,11 @@ export class PracticeService {
 
             const totalNRightAndNWrong = await this.prismaService.practice.groupBy({
                 by: ['userId'],
-                where: { createdAt: { gte: firstDayOfMonth } },
+                where: {
+                    createdAt: { gte: firstDayOfMonth }, User: {
+                        isDeleted: false
+                    }
+                },
                 _sum: {
                     nRight: true,
                     nWrong: true

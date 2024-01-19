@@ -1,23 +1,37 @@
 import {
   IsArray,
+  IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
   MaxLength,
 } from 'class-validator';
 import { CONSTANTS_MAX } from '../../global';
-import { Transform, TransformFnParams } from 'class-transformer';
+import { Transform, TransformFnParams, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-export class UpdateWordDto {
+
+
+class WordMean {
   @ApiProperty()
-  @IsOptional()
   @IsNumber()
-  practiceId?: number;
+  wordId: number
 
   @ApiProperty()
-  @IsOptional()
   @IsNumber()
-  typeId?: number;
+  typeId: number
+
+  @ApiProperty()
+  @IsString()
+  @MaxLength(CONSTANTS_MAX.WORD_NOTE_LEN)
+  @IsNotEmpty()
+  meaning: string
+}
+
+export class UpdateWordDto {
+  // @ApiProperty()
+  // @IsOptional()
+  // @IsNumber()
+  // practiceId?: number;
 
   @ApiProperty()
   @IsOptional()
@@ -46,9 +60,8 @@ export class UpdateWordDto {
 
   @ApiProperty()
   @IsOptional()
-  @IsString()
-  @MaxLength(CONSTANTS_MAX.WORD_MEAN_LEN)
-  mean?: string;
+  @Type(() => WordMean)
+  means: WordMean[];
 
   @ApiProperty()
   @IsOptional()

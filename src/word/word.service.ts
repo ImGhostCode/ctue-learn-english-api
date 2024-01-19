@@ -9,14 +9,20 @@ import { CloudinaryService } from '../cloudinary/cloudinary.service';
 export class WordService {
     constructor(private prismaService: PrismaService, private cloudinaryService: CloudinaryService) { }
 
-    async create(createWordDto: CreateWordDto, pictureFile: Express.Multer.File) {
+    async create(createWordDto: CreateWordDto, pictureFiles: Express.Multer.File[]) {
         try {
-            let { userId, typeId, topicId, levelId, specializationId, content, mean, note, phonetic, examples, antonyms, synonyms, picture } = createWordDto
+            let { userId, topicId, levelId, specializationId, content, means, note, phonetic, examples, antonyms, synonyms, pictures } = createWordDto
+
+            console.log(createWordDto);
+
             const isExisted = await this.isExisted(createWordDto.content)
             if (isExisted) return new ResponseData<string>(null, 400, 'Từ đã tồn tại')
-            if (pictureFile) {
-                const file = await this.cloudinaryService.uploadFile(pictureFile)
-                picture = file.url
+            if (pictureFiles) {
+                const files = await Promise.all(
+                    pictureFiles.map(file => this.cloudinaryService.uploadFile(file))
+                );
+
+                pictures = files.map(file => file.url)
             }
             if (topicId) {
                 topicId = topicId.map((id) => Number(id))
@@ -30,47 +36,59 @@ export class WordService {
             const word = await this.prismaService.word.create({
                 data: {
                     userId,
-                    typeId,
                     Topic: {
                         connect: topicId.map((id) => ({ id }))
                     },
                     levelId,
                     specializationId,
                     content,
-                    mean,
+                    means: {
+                        create: [...means]
+                    },
                     note,
                     phonetic,
                     examples,
                     antonyms,
                     synonyms,
-                    picture
+                    pictures
                 },
                 include: {
                     Topic: true,
-                    Type: true,
                     Specialization: true,
-                    Level: true
+                    Level: true,
                 }
             })
+
             return new ResponseData<Word>(word, 200, 'Tạo từ thành công')
         } catch (error) {
             return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
         }
     }
 
-    async findAll(option: { sort: any, type: number, level: number, specialization: number, topic: [], page: number, key: string }) {
+    async findAll(option: { sort: any, types: number[], level: number, specialization: number, topic: [], page: number, key: string }) {
         let pageSize = PAGE_SIZE.PAGE_WORD
         try {
-            let { sort, type, level, specialization, topic, page, key } = option
+
+            let { sort, types, level, specialization, topic, page, key } = option
             let whereCondition: any = {
                 OR: [
                     { content: { contains: key } },
-                    { mean: { contains: key } }
+                    // { means: { some: { contains: key } } }
                 ]
             };
-            if (type) whereCondition.typeId = Number(type);
             if (level) whereCondition.levelId = Number(level);
             if (specialization) whereCondition.specializationId = Number(specialization);
+            if (types) {
+                if (Array.isArray(types)) {
+                    whereCondition.means = {
+                        some: { typeId: { in: types.map(type => Number(type)) } }
+                    };
+                } else {
+                    whereCondition.means = {
+                        some: { typeId: Number(types) }
+                    };
+                }
+            }
             if (topic) {
                 if (topic.length > 1) {
                     whereCondition.Topic = {
@@ -82,6 +100,7 @@ export class WordService {
                     };
                 }
             }
+
             const totalCount = await this.prismaService.word.count({
                 where: whereCondition
             })
@@ -99,9 +118,9 @@ export class WordService {
                 where: whereCondition,
                 include: {
                     Topic: true,
-                    Type: true,
                     Specialization: true,
-                    Level: true
+                    Level: true,
+                    means: true
                 }
             })
             return new ResponseData<any>({ words, totalPages }, 200, 'Tìm thành công')
@@ -120,62 +139,88 @@ export class WordService {
         }
     }
 
-    async update(id: number, updateWordDto: UpdateWordDto, pictureFile: Express.Multer.File) {
-        try {
-            let { typeId, topicId, levelId, specializationId, content, mean, note, phonetic, examples, antonyms, synonyms } = updateWordDto
-            const word = await this.findById(id)
-            if (!word) return new ResponseData<string>(null, 400, 'Từ không tồn tại')
-            let picture: string
-            if (pictureFile) {
-                const file = await this.cloudinaryService.uploadFile(pictureFile)
-                picture = file.url
-            }
-            if (content && content !== word.content) {
-                const isExisted = await this.isExisted(content)
-                if (isExisted) return new ResponseData<string>(null, 400, 'Từ này đã tồn tại')
-            }
-            if (topicId) {
-                topicId = topicId.map((id) => Number(id))
-                await this.prismaService.word.update({
-                    where: { id: id },
-                    data: {
-                        Topic: { disconnect: word.Topic.map((id) => id) }
-                    }
-                })
-            } else {
-                topicId = []
-            }
-            if (examples) examples = examples.filter(example => example !== '')
-            if (antonyms) antonyms = antonyms.filter(antonym => antonym !== '')
-            if (synonyms) synonyms = synonyms.filter(synonym => synonym !== '')
-            const newWord = await this.prismaService.word.update({
-                where: { id: id },
-                data: {
-                    typeId,
-                    content,
-                    mean,
-                    note,
-                    levelId,
-                    specializationId,
-                    phonetic,
-                    examples,
-                    antonyms,
-                    synonyms,
-                    Topic: { connect: topicId.map((id) => ({ id })) },
-                    picture
-                },
-                include: {
-                    Topic: true,
-                    Type: true,
-                    Specialization: true,
-                    Level: true
-                }
-            })
-            return new ResponseData<Word>(newWord, 200, 'Cập nhật thành công')
-        } catch (error) {
-            return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
-        }
-    }
+    // async update(id: number, updateWordDto: UpdateWordDto, pictureFiles: Express.Multer.File[]) {
+    //     try {
+    //         let { topicId, levelId, specializationId, content, means, note, phonetic, examples, antonyms, synonyms } = updateWordDto
+    //         const word = await this.findById(id)
+    //         if (!word) return new ResponseData<string>(null, 400, 'Từ không tồn tại')
+
+    //         if (means) {
+    //             await this.prismaService.wordMean.deleteMany({
+    //                 where: { wordId: id }
+    //             });
+    //         } else {
+    //             means = word.means;
+    //         }
+
+    //         let pictures: string[] = word.pictures
+    //         if (pictureFiles && pictureFiles.length > 0) {
+    //             const files = await Promise.all(
+    //                 pictureFiles.map(file => this.cloudinaryService.uploadFile(file))
+    //             );
+
+    //             pictures = files.map(file => file.url)
+    //         }
+    //         if (content && content !== word.content) {
+    //             const isExisted = await this.isExisted(content)
+    //             if (isExisted) return new ResponseData<string>(null, 400, 'Từ này đã tồn tại')
+    //         }
+    //         if (topicId) {
+    //             topicId = topicId.map((id) => Number(id))
+    //             await this.prismaService.word.update({
+    //                 where: { id: id },
+    //                 data: {
+    //                     Topic: { disconnect: word.Topic.map((id) => id) }
+    //                 }
+    //             })
+    //         } else {
+    //             topicId = []
+    //         }
+    //         if (examples) examples = examples.filter(example => example !== '')
+    //         if (antonyms) antonyms = antonyms.filter(antonym => antonym !== '')
+    //         if (synonyms) synonyms = synonyms.filter(synonym => synonym !== '')
+
+    //         const meansToCreate = means.map(mean => ({
+    //             wordId: id,
+    //             typeId: mean.typeId,
+    //             meaning: mean.meaning
+    //         }));
+
+    //         const newWord = await this.prismaService.word.update({
+    //             where: { id: id },
+    //             data: {
+
+    //                 content,
+    //                 means: {
+    //                     create: meansToCreate
+    //                 },
+    //                 note,
+    //                 levelId,
+    //                 specializationId,
+    //                 phonetic,
+    //                 examples,
+    //                 antonyms,
+    //                 synonyms,
+    //                 Topic: { connect: topicId.map((id) => ({ id })) },
+    //                 pictures,
+
+    //             },
+    //             include: {
+    //                 Topic: true,
+    //                 means: true,
+    //                 Specialization: true,
+    //                 Level: true
+    //             }
+    //         })
+    //         return new ResponseData<Word>(newWord, 200, 'Cập nhật thành công')
+    //     } catch (error) {
+    //         console.log(
+    //             error
+    //         );
+
+    //         return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+    //     }
+    // }
 
     async delete(id: number) {
         try {
@@ -206,14 +251,16 @@ export class WordService {
                 id: id
             },
             include: {
-                Practice: true, User: true, Topic: true, Type: true, Level: true, Specialization: true
+                Practice: true, User: true, Topic: true, means: true, Level: true, Specialization: true
             }
         })
     }
 
-    async getWordsPack(userId, option: { type: number, level: number, specialization: number, topic: [], numSentence: number }) {
+    async getWordsPack(userId, option: { types: number[], level: number, specialization: number, topic: [], numSentence: number }) {
         try {
-            let { topic, type, level, specialization, numSentence } = option
+            console.log(option);
+
+            let { topic, types, level, specialization, numSentence } = option
             const userPractice = await this.prismaService.practice.findMany({
                 where: {
                     userId: userId,
@@ -244,9 +291,20 @@ export class WordService {
 
             let whereCondition: any = {
             };
-            if (type) whereCondition.typeId = Number(type);
+            // if (type) whereCondition.typeId = Number(type);
             if (level) whereCondition.levelId = Number(level);
             if (specialization) whereCondition.specializationId = Number(specialization);
+            if (types) {
+                if (Array.isArray(types)) {
+                    whereCondition.means = {
+                        some: { typeId: { in: types.map(type => Number(type)) } }
+                    };
+                } else {
+                    whereCondition.means = {
+                        some: { typeId: Number(types) }
+                    };
+                }
+            }
             if (topic) {
                 if (Array.isArray(topic) && topic.length > 1) {
                     whereCondition.Topic = {
@@ -273,7 +331,7 @@ export class WordService {
                 where: whereCondition,
                 take: Number(numSentence),
                 skip: randomPackIndex,
-                include: { Topic: true, Level: true, Specialization: true, Type: true }
+                include: { Topic: true, Level: true, Specialization: true, means: true }
             })
             return new ResponseData<Word>(wordspack, 200, 'Tìm gói từ vựng thành công')
         } catch (error) {
@@ -289,9 +347,9 @@ export class WordService {
                         {
                             content: { contains: key }
                         },
-                        {
-                            mean: { contains: key }
-                        }
+                        // {
+                        //     mean: { contains: key }
+                        // }
                     ]
                 }
             })

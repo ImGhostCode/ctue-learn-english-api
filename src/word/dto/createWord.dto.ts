@@ -10,16 +10,27 @@ import { CONSTANTS_MAX } from '../../global';
 import { Transform, TransformFnParams, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CreateWordDto {
+class WordMean {
   @ApiProperty()
-  @IsOptional()
   @IsNumber()
-  userId?: number;
+  wordId: number
 
   @ApiProperty()
   @IsNumber()
+  typeId: number
+
+  @ApiProperty()
+  @IsString()
+  @MaxLength(CONSTANTS_MAX.WORD_NOTE_LEN)
   @IsNotEmpty()
-  typeId: number;
+  meaning: string
+}
+
+export class CreateWordDto {
+  @ApiProperty()
+  // @IsOptional()
+  @IsNumber()
+  userId?: number;
 
   @ApiProperty()
   @IsOptional()
@@ -43,10 +54,8 @@ export class CreateWordDto {
   content: string;
 
   @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(CONSTANTS_MAX.WORD_MEAN_LEN)
-  mean: string;
+  @Type(() => WordMean)
+  means: WordMean[];
 
   @ApiProperty()
   @IsOptional()
@@ -55,7 +64,7 @@ export class CreateWordDto {
   note?: string;
 
   @ApiProperty()
-  @IsOptional()
+  // @IsOptional()
   @IsString()
   phonetic?: string;
 
@@ -74,8 +83,8 @@ export class CreateWordDto {
   @IsArray()
   antonyms?: string[];
 
-  @ApiProperty()
+  @ApiProperty({ type: 'array', items: { type: 'string', format: 'binary', } })
   @IsOptional()
   @IsString()
-  picture?: string;
+  pictures?: string[];
 }

@@ -105,31 +105,41 @@ model Sentence {
 model Word {
   id Int @id @default(autoincrement())
 
-  typeId           Int
   levelId          Int
   specializationId Int
   userId           Int?
 
   content   String
-  mean      String
   note      String?
+  means     WordMean[]
   phonetic  String?
-  picture   String?
+  pictures  String[]
   examples  String[]
   synonyms  String[]
   antonyms  String[]
-  isDeleted Boolean  @default(false)
+  isDeleted Boolean    @default(false)
 
   FavoriteItem     FavoriteItem[]
   Topic            Topic[]
   Practice         Practice[]
-  Type             Type              @relation(fields: [typeId], references: [id])
   Level            Level             @relation(fields: [levelId], references: [id])
   Specialization   Specialization    @relation(fields: [specializationId], references: [id])
   User             User?             @relation(fields: [userId], references: [id])
   userLearnedWords UserLearnedWord[]
 
   @@map("words")
+}
+
+model WordMean {
+  // id      Int    @id @default(autoincrement())
+  wordId  Int
+  typeId  Int
+  meaning String
+
+  Word Word @relation(fields: [wordId], references: [id])
+  Type Type @relation(fields: [typeId], references: [id])
+
+  @@id([wordId, typeId])
 }
 
 model Topic {
@@ -171,8 +181,8 @@ model Type {
   isWord Boolean
 
   Sentence Sentence[]
-  Word     Word[]
   Practice Practice[]
+  WordType WordMean[]
 
   @@map("types")
 }
