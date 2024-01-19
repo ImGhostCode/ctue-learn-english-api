@@ -9,32 +9,41 @@ import {
   Post,
   Query,
   UploadedFile,
+  UploadedFiles,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { WordService } from './word.service';
 import { CreateWordDto, UpdateWordDto } from './dto';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { MyJWTGuard, RolesGuard } from '../auth/guard';
 import { GetAccount, Roles } from '../auth/decorator';
 import { ACCOUNT_TYPES } from '../global';
 import { Account } from '@prisma/client';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { FilesUploadDto } from './dto/uploadFile.dto';
 
 @ApiTags('Word')
 @Controller('word')
 export class WordController {
-  constructor(private wordServive: WordService) {}
+  constructor(private wordServive: WordService) { }
 
   @Post()
-  @UseInterceptors(FileInterceptor('picture'))
+  @UseInterceptors(FilesInterceptor('pictures'))
+  // @ApiConsumes('multipart/form-data')
+  // @ApiBearerAuth('basic')
   @UseGuards(MyJWTGuard, RolesGuard)
   @Roles(ACCOUNT_TYPES.ADMIN)
   create(
     @Body() createWordDto: CreateWordDto,
-    @UploadedFile() picture: Express.Multer.File,
+    @UploadedFiles() pictures: Express.Multer.File[],
   ) {
-    return this.wordServive.create(createWordDto, picture);
+    return this.wordServive.create(createWordDto, pictures);
+  }
+
+  @Get('id/:id')
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.wordServive.findOne(id)
   }
 
   @Get()
@@ -42,7 +51,7 @@ export class WordController {
     @Query()
     option: {
       sort: any;
-      type: number;
+      types: number[];
       level: number;
       specialization: number;
       topic: [];
@@ -59,7 +68,7 @@ export class WordController {
   getWordsPack(
     @Query()
     option: {
-      type: number;
+      types: number[];
       level: number;
       specialization: number;
       topic: [];
@@ -70,22 +79,19 @@ export class WordController {
     return this.wordServive.getWordsPack(account.userId, option);
   }
 
-  // @Get('id:id')
-  // findOne(@Param('id', ParseIntPipe) id: number) {
-  //     return this.wordServive.findOne(id)
-  // }
 
-  @Patch(':id')
-  @UseGuards(MyJWTGuard, RolesGuard)
-  @Roles(ACCOUNT_TYPES.ADMIN)
-  @UseInterceptors(FileInterceptor('picture'))
-  update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updateWordDto: UpdateWordDto,
-    @UploadedFile() picture: Express.Multer.File,
-  ) {
-    return this.wordServive.update(id, updateWordDto, picture);
-  }
+
+  // @Patch(':id')
+  // @UseGuards(MyJWTGuard, RolesGuard)
+  // @Roles(ACCOUNT_TYPES.ADMIN)
+  // @UseInterceptors(FilesInterceptor('pictures'))
+  // update(
+  //   @Param('id', ParseIntPipe) id: number,
+  //   @Body() updateWordDto: UpdateWordDto,
+  //   @UploadedFiles() pictures: Express.Multer.File[],
+  // ) {
+  //   return this.wordServive.update(id, updateWordDto, pictures);
+  // }
 
   @Delete(':id')
   @UseGuards(MyJWTGuard, RolesGuard)
@@ -96,6 +102,6 @@ export class WordController {
 
   @Get('look-up-dictionary/:key')
   lookUpDictionary(@Param('key') key: string) {
-    return this.lookUpDictionary(key);
+    return this.wordServive.lookUpDictionary(key);
   }
 }

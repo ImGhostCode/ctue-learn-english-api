@@ -41,69 +41,69 @@ export class FavoriteItemService {
     }
   }
 
-  async findAllByUserId(userId: number, sort: any, key: string, page: number) {
-    const pageSize = PAGE_SIZE.PAGE_FAVORITE
-    try {
-      const total = await this.prismaService.favoriteItem.findFirst({
-        where: {
-          userId: userId,
-        },
-        include: {
-          Word: {
-            where: { content: { contains: key } }
-          }
-        }
-      })
-      const totalCount = total.Word.length
-      let totalPages = Math.ceil(totalCount / pageSize)
-      if (!totalPages) totalPages = 1
-      if (!page || page < 1) page = 1
-      if (page > totalPages) page = totalPages
-      let next = (page - 1) * pageSize
-      const data = await this.prismaService.favoriteItem.findFirst({
-        where: {
-          userId: userId,
-        },
-        include: {
-          Word: {
-            where: { content: { contains: key } },
-            take: pageSize,
-            skip: next,
-            orderBy: {
-              content: sort
-            },
-            include: {
-              Topic: true,
-              Level: true,
-              Specialization: true,
-              Type: true
-            }
-          }
-        }
-      })
-      return new ResponseData<any>({ data, totalPages }, 200, 'Tìm thành công')
-    } catch (error) {
-      return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
-    }
-  }
+  // async findAllByUserId(userId: number, sort: any, key: string, page: number) {
+  //   const pageSize = PAGE_SIZE.PAGE_FAVORITE
+  //   try {
+  //     const total = await this.prismaService.favoriteItem.findFirst({
+  //       where: {
+  //         userId: userId,
+  //       },
+  //       include: {
+  //         Word: {
+  //           where: { content: { contains: key } }
+  //         }
+  //       }
+  //     })
+  //     const totalCount = total.Word.length
+  //     let totalPages = Math.ceil(totalCount / pageSize)
+  //     if (!totalPages) totalPages = 1
+  //     if (!page || page < 1) page = 1
+  //     if (page > totalPages) page = totalPages
+  //     let next = (page - 1) * pageSize
+  //     const data = await this.prismaService.favoriteItem.findFirst({
+  //       where: {
+  //         userId: userId,
+  //       },
+  //       include: {
+  //         Word: {
+  //           where: { content: { contains: key } },
+  //           take: pageSize,
+  //           skip: next,
+  //           orderBy: {
+  //             content: sort
+  //           },
+  //           include: {
+  //             Topic: true,
+  //             Level: true,
+  //             Specialization: true,
+  //             Type: true
+  //           }
+  //         }
+  //       }
+  //     })
+  //     return new ResponseData<any>({ data, totalPages }, 200, 'Tìm thành công')
+  //   } catch (error) {
+  //     return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+  //   }
+  // }
 
-  async findAllByUser(userId: number) {
-    try {
-      const data = await this.prismaService.favoriteItem.findFirst({
-        where: {
-          userId: userId,
-        },
-        include: {
-          Word: {
-            select: {
-              id: true
-            }
-          }
-        }
-      })
-      return new ResponseData<FavoriteItem>(data, 200, 'Tìm thành công')
-    } catch (error) {
-      return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
-    }
-  }
+  // async findAllByUser(userId: number) {
+  //   try {
+  //     const data = await this.prismaService.favoriteItem.findFirst({
+  //       where: {
+  //         userId: userId,
+  //       },
+  //       include: {
+  //         Word: {
+  //           select: {
+  //             id: true
+  //           }
+  //         }
+  //       }
+  //     })
+  //     return new ResponseData<FavoriteItem>(data, 200, 'Tìm thành công')
+  //   } catch (error) {
+  //     return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+  //   }
+  // }
 }
