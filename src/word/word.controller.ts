@@ -30,7 +30,7 @@ export class WordController {
 
   @Post()
   @UseInterceptors(FilesInterceptor('pictures'))
-  // @ApiConsumes('multipart/form-data')
+  @ApiConsumes('multipart/form-data')
   // @ApiBearerAuth('basic')
   @UseGuards(MyJWTGuard, RolesGuard)
   @Roles(ACCOUNT_TYPES.ADMIN)
@@ -81,17 +81,18 @@ export class WordController {
 
 
 
-  // @Patch(':id')
-  // @UseGuards(MyJWTGuard, RolesGuard)
-  // @Roles(ACCOUNT_TYPES.ADMIN)
-  // @UseInterceptors(FilesInterceptor('pictures'))
-  // update(
-  //   @Param('id', ParseIntPipe) id: number,
-  //   @Body() updateWordDto: UpdateWordDto,
-  //   @UploadedFiles() pictures: Express.Multer.File[],
-  // ) {
-  //   return this.wordServive.update(id, updateWordDto, pictures);
-  // }
+  @Patch(':id')
+  @UseGuards(MyJWTGuard, RolesGuard)
+  @Roles(ACCOUNT_TYPES.ADMIN)
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FilesInterceptor('new_pictures'))
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateWordDto: UpdateWordDto,
+    @UploadedFiles() newPictures: Express.Multer.File[],
+  ) {
+    return this.wordServive.update(id, updateWordDto, newPictures);
+  }
 
   @Delete(':id')
   @UseGuards(MyJWTGuard, RolesGuard)

@@ -11,9 +11,7 @@ export class WordService {
 
     async create(createWordDto: CreateWordDto, pictureFiles: Express.Multer.File[]) {
         try {
-            let { userId, topicId, levelId, specializationId, content, means, note, phonetic, examples, antonyms, synonyms, pictures } = createWordDto
-
-            console.log(createWordDto);
+            let { userId, topicId = [], levelId, specializationId, content, means = [], note, phonetic, examples = [], antonyms = [], synonyms = [], pictures = [] } = createWordDto
 
             const isExisted = await this.isExisted(createWordDto.content)
             if (isExisted) return new ResponseData<string>(null, 400, 'Từ đã tồn tại')
@@ -26,12 +24,11 @@ export class WordService {
             }
             if (topicId) {
                 topicId = topicId.map((id) => Number(id))
-            } else {
-                topicId = []
             }
-            if (examples) examples = examples.filter(example => example !== '')
-            if (antonyms) antonyms = antonyms.filter(antonym => antonym !== '')
-            if (synonyms) synonyms = synonyms.filter(synonym => synonym !== '')
+
+            // if (examples) examples = examples.filter(example => example !== '')
+            // if (antonyms) antonyms = antonyms.filter(antonym => antonym !== '')
+            // if (synonyms) synonyms = synonyms.filter(synonym => synonym !== '')
 
             const word = await this.prismaService.word.create({
                 data: {
@@ -56,6 +53,7 @@ export class WordService {
                     Topic: true,
                     Specialization: true,
                     Level: true,
+                    means: true
                 }
             })
 
@@ -74,7 +72,8 @@ export class WordService {
                 OR: [
                     { content: { contains: key } },
                     // { means: { some: { contains: key } } }
-                ]
+                ],
+                isDeleted: false
             };
             if (level) whereCondition.levelId = Number(level);
             if (specialization) whereCondition.specializationId = Number(specialization);
@@ -139,88 +138,87 @@ export class WordService {
         }
     }
 
-    // async update(id: number, updateWordDto: UpdateWordDto, pictureFiles: Express.Multer.File[]) {
-    //     try {
-    //         let { topicId, levelId, specializationId, content, means, note, phonetic, examples, antonyms, synonyms } = updateWordDto
-    //         const word = await this.findById(id)
-    //         if (!word) return new ResponseData<string>(null, 400, 'Từ không tồn tại')
+    async update(id: number, updateWordDto: UpdateWordDto, newPictureFiles: Express.Multer.File[]) {
+        try {
+            let { topicId = [], levelId, specializationId, content, means = [], note, phonetic, examples = [], antonyms = [], synonyms = [], oldPictures = [] } = updateWordDto
 
-    //         if (means) {
-    //             await this.prismaService.wordMean.deleteMany({
-    //                 where: { wordId: id }
-    //             });
-    //         } else {
-    //             means = word.means;
-    //         }
+            const word = await this.findById(id)
+            if (!word) return new ResponseData<string>(null, 400, 'Từ không tồn tại')
 
-    //         let pictures: string[] = word.pictures
-    //         if (pictureFiles && pictureFiles.length > 0) {
-    //             const files = await Promise.all(
-    //                 pictureFiles.map(file => this.cloudinaryService.uploadFile(file))
-    //             );
+            if (content !== word.content) {
+                const isExisted = await this.isExisted(content)
+                if (isExisted) return new ResponseData<string>(null, 400, 'Từ này đã tồn tại')
+            }
 
-    //             pictures = files.map(file => file.url)
-    //         }
-    //         if (content && content !== word.content) {
-    //             const isExisted = await this.isExisted(content)
-    //             if (isExisted) return new ResponseData<string>(null, 400, 'Từ này đã tồn tại')
-    //         }
-    //         if (topicId) {
-    //             topicId = topicId.map((id) => Number(id))
-    //             await this.prismaService.word.update({
-    //                 where: { id: id },
-    //                 data: {
-    //                     Topic: { disconnect: word.Topic.map((id) => id) }
-    //                 }
-    //             })
-    //         } else {
-    //             topicId = []
-    //         }
-    //         if (examples) examples = examples.filter(example => example !== '')
-    //         if (antonyms) antonyms = antonyms.filter(antonym => antonym !== '')
-    //         if (synonyms) synonyms = synonyms.filter(synonym => synonym !== '')
+            let pictures: string[] = oldPictures
+            if (pictures) pictures = pictures.filter(pic => pic !== '')
+            if (newPictureFiles && newPictureFiles.length > 0) {
+                const files = await Promise.all(
+                    newPictureFiles.map(file => this.cloudinaryService.uploadFile(file))
+                );
 
-    //         const meansToCreate = means.map(mean => ({
-    //             wordId: id,
-    //             typeId: mean.typeId,
-    //             meaning: mean.meaning
-    //         }));
+                pictures = [...pictures, ...files.map(file => file.url)]
+            }
 
-    //         const newWord = await this.prismaService.word.update({
-    //             where: { id: id },
-    //             data: {
+            // if (examples) examples = examples.filter(example => example !== '')
+            // if (antonyms) antonyms = antonyms.filter(antonym => antonym !== '')
+            // if (synonyms) synonyms = synonyms.filter(synonym => synonym !== '')
 
-    //                 content,
-    //                 means: {
-    //                     create: meansToCreate
-    //                 },
-    //                 note,
-    //                 levelId,
-    //                 specializationId,
-    //                 phonetic,
-    //                 examples,
-    //                 antonyms,
-    //                 synonyms,
-    //                 Topic: { connect: topicId.map((id) => ({ id })) },
-    //                 pictures,
+            if (topicId) {
+                await this.prismaService.word.update({
+                    where: { id: id },
+                    data: {
+                        Topic: { disconnect: word.Topic.map((id) => id) }
+                    }
+                })
+            }
 
-    //             },
-    //             include: {
-    //                 Topic: true,
-    //                 means: true,
-    //                 Specialization: true,
-    //                 Level: true
-    //             }
-    //         })
-    //         return new ResponseData<Word>(newWord, 200, 'Cập nhật thành công')
-    //     } catch (error) {
-    //         console.log(
-    //             error
-    //         );
+            let meansToCreate: any[] = []
+            if (means) {
+                await this.prismaService.wordMean.deleteMany({
+                    where: { wordId: id }
+                });
 
-    //         return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
-    //     }
-    // }
+                meansToCreate = means.map(mean => ({
+                    // wordId: id,
+                    typeId: mean.typeId,
+                    meaning: mean.meaning
+                }));
+            }
+
+            const data: any = {
+                content,
+                note,
+                levelId,
+                specializationId,
+                means: {
+                    create: [...meansToCreate]
+                },
+                phonetic,
+                examples,
+                antonyms,
+                synonyms,
+                Topic: { connect: topicId.map((id) => ({ id: Number(id) })) },
+                pictures,
+            }
+
+
+            const newWord = await this.prismaService.word.update({
+                where: { id: Number(id) }, // Specify the primary key for identifying the record
+                data: data,
+                include: {
+                    Topic: true,
+                    means: true,
+                    Specialization: true,
+                    Level: true
+                }
+            });
+
+            return new ResponseData<Word>(newWord, 200, 'Cập nhật thành công')
+        } catch (error) {
+            return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+        }
+    }
 
     async delete(id: number) {
         try {
@@ -248,7 +246,8 @@ export class WordService {
     async findById(id: number) {
         return await this.prismaService.word.findUnique({
             where: {
-                id: id
+                id: id,
+                isDeleted: false
             },
             include: {
                 Practice: true, User: true, Topic: true, means: true, Level: true, Specialization: true
@@ -258,12 +257,11 @@ export class WordService {
 
     async getWordsPack(userId, option: { types: number[], level: number, specialization: number, topic: [], numSentence: number }) {
         try {
-            console.log(option);
-
             let { topic, types, level, specialization, numSentence } = option
             const userPractice = await this.prismaService.practice.findMany({
                 where: {
                     userId: userId,
+
                 },
                 include: {
                     Words: true,
@@ -290,6 +288,7 @@ export class WordService {
             });
 
             let whereCondition: any = {
+                isDeleted: false
             };
             // if (type) whereCondition.typeId = Number(type);
             if (level) whereCondition.levelId = Number(level);
@@ -350,7 +349,8 @@ export class WordService {
                         // {
                         //     mean: { contains: key }
                         // }
-                    ]
+                    ],
+                    isDeleted: false
                 }
             })
             if (word.length === 0) {

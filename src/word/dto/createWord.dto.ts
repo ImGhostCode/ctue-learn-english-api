@@ -28,7 +28,7 @@ class WordMean {
 
 export class CreateWordDto {
   @ApiProperty()
-  // @IsOptional()
+  @IsOptional()
   @IsNumber()
   userId?: number;
 
@@ -53,7 +53,7 @@ export class CreateWordDto {
   @MaxLength(CONSTANTS_MAX.WORD_CONTENT_LEN)
   content: string;
 
-  @ApiProperty()
+  @ApiProperty({ type: () => WordMean, isArray: true })
   @Type(() => WordMean)
   means: WordMean[];
 
@@ -83,7 +83,7 @@ export class CreateWordDto {
   @IsArray()
   antonyms?: string[];
 
-  @ApiProperty({ type: 'array', items: { type: 'string', format: 'binary', } })
+  @ApiProperty({ name: 'pictures', type: 'array', items: { type: 'string', format: 'binary', } })
   @IsOptional()
   @IsString()
   pictures?: string[];

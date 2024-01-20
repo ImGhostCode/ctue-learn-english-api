@@ -14,15 +14,11 @@ import { ApiProperty } from '@nestjs/swagger';
 class WordMean {
   @ApiProperty()
   @IsNumber()
-  wordId: number
-
-  @ApiProperty()
-  @IsNumber()
   typeId: number
 
   @ApiProperty()
   @IsString()
-  @MaxLength(CONSTANTS_MAX.WORD_NOTE_LEN)
+  @MaxLength(CONSTANTS_MAX.WORD_MEAN_LEN)
   @IsNotEmpty()
   meaning: string
 }
@@ -43,34 +39,34 @@ export class UpdateWordDto {
   topicId: number[];
 
   @ApiProperty()
-  @IsOptional()
+  // @IsOptional()
   @IsNumber()
   levelId?: number;
 
   @ApiProperty()
-  @IsOptional()
+  // @IsOptional()
   @IsNumber()
   specializationId?: number;
 
   @ApiProperty()
-  @IsOptional()
+  // @IsOptional()
   @IsString()
   @MaxLength(CONSTANTS_MAX.WORD_CONTENT_LEN)
   content?: string;
 
-  @ApiProperty()
+  @ApiProperty({ type: () => WordMean, isArray: true })
   @IsOptional()
   @Type(() => WordMean)
   means: WordMean[];
 
   @ApiProperty()
-  @IsOptional()
+  // @IsOptional()
   @IsString()
   @MaxLength(CONSTANTS_MAX.WORD_NOTE_LEN)
   note?: string;
 
   @ApiProperty()
-  @IsOptional()
+  // @IsOptional()
   @IsString()
   phonetic?: string;
 
@@ -88,4 +84,14 @@ export class UpdateWordDto {
   @IsOptional()
   @IsArray()
   antonyms?: string[];
+
+  @ApiProperty()
+  @IsOptional()
+  @IsArray()
+  oldPictures?: string[];
+
+  @ApiProperty({ name: 'new_pictures', type: 'array', items: { type: 'string', format: 'binary', } })
+  @IsOptional()
+  @IsArray()
+  newPictures?: string[];
 }
