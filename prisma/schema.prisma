@@ -77,6 +77,7 @@ model Contribution {
   feedback  String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  isDeleted Boolean  @default(false)
 
   User User @relation(fields: [userId], references: [id])
 
@@ -91,8 +92,8 @@ model Sentence {
   mean      String
   note      String?
   isDeleted Boolean @default(false)
+  Topic     Topic[]
 
-  Topic                Topic[]
   FavoriteItem         FavoriteItem[]
   Practice             Practice[]
   User                 User?                 @relation(fields: [userId], references: [id])

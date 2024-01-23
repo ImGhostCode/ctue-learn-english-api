@@ -1,5 +1,6 @@
 import {
   IsArray,
+  IsJSON,
   IsNotEmpty,
   IsNotEmptyObject,
   IsNumber,
@@ -13,11 +14,25 @@ import { Transform, TransformFnParams, Type } from 'class-transformer';
 import { CONSTANTS_MAX } from 'src/global';
 import { ApiProperty } from '@nestjs/swagger';
 
-class Content {
+class WordMean {
+  // @ApiProperty()
+  // @IsNumber()
+  // wordId: number
+
   @ApiProperty()
-  @IsNotEmpty()
   @IsNumber()
-  typeId?: number;
+  typeId: number
+
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(CONSTANTS_MAX.WORD_MEAN_LEN)
+  meaning: string
+}
+
+
+class Content {
 
   @ApiProperty()
   @IsNotEmpty()
@@ -29,33 +44,35 @@ class Content {
   topicId?: number[];
 
   @ApiProperty()
-  @IsOptional()
+  // @IsOptional()
   @IsNumber()
   levelId?: number;
 
   @ApiProperty()
-  @IsOptional()
+  // @IsOptional()
   @IsNumber()
   specializationId?: number;
 
   @ApiProperty()
-  @IsNotEmpty()
+  // @IsNotEmpty()
   @IsString()
+  @MaxLength(CONSTANTS_MAX.WORD_CONTENT_LEN)
   content?: string;
 
-  @ApiProperty()
+  @ApiProperty({ type: () => WordMean, isArray: true })
   @IsNotEmpty()
-  @IsString()
-  mean?: string;
+  @IsArray()
+  @Type(() => WordMean)
+  means: WordMean[];
 
   @ApiProperty()
   @IsOptional()
   @IsString()
-  @MaxLength(CONSTANTS_MAX.SENTENCE_NOTE_LEN)
+  @MaxLength(CONSTANTS_MAX.WORD_NOTE_LEN)
   note?: string;
 
   @ApiProperty()
-  @IsOptional()
+  // @IsOptional()
   @IsString()
   phonetic?: string;
 
@@ -66,30 +83,30 @@ class Content {
 
   @ApiProperty()
   @IsOptional()
-  @IsString()
-  synonyms?: string;
+  @IsArray()
+  synonyms?: string[];
 
   @ApiProperty()
   @IsOptional()
-  @IsString()
-  antonyms?: string;
+  @IsArray()
+  antonyms?: string[];
 
-  @ApiProperty()
+  @ApiProperty({ name: 'pictures', type: 'array', items: { type: 'string', format: 'binary', } })
   @IsOptional()
   @IsString()
-  picture?: string;
+  pictures?: string[];
 }
 
-export class CreateContributionDto {
+export class CreateWordContributionDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
   type: string;
 
-  // @IsNotEmptyObject()
-  // @IsObject()
+  @IsNotEmptyObject()
+  @IsObject()
   // @IsNotEmpty()
-  // @ValidateNested()
+  @ValidateNested()
   @ApiProperty()
   @Type(() => Content)
   content: Content;

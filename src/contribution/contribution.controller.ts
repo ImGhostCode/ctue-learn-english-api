@@ -11,15 +11,16 @@ import {
   UseGuards,
   UseInterceptors,
   UploadedFile,
+  UploadedFiles,
 } from '@nestjs/common';
 import { ContributionService } from './contribution.service';
-import { CreateContributionDto } from './dto';
+import { CreateSenContributionDto, CreateWordContributionDto } from './dto';
 import { GetAccount, Roles } from '../auth/decorator';
 import { Account } from '@prisma/client';
 import { MyJWTGuard, RolesGuard } from '../auth/guard';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { ACCOUNT_TYPES } from '../global';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Contribution')
 @UseGuards(MyJWTGuard, RolesGuard)
@@ -27,18 +28,31 @@ import { ApiTags } from '@nestjs/swagger';
 export class ContributionController {
   constructor(private readonly contributionService: ContributionService) { }
 
-  @Post()
+  @Post('word')
+  @ApiConsumes('multipart/form-data')
   @Roles(ACCOUNT_TYPES.USER, ACCOUNT_TYPES.ADMIN)
-  @UseInterceptors(FileInterceptor('picture'))
-  create(
-    @Body() createContributionDto: CreateContributionDto,
+  @UseInterceptors(FilesInterceptor('pictures'))
+  createWordContribution(
+    @Body() createWordConDto: CreateWordContributionDto,
     @GetAccount() account: Account,
-    @UploadedFile() picture: Express.Multer.File,
+    @UploadedFiles() pictures: Express.Multer.File[],
   ) {
-    return this.contributionService.create(
-      createContributionDto,
+    return this.contributionService.createWordCon(
+      createWordConDto,
       account.userId,
-      picture,
+      pictures,
+    );
+  }
+
+  @Post('sentence')
+  @Roles(ACCOUNT_TYPES.USER, ACCOUNT_TYPES.ADMIN)
+  createSenContribution(
+    @Body() createSenConDto: CreateSenContributionDto,
+    @GetAccount() account: Account,
+  ) {
+    return this.contributionService.createSenCon(
+      createSenConDto,
+      account.userId,
     );
   }
 
@@ -60,17 +74,26 @@ export class ContributionController {
     return this.contributionService.findOne(id);
   }
 
-  // @Patch(':id')
-  // @Roles(ACCOUNT_TYPES.ADMIN)
-  // verifyContribute(
-  //   @Param('id', ParseIntPipe) id: number,
-  //   @Body() body: { status: number; feedback: string },
-  // ) {
-  //   return this.contributionService.verifyContribute(id, body);
-  // }
+  @Patch('verify/word/:id')
+  @Roles(ACCOUNT_TYPES.ADMIN)
+  verifyWordContribution(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: { status: number; feedback: string },
+  ) {
+    return this.contributionService.verifyWordContribution(id, body);
+  }
+
+  @Patch('verify/sentence/:id')
+  @Roles(ACCOUNT_TYPES.ADMIN)
+  verifySenContribution(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: { status: number; feedback: string },
+  ) {
+    return this.contributionService.verifySenContribution(id, body);
+  }
 
   @Delete(':id')
-  @Roles(ACCOUNT_TYPES.ADMIN, ACCOUNT_TYPES.USER)
+  @Roles(ACCOUNT_TYPES.ADMIN)
   remove(
     @Param('id', ParseIntPipe) id: number,
     @GetAccount() account: Account,

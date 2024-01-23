@@ -47,3 +47,11 @@ export enum PRACTICE_SIZE {
     PRACTICE_SELECT = 5,
     MAX_PRACTICE_COUNT = 100
 }
+
+export enum CONTRIBUTION {
+    REFUSED = -1,
+    PENDING = 0,
+    APPROVED = 1,
+    WORD = 'word',
+    SENTENCE = 'sentence'
+}
