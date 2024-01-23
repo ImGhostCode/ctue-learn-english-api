@@ -1,1 +1,2 @@
-export * from './createContribution.dto'
+export * from './createWordContribution.dto'
+export * from './createSenContribution.dto'
