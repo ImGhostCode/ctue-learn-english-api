@@ -29,15 +29,15 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  Account              Account[]
-  Sentence             Sentence[]
-  Word                 Word[]
-  FavoriteList         FavoriteItem[]
-  Contribution         Contribution[]
-  Practice             Practice[]
-  phoneticProEvals     PhoneticProEval[]
-  userLearnedWords     UserLearnedWord[]
-  userLearnedSentences UserLearnedSentence[]
+  Account           Account[]
+  Sentence          Sentence[]
+  Word              Word[]
+  FavoriteList      FavoriteItem[]
+  Contribution      Contribution[]
+  Practice          Practice[]
+  SpeechAssessments SpeechAssessment[]
+  userLearnedWords  UserLearnedWord[]
+  VocabularySet     VocabularySet[]
 
   @@map("users")
 }
@@ -94,11 +94,10 @@ model Sentence {
   isDeleted Boolean @default(false)
   Topic     Topic[]
 
-  FavoriteItem         FavoriteItem[]
-  Practice             Practice[]
-  User                 User?                 @relation(fields: [userId], references: [id])
-  Type                 Type                  @relation(fields: [typeId], references: [id])
-  userLearnedSentences UserLearnedSentence[]
+  FavoriteItem FavoriteItem[]
+  Practice     Practice[]
+  User         User?          @relation(fields: [userId], references: [id])
+  Type         Type           @relation(fields: [typeId], references: [id])
 
   @@map("sentences")
 }
@@ -126,7 +125,8 @@ model Word {
   Level            Level             @relation(fields: [levelId], references: [id])
   Specialization   Specialization    @relation(fields: [specializationId], references: [id])
   User             User?             @relation(fields: [userId], references: [id])
-  userLearnedWords UserLearnedWord[]
+  UserLearnedWords UserLearnedWord[]
+  Vocabulary       VocabularySet[]
 
   @@map("words")
 }
@@ -224,41 +224,54 @@ model Practice {
   @@map("practices")
 }
 
-model PhoneticProEval {
-  id       Int    @id @default(autoincrement())
-  userId   Int?
-  accuracy Float
-  phoneme  String
+model SpeechAssessment {
+  id                Int                 @id @default(autoincrement())
+  userId            Int?
+  accuracy          Float
+  PhonemeAssessment PhonemeAssessment[]
 
   User User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@map("phoneticProEval")
+  @@map("speechAssessment")
+}
+
+model PhonemeAssessment {
+  id                  Int    @id @default(autoincrement())
+  label               String
+  accuracy            Float
+  speechAssmessmentId Int
+
+  SpeechAssessment SpeechAssessment? @relation(fields: [speechAssmessmentId], references: [id])
+
+  @@map("phonemeAssessments")
 }
 
 model UserLearnedWord {
-  id        Int      @id @default(autoincrement())
-  user_id   Int
-  word_id   Int
-  status    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  Word Word  @relation(fields: [word_id], references: [id])
-  User User? @relation(fields: [user_id], references: [id], onDelete: Cascade)
-
-  @@map("userLearndWords")
-}
-
-model UserLearnedSentence {
   id          Int      @id @default(autoincrement())
-  user_id     Int
-  sentence_id Int
-  status      String
+  userId      Int
+  wordId      Int
+  setId       Int
+  memoryLevel Int // Thêm trường lưu cấp độ nhớ
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  Sentence Sentence @relation(fields: [sentence_id], references: [id])
-  User     User?    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  Word          Word          @relation(fields: [wordId], references: [id])
+  User          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  VocabularySet VocabularySet @relation(fields: [setId], references: [id])
 
-  @@map("userLearndSentences")
+  @@map("userLearnedWords")
+}
+
+model VocabularySet {
+  id        Int      @id @default(autoincrement())
+  name      String
+  userId    Int
+  isPublic  Boolean  @default(false) // Indicates whether the set is public or private
+  createdAt DateTime @default(now())
+
+  User            User              @relation(fields: [userId], references: [id])
+  UserLearnedWord UserLearnedWord[]
+  Word            Word[]
+
+  @@map("vocabularySets")
 }
