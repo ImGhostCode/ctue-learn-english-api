@@ -17,7 +17,7 @@ export class IrregularVerbService {
           v1: createIrregularVerbDto.v1,
           v2: createIrregularVerbDto.v2,
           v3: createIrregularVerbDto.v3,
-          mean: createIrregularVerbDto.mean
+          meaning: createIrregularVerbDto.meaning
         }
       }), 200, 'Tạo thành công động từ bất quy tắc')
     } catch (error) {
@@ -54,7 +54,7 @@ export class IrregularVerbService {
             { v1: { contains: key } },
             { v2: { contains: key } },
             { v3: { contains: key } },
-            { mean: { contains: key } },
+            { meaning: { contains: key } },
           ]
         },
       })
@@ -90,7 +90,7 @@ export class IrregularVerbService {
           v1: updateIrregularVerbDto.v1,
           v2: updateIrregularVerbDto.v2,
           v3: updateIrregularVerbDto.v3,
-          mean: updateIrregularVerbDto.mean
+          meaning: updateIrregularVerbDto.meaning
         }
       }), 200, 'Cập nhật thành công động từ')
     } catch (error) {
@@ -137,7 +137,7 @@ export class IrregularVerbService {
   //             v3: { contains: key }
   //           },
   //           {
-  //             mean: { contains: key }
+  //             meaning: { contains: key }
   //           },
   //         ]
   //       }

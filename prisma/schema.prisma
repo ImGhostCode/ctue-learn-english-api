@@ -29,15 +29,15 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  Account           Account[]
-  Sentence          Sentence[]
-  Word              Word[]
-  FavoriteList      FavoriteItem[]
-  Contribution      Contribution[]
-  Practice          Practice[]
-  SpeechAssessments SpeechAssessment[]
-  userLearnedWords  UserLearnedWord[]
-  VocabularySet     VocabularySet[]
+  Account                  Account[]
+  Sentence                 Sentence[]
+  Word                     Word[]
+  FavoriteList             FavoriteItem[]
+  Contribution             Contribution[]
+  Practice                 Practice[]
+  PronunciationAssessments PronunciationAssessment[]
+  userLearnedWords         UserLearnedWord[]
+  VocabularySet            VocabularySet[]
 
   @@map("users")
 }
@@ -111,13 +111,13 @@ model Word {
 
   content   String
   note      String?
-  means     WordMean[]
+  meanings  WordMeaning[]
   phonetic  String?
   pictures  String[]
   examples  String[]
   synonyms  String[]
   antonyms  String[]
-  isDeleted Boolean    @default(false)
+  isDeleted Boolean       @default(false)
 
   FavoriteItem     FavoriteItem[]
   Topic            Topic[]
@@ -131,7 +131,7 @@ model Word {
   @@map("words")
 }
 
-model WordMean {
+model WordMeaning {
   // id      Int    @id @default(autoincrement())
   wordId  Int
   typeId  Int
@@ -183,7 +183,7 @@ model Type {
 
   Sentence Sentence[]
   Practice Practice[]
-  WordType WordMean[]
+  WordType WordMeaning[]
 
   @@map("types")
 }
@@ -193,7 +193,7 @@ model IrregularVerb {
   v1        String
   v2        String
   v3        String
-  mean      String
+  meaning   String
   isDeleted Boolean @default(false)
 
   @@map("irregularVerbs")
@@ -224,24 +224,24 @@ model Practice {
   @@map("practices")
 }
 
-model SpeechAssessment {
+model PronunciationAssessment {
   id                Int                 @id @default(autoincrement())
   userId            Int?
-  accuracy          Float
+  score             Int
   PhonemeAssessment PhonemeAssessment[]
 
   User User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@map("speechAssessment")
+  @@map("pronunciationAssessment")
 }
 
 model PhonemeAssessment {
-  id                  Int    @id @default(autoincrement())
-  label               String
-  accuracy            Float
-  speechAssmessmentId Int
+  id                      Int    @id @default(autoincrement())
+  label                   String
+  score                   Int
+  pronunciationAssessment Int
 
-  SpeechAssessment SpeechAssessment? @relation(fields: [speechAssmessmentId], references: [id])
+  PronunciationAssessment PronunciationAssessment? @relation(fields: [pronunciationAssessment], references: [id])
 
   @@map("phonemeAssessments")
 }
@@ -264,14 +264,15 @@ model UserLearnedWord {
 
 model VocabularySet {
   id        Int      @id @default(autoincrement())
-  name      String
+  title     String
   userId    Int
   isPublic  Boolean  @default(false) // Indicates whether the set is public or private
   createdAt DateTime @default(now())
+  isDeleted Boolean  @default(false)
+  words     Word[]
 
   User            User              @relation(fields: [userId], references: [id])
   UserLearnedWord UserLearnedWord[]
-  Word            Word[]
 
   @@map("vocabularySets")
 }

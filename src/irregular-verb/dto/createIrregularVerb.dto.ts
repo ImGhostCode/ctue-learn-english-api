@@ -25,5 +25,5 @@ export class CreateIrregularVerbDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(CONSTANTS_MAX.WORD_MEAN_LEN)
-  mean: string;
+  meaning: string;
 }
