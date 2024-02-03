@@ -16,8 +16,10 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { MailingModule } from './mailing/mailing.module';
 import { PracticeModule } from './practice/practice.module';
 
+import { VocabularySetsModule } from './vocabulary-sets/vocabulary-sets.module';
+
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }), PrismaModule, AuthModule, UserModule, SentenceModule, WordModule, TypeModule, LevelModule, TopicModule, SpecializationModule, ContributionModule, IrregularVerbModule, FavoriteItemModule, CloudinaryModule, MailingModule, PracticeModule]
+  imports: [ConfigModule.forRoot({ isGlobal: true }), PrismaModule, AuthModule, UserModule, SentenceModule, WordModule, TypeModule, LevelModule, TopicModule, SpecializationModule, ContributionModule, IrregularVerbModule, FavoriteItemModule, CloudinaryModule, MailingModule, PracticeModule, VocabularySetsModule]
 })
 export class AppModule {
   static port: number

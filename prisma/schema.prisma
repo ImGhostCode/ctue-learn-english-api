@@ -37,7 +37,8 @@ model User {
   Practice                 Practice[]
   PronunciationAssessments PronunciationAssessment[]
   userLearnedWords         UserLearnedWord[]
-  VocabularySet            VocabularySet[]
+  CreatedVocabularySet     VocabularySet[]
+  UserVocabularySets       UserVocabularySet[]
 
   @@map("users")
 }
@@ -149,9 +150,10 @@ model Topic {
   isWord Boolean
   image  String
 
-  Sentence Sentence[]
-  Word     Word[]
-  Practice Practice[]
+  Sentence      Sentence[]
+  Word          Word[]
+  Practice      Practice[]
+  VocabularySet VocabularySet[]
 
   @@map("topics")
 }
@@ -170,8 +172,9 @@ model Specialization {
   id   Int    @id @default(autoincrement())
   name String
 
-  Word     Word[]
-  Practice Practice[]
+  Word          Word[]
+  Practice      Practice[]
+  VocabularySet VocabularySet[]
 
   @@map("specializations")
 }
@@ -247,17 +250,17 @@ model PhonemeAssessment {
 }
 
 model UserLearnedWord {
-  id          Int      @id @default(autoincrement())
-  userId      Int
-  wordId      Int
-  setId       Int
-  memoryLevel Int // Thêm trường lưu cấp độ nhớ
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                  Int      @id @default(autoincrement())
+  userId              Int
+  wordId              Int
+  userVocabularySetId Int
+  memoryLevel         Int // Thêm trường lưu cấp độ nhớ
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
-  Word          Word          @relation(fields: [wordId], references: [id])
-  User          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  VocabularySet VocabularySet @relation(fields: [setId], references: [id])
+  Word              Word              @relation(fields: [wordId], references: [id])
+  User              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  UserVocabularySet UserVocabularySet @relation(fields: [userVocabularySetId], references: [id])
 
   @@map("userLearnedWords")
 }
@@ -266,13 +269,31 @@ model VocabularySet {
   id        Int      @id @default(autoincrement())
   title     String
   userId    Int
+  topicId   Int?
+  specId    Int?
+  picture   String?
   isPublic  Boolean  @default(false) // Indicates whether the set is public or private
   createdAt DateTime @default(now())
   isDeleted Boolean  @default(false)
-  words     Word[]
 
-  User            User              @relation(fields: [userId], references: [id])
-  UserLearnedWord UserLearnedWord[]
+  words              Word[]
+  Specialization     Specialization?     @relation(fields: [specId], references: [id])
+  Topic              Topic?              @relation(fields: [topicId], references: [id])
+  User               User                @relation(fields: [userId], references: [id])
+  UserVocabularySets UserVocabularySet[]
 
   @@map("vocabularySets")
+}
+
+model UserVocabularySet {
+  id              Int      @id @default(autoincrement())
+  userId          Int
+  vocabularySetId Int
+  createdAt       DateTime @default(now())
+
+  User            User              @relation(fields: [userId], references: [id])
+  VocabularySet   VocabularySet     @relation(fields: [vocabularySetId], references: [id])
+  UserLearnedWord UserLearnedWord[]
+
+  @@map("userVocabularySets")
 }
