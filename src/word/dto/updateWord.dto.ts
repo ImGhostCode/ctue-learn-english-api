@@ -11,7 +11,7 @@ import { Transform, TransformFnParams, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
 
-class WordMean {
+class WordMeaning {
   @ApiProperty()
   @IsNumber()
   typeId: number
@@ -54,10 +54,10 @@ export class UpdateWordDto {
   @MaxLength(CONSTANTS_MAX.WORD_CONTENT_LEN)
   content?: string;
 
-  @ApiProperty({ type: () => WordMean, isArray: true })
+  @ApiProperty({ type: () => WordMeaning, isArray: true })
   @IsOptional()
-  @Type(() => WordMean)
-  means: WordMean[];
+  @Type(() => WordMeaning)
+  meanings: WordMeaning[];
 
   @ApiProperty()
   // @IsOptional()

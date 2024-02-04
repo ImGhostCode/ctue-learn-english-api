@@ -11,7 +11,7 @@ export class WordService {
 
     async create(createWordDto: CreateWordDto, pictureFiles: Express.Multer.File[]) {
         try {
-            let { userId, topicId = [], levelId, specializationId, content, means = [], note, phonetic, examples = [], antonyms = [], synonyms = [], pictures = [] } = createWordDto
+            let { userId, topicId = [], levelId, specializationId, content, meanings = [], note, phonetic, examples = [], antonyms = [], synonyms = [], pictures = [] } = createWordDto
 
             const isExisted = await this.isExisted(createWordDto.content)
             if (isExisted) return new ResponseData<string>(null, 400, 'Từ đã tồn tại')
@@ -39,8 +39,8 @@ export class WordService {
                     levelId,
                     specializationId,
                     content,
-                    means: {
-                        create: [...means]
+                    meanings: {
+                        create: [...meanings]
                     },
                     note,
                     phonetic,
@@ -53,7 +53,7 @@ export class WordService {
                     Topic: true,
                     Specialization: true,
                     Level: true,
-                    means: true
+                    meanings: true
                 }
             })
 
@@ -71,7 +71,7 @@ export class WordService {
             let whereCondition: any = {
                 OR: [
                     { content: { contains: key } },
-                    // { means: { some: { contains: key } } }
+                    // { meanings: { some: { contains: key } } }
                 ],
                 isDeleted: false
             };
@@ -79,11 +79,11 @@ export class WordService {
             if (specialization) whereCondition.specializationId = Number(specialization);
             if (types) {
                 if (Array.isArray(types)) {
-                    whereCondition.means = {
+                    whereCondition.meanings = {
                         some: { typeId: { in: types.map(type => Number(type)) } }
                     };
                 } else {
-                    whereCondition.means = {
+                    whereCondition.meanings = {
                         some: { typeId: Number(types) }
                     };
                 }
@@ -119,7 +119,7 @@ export class WordService {
                     Topic: true,
                     Specialization: true,
                     Level: true,
-                    means: true
+                    meanings: true
                 }
             })
             return new ResponseData<any>({ words, totalPages }, 200, 'Tìm thành công')
@@ -140,7 +140,7 @@ export class WordService {
 
     async update(id: number, updateWordDto: UpdateWordDto, newPictureFiles: Express.Multer.File[]) {
         try {
-            let { topicId = [], levelId, specializationId, content, means = [], note, phonetic, examples = [], antonyms = [], synonyms = [], oldPictures = [] } = updateWordDto
+            let { topicId = [], levelId, specializationId, content, meanings = [], note, phonetic, examples = [], antonyms = [], synonyms = [], oldPictures = [] } = updateWordDto
 
             const word = await this.findById(id)
             if (!word) return new ResponseData<string>(null, 400, 'Từ không tồn tại')
@@ -173,13 +173,13 @@ export class WordService {
                 })
             }
 
-            let meansToCreate: any[] = []
-            if (means) {
-                await this.prismaService.wordMean.deleteMany({
+            let meaningsToCreate: any[] = []
+            if (meanings) {
+                await this.prismaService.wordMeaning.deleteMany({
                     where: { wordId: id }
                 });
 
-                meansToCreate = means.map(mean => ({
+                meaningsToCreate = meanings.map(mean => ({
                     // wordId: id,
                     typeId: mean.typeId,
                     meaning: mean.meaning
@@ -191,8 +191,8 @@ export class WordService {
                 note,
                 levelId,
                 specializationId,
-                means: {
-                    create: [...meansToCreate]
+                meanings: {
+                    create: [...meaningsToCreate]
                 },
                 phonetic,
                 examples,
@@ -208,7 +208,7 @@ export class WordService {
                 data: data,
                 include: {
                     Topic: true,
-                    means: true,
+                    meanings: true,
                     Specialization: true,
                     Level: true
                 }
@@ -250,7 +250,7 @@ export class WordService {
                 isDeleted: false
             },
             include: {
-                Practice: true, User: true, Topic: true, means: true, Level: true, Specialization: true
+                Practice: true, User: true, Topic: true, meanings: true, Level: true, Specialization: true
             }
         })
     }
@@ -295,11 +295,11 @@ export class WordService {
             if (specialization) whereCondition.specializationId = Number(specialization);
             if (types) {
                 if (Array.isArray(types)) {
-                    whereCondition.means = {
+                    whereCondition.meanings = {
                         some: { typeId: { in: types.map(type => Number(type)) } }
                     };
                 } else {
-                    whereCondition.means = {
+                    whereCondition.meanings = {
                         some: { typeId: Number(types) }
                     };
                 }
@@ -330,7 +330,7 @@ export class WordService {
                 where: whereCondition,
                 take: Number(numSentence),
                 skip: randomPackIndex,
-                include: { Topic: true, Level: true, Specialization: true, means: true }
+                include: { Topic: true, Level: true, Specialization: true, meanings: true }
             })
             return new ResponseData<Word>(wordspack, 200, 'Tìm gói từ vựng thành công')
         } catch (error) {

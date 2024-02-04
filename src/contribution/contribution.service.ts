@@ -13,7 +13,7 @@ export class ContributionService {
 
   async createWordCon(createWordContributionDto: CreateWordContributionDto, userId: number, pictureFiles: Express.Multer.File[]) {
 
-    // const { levelId, specializationId, content, means, note = '' } = createWordContributionDto.content
+    // const { levelId, specializationId, content, meanings, note = '' } = createWordContributionDto.content
     try {
       if (pictureFiles) {
         const files = await Promise.all(
@@ -96,10 +96,10 @@ export class ContributionService {
         return new ResponseData<string>(null, 400, "Đóng góp đã được duyệt")
       }
       if (body.status === CONTRIBUTION.APPROVED) {
-        const { topicId = [], levelId, specializationId, content, means = [], note, phonetic, examples = [], synonyms = [], antonyms = [], pictures = [] } = JSON.parse(JSON.stringify(contribution.content))
+        const { topicId = [], levelId, specializationId, content, meanings = [], note, phonetic, examples = [], synonyms = [], antonyms = [], pictures = [] } = JSON.parse(JSON.stringify(contribution.content))
         const { userId } = contribution
 
-        const result = await this.wordService.create({ topicId: topicId.map(id => Number(id)), levelId, specializationId, content, means, note, phonetic, synonyms, antonyms, userId, examples, pictures }, null)
+        const result = await this.wordService.create({ topicId: topicId.map(id => Number(id)), levelId, specializationId, content, meanings, note, phonetic, synonyms, antonyms, userId, examples, pictures }, null)
 
         if (result.statusCode === 200) {
           await this.prismaService.contribution.update({ where: { id }, data: { status: Number(body.status), feedback: '' } })

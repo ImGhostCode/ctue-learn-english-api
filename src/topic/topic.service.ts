@@ -16,10 +16,12 @@ export class TopicService {
         data: {
           name: createTopicDto.name,
           isWord: createTopicDto.isWord,
-          image: createTopicDto.image
+          image: createTopicDto.image ?? ''
         }
       }), 200, 'Tạo chủ đề thành công')
     } catch (error) {
+      console.log(error);
+
       return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
     }
   }
