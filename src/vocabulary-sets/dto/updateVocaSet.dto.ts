@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { ArrayMaxSize, IsArray, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength } from "class-validator";
+import { Transform } from "class-transformer";
+import { ArrayMaxSize, IsArray, IsBoolean, IsBooleanString, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength } from "class-validator";
 import { VOCABULARY_SET } from "src/global";
 
 export class UpdateVocaSetDto {
@@ -35,10 +36,16 @@ export class UpdateVocaSetDto {
     @IsOptional()
     picture?: string;
 
-    // @ApiProperty()
-    // @IsOptional()
-    // @IsBoolean()
-    // isPublic: boolean
+    @ApiProperty()
+    @IsOptional()
+    @IsBoolean()
+    // @IsBooleanString()
+    @Transform(({ value }) => {
+        if (value === 'true') return true;
+        if (value === 'false') return false;
+        return value;
+    })
+    isPublic?: boolean
 
     @ApiProperty()
     @IsArray()

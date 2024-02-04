@@ -275,6 +275,7 @@ model VocabularySet {
   isPublic  Boolean  @default(false) // Indicates whether the set is public or private
   createdAt DateTime @default(now())
   isDeleted Boolean  @default(false)
+  downloads Int      @default(0)
 
   words              Word[]
   Specialization     Specialization?     @relation(fields: [specId], references: [id])

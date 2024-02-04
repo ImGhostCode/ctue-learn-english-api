@@ -20,7 +20,17 @@ export class VocabularySetsController {
   @Roles(ACCOUNT_TYPES.USER, ACCOUNT_TYPES.ADMIN)
   @Post()
   create(@Body() createVocaSetDto: CreateVocaSetDto, @GetAccount() account: Account, @UploadedFile() picture: Express.Multer.File) {
-    return this.vocabularySetsService.create(account.userId, account.accountType, createVocaSetDto, picture);
+    return this.vocabularySetsService.create(account.userId, createVocaSetDto, picture);
+  }
+
+  @Patch('download/:id')
+  downloadVocaSet(@Param('id') id: string, @GetAccount() account: Account) {
+    return this.vocabularySetsService.downloadVocaSet(+id, account.userId)
+  }
+
+  @Delete('user/:id')
+  rmDownloadedVocaSet(@Param('id') id: string, @GetAccount() account: Account) {
+    return this.vocabularySetsService.rmDownloadedVocaSet(+id, account.userId)
   }
 
   @Get()
@@ -34,13 +44,8 @@ export class VocabularySetsController {
   }
 
   @Get('user')
-  findAllByUser(@Query()
-  option: {
-    spec: number;
-    topic: number;
-    key: string;
-  }, @GetAccount() account: Account,) {
-    return this.vocabularySetsService.findAllByUser(account.userId, option);
+  findAllByUser(@GetAccount() account: Account,) {
+    return this.vocabularySetsService.findAllByUser(account.userId);
   }
 
   @Get(':id')
@@ -51,8 +56,8 @@ export class VocabularySetsController {
   @Patch(':id')
   @UseInterceptors(FileInterceptor('picture'))
   @ApiConsumes('multipart/form-data')
-  update(@Param('id') id: string, @Body() updateVocaSetDto: UpdateVocaSetDto, @UploadedFile() newPicture: Express.Multer.File) {
-    return this.vocabularySetsService.update(+id, updateVocaSetDto, newPicture);
+  update(@Param('id') id: string, @Body() updateVocaSetDto: UpdateVocaSetDto, @UploadedFile() newPicture: Express.Multer.File, @GetAccount() account: Account,) {
+    return this.vocabularySetsService.update(+id, updateVocaSetDto, newPicture, account);
   }
 
   @Delete(':id')
