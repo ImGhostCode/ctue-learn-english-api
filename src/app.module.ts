@@ -17,9 +17,10 @@ import { MailingModule } from './mailing/mailing.module';
 import { PracticeModule } from './practice/practice.module';
 
 import { VocabularySetsModule } from './vocabulary-sets/vocabulary-sets.module';
+import { PronunciationAssessmentModule } from './pronunciation-assessment/pronunciation-assessment.module';
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }), PrismaModule, AuthModule, UserModule, SentenceModule, WordModule, TypeModule, LevelModule, TopicModule, SpecializationModule, ContributionModule, IrregularVerbModule, FavoriteItemModule, CloudinaryModule, MailingModule, PracticeModule, VocabularySetsModule]
+  imports: [ConfigModule.forRoot({ isGlobal: true }), PrismaModule, AuthModule, UserModule, SentenceModule, WordModule, TypeModule, LevelModule, TopicModule, SpecializationModule, ContributionModule, IrregularVerbModule, FavoriteItemModule, CloudinaryModule, MailingModule, PracticeModule, VocabularySetsModule, PronunciationAssessmentModule]
 })
 export class AppModule {
   static port: number

@@ -61,3 +61,8 @@ export enum VOCABULARY_SET {
     TITLE_LEN = 100
 
 }
+
+export enum PRO_ASSESSMENT {
+    NEED_TO_IMPROVE_THRESHOLD = 80,
+    NUM_OF_SUGGESTS = 10
+}
