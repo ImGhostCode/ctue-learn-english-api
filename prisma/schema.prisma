@@ -228,23 +228,25 @@ model Practice {
 }
 
 model PronunciationAssessment {
-  id                Int                 @id @default(autoincrement())
-  userId            Int?
-  score             Int
-  PhonemeAssessment PhonemeAssessment[]
+  id                 Int                 @id @default(autoincrement())
+  userId             Int?
+  label              String
+  score              Int
+  phonemeAssessments PhonemeAssessment[]
+  createdAt          DateTime            @default(now())
 
   User User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@map("pronunciationAssessment")
+  @@map("pronunciationAssessments")
 }
 
 model PhonemeAssessment {
-  id                      Int    @id @default(autoincrement())
-  label                   String
-  score                   Int
-  pronunciationAssessment Int
+  id                        Int    @id @default(autoincrement())
+  label                     String
+  score                     Int
+  pronunciationAssessmentId Int
 
-  PronunciationAssessment PronunciationAssessment? @relation(fields: [pronunciationAssessment], references: [id])
+  PronunciationAssessment PronunciationAssessment? @relation(fields: [pronunciationAssessmentId], references: [id])
 
   @@map("phonemeAssessments")
 }
