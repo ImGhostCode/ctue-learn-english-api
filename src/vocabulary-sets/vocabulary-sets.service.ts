@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateVocaSetDto, UpdateVocaSetDto } from './dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
-import { Account, VocabularySet } from '@prisma/client';
+import { Account, UserLearnedWord, VocabularySet } from '@prisma/client';
 import { ACCOUNT_TYPES, ResponseData } from 'src/global';
 
 
@@ -23,25 +23,39 @@ export class VocabularySetsService {
                 const file = await this.cloudinaryService.uploadFile(pictureFile)
                 picture = file.url
             }
-            const res = await this.prismaService.vocabularySet.create({
-                data: {
-                    title,
-                    userId,
-                    topicId,
-                    specId,
-                    picture,
-                    words: {
-                        connect: words.map(id => ({ id }))
+            let createdVocaSet: VocabularySet | null = null
+            await this.prismaService.$transaction(async (tx) => {
+                createdVocaSet = await this.prismaService.vocabularySet.create({
+                    data: {
+                        title,
+                        userId,
+                        topicId,
+                        specId,
+                        picture,
+                        words: {
+                            connect: words.map(id => ({ id }))
+                        },
+                        isPublic: false
                     },
-                    isPublic: false
-                },
-                include: {
-                    Topic: true,
-                    Specialization: true,
-                    words: true
-                }
-            })
-            return new ResponseData<VocabularySet>(res, 200, 'Tạo bộ từ thành công')
+                    include: {
+                        Topic: true,
+                        Specialization: true,
+                        words: true,
+
+                    },
+
+                })
+
+                await this.prismaService.userVocabularySet.create({
+                    data: {
+                        userId,
+                        vocabularySetId: createdVocaSet.id
+                    }
+                })
+            });
+
+
+            return new ResponseData<any>(createdVocaSet, 200, 'Tạo bộ từ thành công')
         } catch (error) {
             console.log(error);
             return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
@@ -146,12 +160,15 @@ export class VocabularySetsService {
             const downloadedVocaSets: any = await this.prismaService.userVocabularySet.findMany({
                 where: {
                     userId: userId,
+                    vocabularySetId: {
+                        notIn: createdVocaSets.CreatedVocabularySet.map(set => set.id)
+                    }
                 },
                 select: {
                     VocabularySet: true,
                 },
             });
-            return new ResponseData<any>({ createdVocaSets, downloadedVocaSets }, 200, 'Tìm thành công')
+            return new ResponseData<any>({ createdVocaSets: createdVocaSets.CreatedVocabularySet, downloadedVocaSets }, 200, 'Tìm thành công')
         } catch (error) {
             console.log(error);
             return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
@@ -197,7 +214,7 @@ export class VocabularySetsService {
             if (account.accountType === ACCOUNT_TYPES.USER) {
                 whereCondition.userId = account.userId
 
-            } else {
+            } else if (account.accountType === ACCOUNT_TYPES.ADMIN) {
                 data.isPublic = isPublic
             }
 

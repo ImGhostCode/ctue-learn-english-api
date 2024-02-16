@@ -10,6 +10,7 @@ import { Account } from '@prisma/client';
 
 @ApiTags('Vocabulary Set')
 @UseGuards(MyJWTGuard, RolesGuard)
+@Roles(ACCOUNT_TYPES.USER, ACCOUNT_TYPES.ADMIN)
 @Controller('vocabulary-sets')
 export class VocabularySetsController {
   constructor(private readonly vocabularySetsService: VocabularySetsService) {
@@ -17,7 +18,6 @@ export class VocabularySetsController {
 
   @UseInterceptors(FileInterceptor('picture'))
   @ApiConsumes('multipart/form-data')
-  @Roles(ACCOUNT_TYPES.USER, ACCOUNT_TYPES.ADMIN)
   @Post()
   create(@Body() createVocaSetDto: CreateVocaSetDto, @GetAccount() account: Account, @UploadedFile() picture: Express.Multer.File) {
     return this.vocabularySetsService.create(account.userId, createVocaSetDto, picture);

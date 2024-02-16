@@ -39,6 +39,7 @@ model User {
   userLearnedWords         UserLearnedWord[]
   CreatedVocabularySet     VocabularySet[]
   UserVocabularySets       UserVocabularySet[]
+  ReviewReminder           ReviewReminder[]
 
   @@map("users")
 }
@@ -128,6 +129,7 @@ model Word {
   User             User?             @relation(fields: [userId], references: [id])
   UserLearnedWords UserLearnedWord[]
   Vocabulary       VocabularySet[]
+  ReviewReminder   ReviewReminder[]
 
   @@map("words")
 }
@@ -252,7 +254,7 @@ model PhonemeAssessment {
 }
 
 model UserLearnedWord {
-  id                  Int      @id @default(autoincrement())
+  // id                  Int      @id @default(autoincrement())
   userId              Int
   wordId              Int
   userVocabularySetId Int
@@ -264,6 +266,7 @@ model UserLearnedWord {
   User              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   UserVocabularySet UserVocabularySet @relation(fields: [userVocabularySetId], references: [id])
 
+  @@id([userId, wordId, userVocabularySetId])
   @@map("userLearnedWords")
 }
 
@@ -297,6 +300,22 @@ model UserVocabularySet {
   User            User              @relation(fields: [userId], references: [id])
   VocabularySet   VocabularySet     @relation(fields: [vocabularySetId], references: [id])
   UserLearnedWord UserLearnedWord[]
+  ReviewReminder  ReviewReminder[]
 
   @@map("userVocabularySets")
+}
+
+model ReviewReminder {
+  id                  Int      @id @default(autoincrement())
+  userVocabularySetId Int
+  userId              Int
+  isDone              Boolean  @default(false)
+  words               Word[]
+  reviewAt            DateTime
+  createdAt           DateTime @default(now())
+
+  UserVocabularySet UserVocabularySet @relation(fields: [userVocabularySetId], references: [id])
+  User              User              @relation(fields: [userId], references: [id])
+
+  @@map("reviewReminders")
 }
