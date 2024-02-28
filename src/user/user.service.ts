@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { PAGE_SIZE, ResponseData } from 'src/global';
 import { UpdateProfileDto, VerifyCodeDto, UpdatePasswordDto, ResetPasswordDto, ToggleBanUserDto } from './dto';
@@ -13,9 +13,9 @@ export class UserService {
 
     async getUser(account: Account) {
         try {
-            return new ResponseData<any>(account, 200, 'Tài khoản tồn tại')
+            return new ResponseData<any>(account, HttpStatus.OK, 'Tài khoản tồn tại')
         } catch (error) {
-            return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+            throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -52,9 +52,9 @@ export class UserService {
                     userId: 'asc'
                 }
             })
-            return new ResponseData<any>({ accounts, totalPages }, 200, 'Tìm thấy các người dùng')
+            return new ResponseData<any>({ accounts, totalPages }, HttpStatus.OK, 'Tìm thấy các người dùng')
         } catch (error) {
-            return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+            throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -65,15 +65,15 @@ export class UserService {
             })
             let feedback = toggleBanUserDto.feedback
             if (account.isBan) feedback = ''
-            if (!account) new ResponseData<any>(null, 400, 'Tài khoản không tồn tại')
+            if (!account) throw new HttpException('Tài khoản không tồn tại', HttpStatus.NOT_FOUND)
             await this.prismaService.account.update({
                 where: { email: account.email },
                 data: { isBan: !account.isBan, feedback: feedback }
             })
-            if (!account.isBan) return new ResponseData<any>(null, 200, 'Khóa người dùng thành công')
-            return new ResponseData<any>(null, 200, 'Mở khóa người dùng thành công')
+            if (!account.isBan) return new ResponseData<any>(null, HttpStatus.OK, 'Khóa người dùng thành công')
+            return new ResponseData<any>(null, HttpStatus.OK, 'Mở khóa người dùng thành công')
         } catch (error) {
-            return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+            throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -84,19 +84,23 @@ export class UserService {
             const account = await this.prismaService.account.findFirst({
                 where: { userId: id, isDeleted: false }
             })
-            if (!account) new ResponseData<any>(null, 400, 'Tài khoản không tồn tại')
+            if (!account) throw new HttpException('Tài khoản không tồn tại', HttpStatus.NOT_FOUND)
             if (avt) {
                 const img = await this.cloudinaryService.uploadFile(avt)
                 data.avt = img.url
             }
 
-            await this.prismaService.user.update({
+            const dataUpdate: any = {}
+            if (data.name) dataUpdate.name = data.name
+            if (data.avt) dataUpdate.avt = data.avt
+
+            const result = await this.prismaService.user.update({
                 where: { id: id },
-                data: data
+                data: dataUpdate
             })
-            return new ResponseData<any>(null, 200, 'Cập nhật thông tin thành công')
+            return new ResponseData<any>(result, HttpStatus.OK, 'Cập nhật thông tin thành công')
         } catch (error) {
-            return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+            throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -105,17 +109,17 @@ export class UserService {
             const account = await this.prismaService.account.findFirst({
                 where: { userId: id, isDeleted: false }
             })
-            if (!account) new ResponseData<any>(null, 400, 'Tài khoản không tồn tại')
+            if (!account) throw new HttpException('Tài khoản không tồn tại', HttpStatus.NOT_FOUND)
             const passwordMatched = await argon2.verify(account.password, updatePasswordDto.oldPassword)
-            if (!passwordMatched) return new ResponseData<string>(null, 400, 'Mật khẩu hiện tại không chính xác')
+            if (!passwordMatched) throw new HttpException('Mật khẩu hiện tại không chính xác', HttpStatus.BAD_REQUEST)
             const hashedPassword = await argon2.hash(updatePasswordDto.newPassword)
             await this.prismaService.account.update({
                 where: { email: account.email },
                 data: { password: hashedPassword }
             })
-            return new ResponseData<string>(null, 200, 'Cập nhật mật khẩu thành công')
+            return new ResponseData<string>(null, HttpStatus.OK, 'Cập nhật mật khẩu thành công')
         } catch (error) {
-            return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+            throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -124,7 +128,7 @@ export class UserService {
             const account = await this.prismaService.account.findFirst({
                 where: { userId: id }
             })
-            if (!account) new ResponseData<any>(null, 400, 'Tài khoản không tồn tại')
+            if (!account) throw new HttpException('Tài khoản không tồn tại', HttpStatus.NOT_FOUND)
             await this.prismaService.account.delete({
                 where: { email: account.email },
                 include: {
@@ -134,9 +138,9 @@ export class UserService {
             await this.prismaService.user.delete({
                 where: { id: account.userId }
             })
-            return new ResponseData<any>(null, 200, 'Xóa người dùng thành công')
+            return new ResponseData<any>(null, HttpStatus.OK, 'Xóa người dùng thành công')
         } catch (error) {
-            return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+            throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -147,14 +151,14 @@ export class UserService {
             const verifyCode = await this.prismaService.verifyCode.findFirst({
                 where: { email, code }
             })
-            if (!verifyCode) return new ResponseData<string>(null, 400, 'Mã xác minh không tồn tại')
+            if (!verifyCode) throw new HttpException('Mã xác minh không tồn tại', HttpStatus.BAD_REQUEST)
             const createdAt = new Date(verifyCode.createdAt)
             createdAt.setMinutes(createdAt.getMinutes() + 5)
-            if (createdAt <= currentDate) return new ResponseData<string>(null, 400, 'Quá thời gian của mã xác minh')
+            if (createdAt <= currentDate) throw new HttpException('Quá thời gian của mã xác minh', HttpStatus.NOT_ACCEPTABLE)
             const account = await this.prismaService.account.findUnique({
                 where: { email, isDeleted: false }
             })
-            if (!account) return new ResponseData<string>(null, 400, 'Tài khoản không tồn tại')
+            if (!account) throw new HttpException('Tài khoản không tồn tại', HttpStatus.NOT_FOUND)
             const hashedPassword = await argon2.hash(newPassword)
             await this.prismaService.account.update({
                 where: { email, isDeleted: false },
@@ -163,9 +167,9 @@ export class UserService {
             await this.prismaService.verifyCode.deleteMany({
                 where: { email: email }
             })
-            return new ResponseData<string>(null, 200, 'Đổi mật khẩu thành công')
+            return new ResponseData<string>(null, HttpStatus.OK, 'Đổi mật khẩu thành công')
         } catch (error) {
-            return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+            throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -173,7 +177,7 @@ export class UserService {
         try {
             const { email } = verifyCodeDto
             const account = await this.prismaService.account.findUnique({ where: { email, isDeleted: false }, include: { User: true } })
-            if (!account) return new ResponseData<any>(null, 400, 'Tài khoản không tồn tại')
+            if (!account) throw new HttpException('Tài khoản không tồn tại', HttpStatus.NOT_FOUND)
             await this.prismaService.verifyCode.deleteMany({ where: { email: email } })
             const code = this.random6DigitNumber()
             const verifyCode = await this.prismaService.verifyCode.create({
@@ -182,7 +186,7 @@ export class UserService {
                     code: parseInt(code)
                 }
             })
-            if (!verifyCode) return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+            if (!verifyCode) throw new HttpException('Không tìm thấy mã xác minh', HttpStatus.NOT_FOUND);
             const emailSend = await this.mailerService.sendMail({
                 to: email,
                 subject: 'Mã OTP để thiết lập mật khẩu mới hoặc tài khoản Ứng dụng hỗ  trợ học tiếng anh',
@@ -192,10 +196,10 @@ export class UserService {
                     code: code
                 }
             })
-            if (!emailSend) return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
-            return new ResponseData<string>(null, 200, 'Gửi mã thành công')
+            if (!emailSend) throw new HttpException('Gửi mã xác minh thất bại', HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseData<string>(null, HttpStatus.OK, 'Gửi mã thành công')
         } catch (error) {
-            return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+            throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

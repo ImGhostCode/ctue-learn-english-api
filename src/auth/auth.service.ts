@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { LoginDto, RegisterDto } from './dto';
 import { PrismaService } from '../prisma/prisma.service';
 import * as argon2 from 'argon2';
@@ -15,13 +15,15 @@ export class AuthService {
             const user = await this.prismaService.account.findUnique({
                 where: { email: registerDto.email }
             })
-            if (user) return new ResponseData<string>(null, 400, 'Email đã được sử dụng')
+            if (user) throw new HttpException('Email đã được sử dụng', HttpStatus.CONFLICT);
+
             const newUser = await this.prismaService.user.create({
                 data: {
                     name: registerDto.name
                 }
             })
-            if (!newUser) return new ResponseData<string>(null, 400, 'Tạo tài khoản thất bại, thử lại')
+            if (!newUser) throw new HttpException('Tạo tài khoản thất bại, thử lại', HttpStatus.BAD_REQUEST);
+
             const hashedPassword = await argon2.hash(registerDto.password)
             const newAccount = await this.prismaService.account.create({
                 data: {
@@ -32,14 +34,15 @@ export class AuthService {
                     userId: newUser.id
                 }
             })
-            if (!newAccount) return new ResponseData<string>(null, 400, 'Tạo tài khoản thất bại, thử lại')
+            if (!newAccount) throw new HttpException('Tạo tài khoản thất bại, thử lại', HttpStatus.BAD_REQUEST);
+
             await this.prismaService.favoriteItem.create({ data: { userId: newUser.id } })
             delete newAccount.password
             delete newUser.id
-            const data = { ...newAccount, ...newUser }
-            return new ResponseData<any>(data, 200, 'Tạo tài khoản thành công')
+            const data = { ...newAccount }
+            return new ResponseData<any>(data, HttpStatus.CREATED, 'Tạo tài khoản thành công')
         } catch (error) {
-            return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+            throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -48,14 +51,18 @@ export class AuthService {
             const account = await this.prismaService.account.findUnique({
                 where: { email: loginDto.email, isDeleted: false }
             })
-            if (!account) return new ResponseData<string>(null, 400, 'Tài khoản không tồn tại')
+            if (!account) throw new HttpException('Tài khoản không tồn tại', HttpStatus.NOT_FOUND);
+
             const passwordMatched = await argon2.verify(account.password, loginDto.password)
-            if (!passwordMatched) return new ResponseData<string>(null, 400, 'Mật khẩu không chính xác')
-            if (account.isBan) return new ResponseData<any>({ feedback: account.feedback }, 403, 'Tài khoản đã bị khóa')
+            // if (!passwordMatched) return new ResponseData<string>(null, HttpStatus.BAD_REQUEST, 'Mật khẩu không chính xác')
+            if (!passwordMatched) throw new HttpException('Mật khẩu không chính xác', HttpStatus.BAD_REQUEST);
+
+            if (account.isBan) return new ResponseData<any>({ feedback: account.feedback }, HttpStatus.FORBIDDEN, 'Tài khoản đã bị khóa')
+
             const data = await this.signJwtToken(account.userId, account.email)
-            return new ResponseData<any>(data, 200, 'Đăng nhập thành công')
+            return new ResponseData<any>(data, HttpStatus.OK, 'Đăng nhập thành công')
         } catch (error) {
-            return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+            throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

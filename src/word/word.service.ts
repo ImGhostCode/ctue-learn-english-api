@@ -63,11 +63,11 @@ export class WordService {
         }
     }
 
-    async findAll(option: { sort: any, types: number[], level: number, specialization: number, topic: [], page: number, key: string }) {
+    async findAll(option: { sort: any, type: number[], level: number, specialization: number, topic: [], page: number, key: string }) {
         let pageSize = PAGE_SIZE.PAGE_WORD
         try {
 
-            let { sort, types, level, specialization, topic, page, key } = option
+            let { sort, type, level, specialization, topic, page, key } = option
             let whereCondition: any = {
                 OR: [
                     { content: { contains: key } },
@@ -77,14 +77,14 @@ export class WordService {
             };
             if (level) whereCondition.levelId = Number(level);
             if (specialization) whereCondition.specializationId = Number(specialization);
-            if (types) {
-                if (Array.isArray(types)) {
+            if (type) {
+                if (Array.isArray(type)) {
                     whereCondition.meanings = {
-                        some: { typeId: { in: types.map(type => Number(type)) } }
+                        some: { typeId: { in: type.map(type => Number(type)) } }
                     };
                 } else {
                     whereCondition.meanings = {
-                        some: { typeId: Number(types) }
+                        some: { typeId: Number(type) }
                     };
                 }
             }
@@ -122,7 +122,7 @@ export class WordService {
                     meanings: true
                 }
             })
-            return new ResponseData<any>({ words, totalPages }, 200, 'Tìm thành công')
+            return new ResponseData<any>({ results: words, totalPages }, 200, 'Tìm thành công')
         } catch (error) {
             return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
         }
@@ -250,7 +250,12 @@ export class WordService {
                 isDeleted: false
             },
             include: {
-                Practice: true, User: true, Topic: true, meanings: true, Level: true, Specialization: true
+                // Practice: true, 
+                User: true, Topic: true, meanings: {
+                    include: {
+                        Type: true,
+                    }
+                }, Level: true, Specialization: true
             }
         })
     }

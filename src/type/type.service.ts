@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateTypeDto, UpdateTypeDto } from './dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { ResponseData } from '../global';
@@ -11,18 +11,18 @@ export class TypeService {
   async create(createTypeDto: CreateTypeDto) {
     try {
       const isExisted = await this.IsExisted(createTypeDto.name, createTypeDto.isWord)
-      if (isExisted) return new ResponseData<string>(null, 400, 'Loại đã tồn tại')
-      return new ResponseData<Type>(await this.prismaService.type.create({ data: { ...createTypeDto } }), 200, 'Tạo loại thành công')
+      if (isExisted) throw new HttpException('Loại đã tồn tại', HttpStatus.CONFLICT);
+      return new ResponseData<Type>(await this.prismaService.type.create({ data: { ...createTypeDto } }), HttpStatus.OK, 'Tạo loại thành công')
     } catch (error) {
-      return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+      throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
   async findAll(isWord: boolean) {
     try {
-      return new ResponseData<Type>(await this.prismaService.type.findMany({ where: { isWord: isWord } }), 200, 'Tìm thành công')
+      return new ResponseData<Type>(await this.prismaService.type.findMany({ where: { isWord: isWord } }), HttpStatus.OK, 'Tìm thành công')
     } catch (error) {
-      return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+      throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -47,22 +47,22 @@ export class TypeService {
   async update(id: number, updateTypeDto: UpdateTypeDto) {
     try {
       const type = await this.findOne(id)
-      if (!type) return new ResponseData<string>(null, 400, 'Không tìm thấy loại')
+      if (!type) throw new HttpException('Không tìm thấy loại', HttpStatus.NOT_FOUND);
       const isExisted = await this.IsExisted(updateTypeDto.name, updateTypeDto.isWord)
-      if (isExisted) return new ResponseData<string>(null, 400, 'Loại đã tồn tại')
-      return new ResponseData<Type>(await this.prismaService.type.update({ where: { id }, data: { ...updateTypeDto } }), 200, 'Cập nhật thành công')
+      if (isExisted) throw new HttpException('Loại đã tồn tại', HttpStatus.CONFLICT);
+      return new ResponseData<Type>(await this.prismaService.type.update({ where: { id }, data: { ...updateTypeDto } }), HttpStatus.OK, 'Cập nhật thành công')
     } catch (error) {
-      return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+      throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
   async remove(id: number) {
     try {
       const type = await this.findOne(id)
-      if (!type) return new ResponseData<string>(null, 400, 'Không tìm thấy loại')
-      return new ResponseData<any>(await this.prismaService.type.delete({ where: { id } }), 200, 'Xóa thành công')
+      if (!type) throw new HttpException('Không tìm thấy loại', HttpStatus.NOT_FOUND);
+      return new ResponseData<any>(await this.prismaService.type.delete({ where: { id } }), HttpStatus.OK, 'Xóa thành công')
     } catch (error) {
-      return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+      throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

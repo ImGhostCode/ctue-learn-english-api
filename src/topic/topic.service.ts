@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateTopicDto, UpdateTopicDto } from './dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { ResponseData } from '../global';
@@ -11,18 +11,16 @@ export class TopicService {
   async create(createTopicDto: CreateTopicDto) {
     try {
       const isExisted = await this.IsExisted(createTopicDto.name)
-      if (isExisted) return new ResponseData<string>(null, 400, 'Chủ đề đã tồn tại')
+      if (isExisted) throw new HttpException('Chủ đề đã tồn tại', HttpStatus.CONFLICT);
       return new ResponseData<Topic>(await this.prismaService.topic.create({
         data: {
           name: createTopicDto.name,
           isWord: createTopicDto.isWord,
           image: createTopicDto.image ?? ''
         }
-      }), 200, 'Tạo chủ đề thành công')
+      }), HttpStatus.CREATED, 'Tạo chủ đề thành công')
     } catch (error) {
-      console.log(error);
-
-      return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+      throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -32,9 +30,9 @@ export class TopicService {
         where: {
           isWord: isWord
         }
-      }), 200, 'Tìm thành công')
+      }), HttpStatus.OK, 'Tìm thành công')
     } catch (error) {
-      return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+      throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -58,9 +56,9 @@ export class TopicService {
   async update(id: number, updateTopicDto: UpdateTopicDto) {
     try {
       const topic = await this.findOne(id)
-      if (!topic) return new ResponseData<string>(null, 400, 'Không tìm thấy chủ đề')
+      if (!topic) throw new HttpException('Không tìm thấy chủ đề', HttpStatus.NOT_FOUND);
       const isExisted = await this.IsExisted(updateTopicDto.name)
-      if (isExisted) return new ResponseData<string>(null, 400, 'Chủ đề đã tồn tại')
+      if (isExisted) throw new HttpException('Chủ đề đã tồn tại', HttpStatus.CONFLICT);
       return new ResponseData<Topic>(await this.prismaService.topic.update({
         where: {
           id: id
@@ -70,19 +68,19 @@ export class TopicService {
           isWord: updateTopicDto.isWord,
           image: updateTopicDto.image
         }
-      }), 200, 'Cập nhật thành công')
+      }), HttpStatus.OK, 'Cập nhật thành công')
     } catch (error) {
-      return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+      throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
   async remove(id: number) {
     try {
       const topic = await this.findOne(id)
-      if (!topic) return new ResponseData<string>(null, 400, 'Không tìm thấy chủ đề')
-      return new ResponseData<any>(await this.prismaService.topic.delete({ where: { id } }), 200, 'Xóa thành công')
+      if (!topic) throw new HttpException('Không tìm thấy chủ đề', HttpStatus.NOT_FOUND);
+      return new ResponseData<any>(await this.prismaService.topic.delete({ where: { id } }), HttpStatus.OK, 'Xóa thành công')
     } catch (error) {
-      return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+      throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }
