@@ -51,7 +51,7 @@ export class WordController {
     @Query()
     option: {
       sort: any;
-      types: number[];
+      type: number[];
       level: number;
       specialization: number;
       topic: [];

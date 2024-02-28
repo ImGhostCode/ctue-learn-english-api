@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
 import { LearnService } from './learn.service';
 import { CreateLearnDto } from './dto/create-learn.dto';
 import { UpdateLearnDto } from './dto/update-learn.dto';
@@ -31,6 +31,11 @@ export class LearnController {
   @Get('reminder-coming')
   getReminderComing(@GetAccount() account: Account) {
     return this.learnService.getReminderComing(account.userId)
+  }
+
+  @Get('statistics')
+  getStatistics(@Query() query: { setId: number }, @GetAccount() account: Account) {
+    return this.learnService.getStatistics(account.userId, +query.setId)
   }
 
   @Patch('review-reminder/:id')

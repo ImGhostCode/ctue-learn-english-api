@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateSentenceDto, UpdateSentenceDto } from './dto';
 import { PAGE_SIZE, ResponseData } from '../global';
@@ -12,7 +12,7 @@ export class SentenceService {
         try {
             let { topicId, typeId, content, mean, note, userId } = createSentenceDto
             const isExisted = await this.isExisted(createSentenceDto.content)
-            if (isExisted) return new ResponseData<string>(null, 400, 'Câu đã tồn tại')
+            if (isExisted) throw new HttpException('Câu đã tồn tại', HttpStatus.CONFLICT);
             topicId = topicId.map((id) => Number(id))
             topicId = topicId.filter((id) => id !== 0)
             const sentence = await this.prismaService.sentence.create({
@@ -31,11 +31,9 @@ export class SentenceService {
                     Topic: true
                 }
             })
-            return new ResponseData<Sentence>(sentence, 200, 'Tạo câu thành công')
+            return new ResponseData<Sentence>(sentence, HttpStatus.OK, 'Tạo câu thành công')
         } catch (error) {
-            console.log(error);
-
-            return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+            throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -81,24 +79,24 @@ export class SentenceService {
                 },
                 where: whereClause,
                 include: {
-                    Practice: true,
+                    // Practice: true,
                     Topic: true,
                     Type: true
                 }
             })
-            return new ResponseData<any>({ sentences, totalPages }, 200, 'Tìm thành công')
+            return new ResponseData<any>({ results:sentences, totalPages }, HttpStatus.OK, 'Tìm thành công')
         } catch (error) {
-            return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+            throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     async findOne(id: number) {
         try {
             const sentence = await this.findById(id)
-            if (!sentence) return new ResponseData<string>(null, 400, 'Câu không tồn tại')
-            return new ResponseData<Sentence>(sentence, 200, 'Tìm thành công')
+            if (!sentence) throw new HttpException('Câu không tồn tại', HttpStatus.NOT_FOUND);
+            return new ResponseData<Sentence>(sentence, HttpStatus.OK, 'Tìm thành công')
         } catch (error) {
-            return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+            throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -106,10 +104,10 @@ export class SentenceService {
         try {
             let { typeId, content, mean, note, topicId } = updateSentenceDto
             const sentence = await this.findById(id)
-            if (!sentence) return new ResponseData<string>(null, 400, 'Câu không tồn tại')
+            if (!sentence) throw new HttpException('Câu không tồn tại', HttpStatus.NOT_FOUND);
             if (content && sentence.content !== content) {
                 const isExisted = await this.isExisted(content)
-                if (isExisted) return new ResponseData<string>(null, 400, 'Câu này đã tồn tại')
+                if (isExisted) throw new HttpException('Câu này đã tồn tại', HttpStatus.CONFLICT);
             }
             if (topicId) {
                 await this.prismaService.sentence.update({
@@ -133,24 +131,24 @@ export class SentenceService {
                     Topic: { connect: topicId.map((id) => ({ id })) }
                 },
                 include: {
-                    Practice: true,
+                    //Practice: true,
                     Topic: true,
                     Type: true
                 }
             })
-            return new ResponseData<Sentence>(newSentence, 200, 'Cập nhật thành công')
+            return new ResponseData<Sentence>(newSentence, HttpStatus.OK, 'Cập nhật thành công')
         } catch (error) {
-            return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+            throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     async delete(id: number) {
         try {
             const sentence = await this.findById(id)
-            if (!sentence) return new ResponseData<string>(null, 400, 'Câu không tồn tại')
-            return new ResponseData<Sentence>(await this.prismaService.sentence.delete({ where: { id: id } }), 200, 'Xóa thành công')
+            if (!sentence) throw new HttpException('Câu không tồn tại', HttpStatus.NOT_FOUND);
+            return new ResponseData<Sentence>(await this.prismaService.sentence.delete({ where: { id: id } }), HttpStatus.OK, 'Xóa thành công')
         } catch (error) {
-            return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+            throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -173,7 +171,7 @@ export class SentenceService {
                 id: id
             },
             include: {
-                Practice: true,
+                //Practice: true,
                 User: true,
                 Topic: true,
                 Type: true

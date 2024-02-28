@@ -59,13 +59,14 @@ export class UserController {
   @UseGuards(MyJWTGuard, RolesGuard)
   @Roles(ACCOUNT_TYPES.USER, ACCOUNT_TYPES.ADMIN)
   @UseInterceptors(FileInterceptor('avt'))
-  @Patch('update-profile/:id')
+  @Patch(':id')
   updateProfile(
     @Param('id', ParseIntPipe) id: number,
     @GetAccount() account: Account,
     @Body() updateProfileDto: UpdateProfileDto,
     @UploadedFile() avt: Express.Multer.File,
   ) {
+  console.log(avt);
     if (account.accountType == ACCOUNT_TYPES.USER)
       return this.userService.updateProfile(
         account.userId,

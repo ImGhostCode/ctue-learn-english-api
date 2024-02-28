@@ -10,8 +10,41 @@ import { UpdateReviewReminderDto } from './dto/update-reminder.dto';
 
 @Injectable()
 export class LearnService {
-
   constructor(private readonly prismaService: PrismaService) { }
+
+  async getStatistics(userId: number, setId: number) {
+    try {
+      const whereCondition: any = {
+        userId
+      }
+      if (setId) whereCondition.userVocabularySetId = setId
+
+      const res = await this.prismaService.userLearnedWord.findMany({
+        where: whereCondition,
+
+        include: {
+          Word: true
+        }
+      })
+
+      const groupedWords = {}
+
+      res.forEach(item => {
+        if (!groupedWords[`level_${item.memoryLevel}`]) {
+          groupedWords[`level_${item.memoryLevel}`] = []
+        }
+        groupedWords[`level_${item.memoryLevel}`].push(item)
+
+      })
+
+      return new ResponseData<any>({ count: res.length, data: groupedWords }, 200, 'Lấy thống kê thành công')
+    } catch (error) {
+      console.log(error);
+      return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+    }
+  }
+
+
 
   async createReivewReminder(createReviewReminderDto: CreateReviewReminderDto, userId: number) {
     try {
