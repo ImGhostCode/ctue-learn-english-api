@@ -30,7 +30,7 @@ import { ApiTags } from '@nestjs/swagger';
 @ApiTags('User')
 @Controller('users')
 export class UserController {
-  constructor(private userService: UserService) {}
+  constructor(private userService: UserService) { }
 
   @UseGuards(MyJWTGuard, RolesGuard)
   @Roles(ACCOUNT_TYPES.USER, ACCOUNT_TYPES.ADMIN)
@@ -66,7 +66,6 @@ export class UserController {
     @Body() updateProfileDto: UpdateProfileDto,
     @UploadedFile() avt: Express.Multer.File,
   ) {
-  console.log(avt);
     if (account.accountType == ACCOUNT_TYPES.USER)
       return this.userService.updateProfile(
         account.userId,
