@@ -101,8 +101,8 @@ export class WordController {
     return this.wordServive.delete(id);
   }
 
-  @Get('look-up-dictionary/:key')
-  lookUpDictionary(@Param('key') key: string) {
+  @Get('look-up-dictionary')
+  lookUpDictionary(@Query('key') key: string) {
     return this.wordServive.lookUpDictionary(key);
   }
 }

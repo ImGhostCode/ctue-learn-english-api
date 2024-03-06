@@ -20,7 +20,7 @@ export class LevelService {
 
   async findAll() {
     try {
-      return new ResponseData<Level>(await this.prismaService.level.findMany({}), 200, 'Tìm thành công')
+      return new ResponseData<{results: Level[]}>({results: await this.prismaService.level.findMany({})}, 200, 'Tìm thành công')
     } catch (error) {
       return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
     }

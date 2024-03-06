@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateWordDto, UpdateWordDto } from './dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { PAGE_SIZE, PRACTICE_SIZE, ResponseData } from '../global';
@@ -14,7 +14,7 @@ export class WordService {
             let { userId, topicId = [], levelId, specializationId, content, meanings = [], note, phonetic, examples = [], antonyms = [], synonyms = [], pictures = [] } = createWordDto
 
             const isExisted = await this.isExisted(createWordDto.content)
-            if (isExisted) return new ResponseData<string>(null, 400, 'Từ đã tồn tại')
+            if (isExisted) throw new HttpException('Từ này đã tồn tại', HttpStatus.CONFLICT)
             if (pictureFiles) {
                 const files = await Promise.all(
                     pictureFiles.map(file => this.cloudinaryService.uploadFile(file))
@@ -57,9 +57,9 @@ export class WordService {
                 }
             })
 
-            return new ResponseData<Word>(word, 200, 'Tạo từ thành công')
+            return new ResponseData<Word>(word, HttpStatus.CREATED, 'Tạo từ thành công')
         } catch (error) {
-            return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+            throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -122,19 +122,19 @@ export class WordService {
                     meanings: true
                 }
             })
-            return new ResponseData<any>({ results: words, totalPages }, 200, 'Tìm thành công')
+            return new ResponseData<any>({ results: words, totalPages }, HttpStatus.OK, 'Tìm thành công')
         } catch (error) {
-            return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+            throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     async findOne(id: number) {
         try {
             const word = await this.findById(id)
-            if (!word) return new ResponseData<string>(null, 400, 'Từ không tồn tại')
-            return new ResponseData<Word>(word, 200, 'Tìm thành công')
+            if (!word) throw new HttpException('Từ không tồn tại', HttpStatus.NOT_FOUND)
+            return new ResponseData<Word>(word, HttpStatus.OK, 'Tìm thành công')
         } catch (error) {
-            return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+            throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -143,11 +143,11 @@ export class WordService {
             let { topicId = [], levelId, specializationId, content, meanings = [], note, phonetic, examples = [], antonyms = [], synonyms = [], oldPictures = [] } = updateWordDto
 
             const word = await this.findById(id)
-            if (!word) return new ResponseData<string>(null, 400, 'Từ không tồn tại')
+            if (!word) throw new HttpException('Từ không tồn tại', HttpStatus.NOT_FOUND)
 
             if (content !== word.content) {
                 const isExisted = await this.isExisted(content)
-                if (isExisted) return new ResponseData<string>(null, 400, 'Từ này đã tồn tại')
+                if (isExisted) throw new HttpException('Từ này đã tồn tại', HttpStatus.CONFLICT)
             }
 
             let pictures: string[] = oldPictures
@@ -214,19 +214,19 @@ export class WordService {
                 }
             });
 
-            return new ResponseData<Word>(newWord, 200, 'Cập nhật thành công')
+            return new ResponseData<Word>(newWord, HttpStatus.OK, 'Cập nhật thành công')
         } catch (error) {
-            return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+            throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     async delete(id: number) {
         try {
             const word = await this.findById(id)
-            if (!word) return new ResponseData<string>(null, 400, 'Từ không tồn tại')
-            return new ResponseData<Word>(await this.prismaService.word.delete({ where: { id: id } }), 200, 'Xóa thành công')
+            if (!word) throw new HttpException('Từ không tồn tại', HttpStatus.NOT_FOUND)
+            return new ResponseData<Word>(await this.prismaService.word.delete({ where: { id: id } }), HttpStatus.OK, 'Xóa thành công')
         } catch (error) {
-            return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+            throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -328,7 +328,7 @@ export class WordService {
             const totalWordspack = await this.prismaService.word.count({
                 where: whereCondition
             })
-            if (totalWordspack <= Number(numSentence)) return new ResponseData<Word>(null, 400, 'Không đủ gói từ vựng');
+            if (totalWordspack <= Number(numSentence)) throw new HttpException('Không đủ gói từ vựng', HttpStatus.NO_CONTENT);
             const maxRandomIndex = totalWordspack - Number(numSentence);
             const randomPackIndex = Math.floor(Math.random() * (maxRandomIndex + 1))
             const wordspack = await this.prismaService.word.findMany({
@@ -337,15 +337,15 @@ export class WordService {
                 skip: randomPackIndex,
                 include: { Topic: true, Level: true, Specialization: true, meanings: true }
             })
-            return new ResponseData<Word>(wordspack, 200, 'Tìm gói từ vựng thành công')
+            return new ResponseData<Word>(wordspack, HttpStatus.OK, 'Tìm gói từ vựng thành công')
         } catch (error) {
-            return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+            throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     async lookUpDictionary(key: string) {
         try {
-            const word = await this.prismaService.word.findMany({
+            const words = await this.prismaService.word.findMany({
                 where: {
                     OR: [
                         {
@@ -358,12 +358,12 @@ export class WordService {
                     isDeleted: false
                 }
             })
-            if (word.length === 0) {
-                return new ResponseData<Word>([], 400, 'Không tìm thấy từ trong từ điển');
-            }
-            return new ResponseData<Word>(word, 200, 'Tìm thấy từ trong từ điển');
+            //if (word.length === 0) {
+            //return new ResponseData<Word>([], 400, 'Không tìm thấy từ trong từ điển');
+            // }
+            return new ResponseData<any>({ results: words }, HttpStatus.OK, 'Tra từ điển thành công');
         } catch (error) {
-            return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+            throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

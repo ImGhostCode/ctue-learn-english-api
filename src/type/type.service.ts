@@ -20,7 +20,7 @@ export class TypeService {
 
   async findAll(isWord: boolean) {
     try {
-      return new ResponseData<Type>(await this.prismaService.type.findMany({ where: { isWord: isWord } }), HttpStatus.OK, 'Tìm thành công')
+      return new ResponseData<{results: Type[]}>({results: await this.prismaService.type.findMany({ where: { isWord: isWord } })}, HttpStatus.OK, 'Tìm thành công')
     } catch (error) {
       throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
     }
