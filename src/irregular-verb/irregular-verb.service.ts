@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateIrregularVerbDto, UpdateIrregularVerbDto } from './dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { PAGE_SIZE, ResponseData } from '../global';
@@ -11,7 +11,7 @@ export class IrregularVerbService {
   async create(createIrregularVerbDto: CreateIrregularVerbDto) {
     try {
       const isExisted = await this.isExisted(createIrregularVerbDto.v1)
-      if (isExisted) return new ResponseData<string>(null, 400, 'Động từ đã tồn tại')
+      if (isExisted) throw new HttpException('Động từ đã tồn tại', HttpStatus.CONFLICT);
       return new ResponseData<IrregularVerb>(await this.prismaService.irregularVerb.create({
         data: {
           v1: createIrregularVerbDto.v1,
@@ -19,9 +19,9 @@ export class IrregularVerbService {
           v3: createIrregularVerbDto.v3,
           meaning: createIrregularVerbDto.meaning
         }
-      }), 200, 'Tạo thành công động từ bất quy tắc')
+      }), HttpStatus.CREATED, 'Tạo thành công động từ bất quy tắc')
     } catch (error) {
-      return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+      throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -58,29 +58,29 @@ export class IrregularVerbService {
           ]
         },
       })
-      return new ResponseData<any>({ results: irregularVerb, totalPages }, 200, 'Tìm thành công')
+      return new ResponseData<any>({ results: irregularVerb, totalPages }, HttpStatus.OK, 'Tìm thành công')
     } catch (error) {
-      return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+      throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
   async findOne(id: number) {
     try {
       const verb = await this.findById(id)
-      if (!verb) return new ResponseData<string>(null, 400, 'Động từ không tồn tại')
-      return new ResponseData<IrregularVerb>(verb, 200, 'Tìm thành công động từ')
+      if (!verb) throw new HttpException('Động từ không tồn tại', HttpStatus.NOT_FOUND)
+      return new ResponseData<IrregularVerb>(verb, HttpStatus.OK, 'Tìm thành công động từ')
     } catch (error) {
-      return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+      throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
   async update(id: number, updateIrregularVerbDto: UpdateIrregularVerbDto) {
     try {
       const verb = await this.findById(id)
-      if (!verb) return new ResponseData<string>(null, 400, 'Động từ không tồn tại')
+      if (!verb) throw new HttpException('Động từ không tồn tại', HttpStatus.NOT_FOUND)
       if (updateIrregularVerbDto.v1 && updateIrregularVerbDto.v1 !== verb.v1) {
         const isExisted = await this.isExisted(updateIrregularVerbDto.v1)
-        if (isExisted) return new ResponseData<string>(null, 400, 'Động từ đã tồn tại')
+        if (isExisted) throw new HttpException('Động từ đã tồn tại', HttpStatus.CONFLICT)
       }
       return new ResponseData<IrregularVerb>(await this.prismaService.irregularVerb.update({
         where: {
@@ -92,17 +92,17 @@ export class IrregularVerbService {
           v3: updateIrregularVerbDto.v3,
           meaning: updateIrregularVerbDto.meaning
         }
-      }), 200, 'Cập nhật thành công động từ')
+      }), HttpStatus.OK, 'Cập nhật thành công động từ')
     } catch (error) {
-      return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+      throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
   async remove(id: number) {
     const verb = await this.findById(id)
-    if (!verb) return new ResponseData<string>(null, 400, 'Động từ không tồn tại')
+    if (!verb) throw new HttpException('Động từ không tồn tại', HttpStatus.NOT_FOUND)
     await this.prismaService.irregularVerb.delete({ where: { id } })
-    return new ResponseData<string>(null, 200, 'Xóa thành công động từ')
+    return new ResponseData<string>(null, HttpStatus.OK, 'Xóa thành công động từ')
   }
 
   async isExisted(content: string) {
@@ -145,9 +145,9 @@ export class IrregularVerbService {
   //     if (data.length === 0) {
   //       return new ResponseData<IrregularVerb>([], 400, 'Không tìm thấy từ');
   //     }
-  //     return new ResponseData<IrregularVerb>(data, 200, 'Tìm thấy từ');
+  //     return new ResponseData<IrregularVerb>(data, HttpStatus.OK, 'Tìm thấy từ');
   //   } catch (error) {
-  //     return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+  //     throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
   //   }
   // }
 }

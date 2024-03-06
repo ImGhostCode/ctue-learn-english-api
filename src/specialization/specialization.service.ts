@@ -20,7 +20,7 @@ export class SpecializationService {
 
   async findAll() {
     try {
-      return new ResponseData<Specialization>(await this.prismaService.specialization.findMany({}), 200, 'Tìm thành công')
+      return new ResponseData<{results: Specialization[]}>({results: await this.prismaService.specialization.findMany({})}, 200, 'Tìm thành công')
     } catch (error) {
       return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
     }
