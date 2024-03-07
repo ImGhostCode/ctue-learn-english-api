@@ -11,7 +11,7 @@ import { Account } from '@prisma/client';
 @ApiTags('Vocabulary Set')
 @UseGuards(MyJWTGuard, RolesGuard)
 @Roles(ACCOUNT_TYPES.USER, ACCOUNT_TYPES.ADMIN)
-@Controller('vocabulary-sets')
+@Controller('vocabulary-set')
 export class VocabularySetsController {
   constructor(private readonly vocabularySetsService: VocabularySetsService) {
   }
