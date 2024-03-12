@@ -17,7 +17,7 @@ export class LearnService {
       const whereCondition: any = {
         userId
       }
-      if (setId) whereCondition.userVocabularySetId = setId
+      if (setId) whereCondition.vocabularySetId = setId
 
       const res = await this.prismaService.userLearnedWord.findMany({
         where: whereCondition,
@@ -48,7 +48,7 @@ export class LearnService {
 
   async createReivewReminder(createReviewReminderDto: CreateReviewReminderDto, userId: number) {
     try {
-      const { userVocabularySetId, data } = createReviewReminderDto
+      const { vocabularySetId, data } = createReviewReminderDto
       const groupedReminders = {}
 
       data.forEach(item => {
@@ -57,7 +57,7 @@ export class LearnService {
         if (!groupedReminders[time]) {
           groupedReminders[time] = {
             userId,
-            userVocabularySetId,
+            vocabularySetId,
             isDone: false,
             reviewAt: item.reviewAt,
             words: {
@@ -76,7 +76,7 @@ export class LearnService {
           this.prismaService.reviewReminder.create({
             data: {
               userId,
-              userVocabularySetId,
+              vocabularySetId,
               isDone: false,
               reviewAt: data.reviewAt,
               words: data.words
@@ -128,11 +128,12 @@ export class LearnService {
 
   async saveTheLearnedResult(saveTheLearnedResultDto: SaveTheLearnedResultDto, userId: number) {
     try {
-      const { wordIds, userVocabularySetId, memoryLevels } = saveTheLearnedResultDto
+      const { wordIds, vocabularySetId, memoryLevels } = saveTheLearnedResultDto
 
       const isNotExistWord = await this.prismaService.userVocabularySet.findMany({
         where: {
-          id: userVocabularySetId,
+          userId,
+          vocabularySetId,
           VocabularySet: {
             words: {
               every: {
@@ -153,7 +154,7 @@ export class LearnService {
 
       const saveData = wordIds.map((id, index) => ({
         wordId: id,
-        userVocabularySetId,
+        vocabularySetId,
         userId,
         memoryLevel: memoryLevels[index]
       }));
@@ -162,10 +163,10 @@ export class LearnService {
         ...saveData.map(data =>
           this.prismaService.userLearnedWord.upsert({
             where: {
-              userId_wordId_userVocabularySetId: {
+              userId_wordId_vocabularySetId: {
                 userId: data.userId,
                 wordId: data.wordId,
-                userVocabularySetId: data.userVocabularySetId
+                vocabularySetId: data.vocabularySetId
               }
             },
             update: data,
@@ -184,7 +185,7 @@ export class LearnService {
     try {
       const whereCondition: any = {}
       whereCondition.userId = userId
-      if (setId) whereCondition.userVocabularySetId = setId
+      if (setId) whereCondition.vocabularySetId = setId
 
       const res = await this.prismaService.userLearnedWord.findMany({
         where: whereCondition,
