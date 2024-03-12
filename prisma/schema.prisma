@@ -255,18 +255,22 @@ model PhonemeAssessment {
 
 model UserLearnedWord {
   // id                  Int      @id @default(autoincrement())
-  userId              Int
-  wordId              Int
-  userVocabularySetId Int
-  memoryLevel         Int // Thêm trường lưu cấp độ nhớ
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  userId          Int
+  wordId          Int
+  vocabularySetId Int
+  memoryLevel     Int // Thêm trường lưu cấp độ nhớ
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
-  Word              Word              @relation(fields: [wordId], references: [id])
-  User              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  UserVocabularySet UserVocabularySet @relation(fields: [userVocabularySetId], references: [id])
+  Word                             Word               @relation(fields: [wordId], references: [id])
+  User                             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // UserVocabularySet UserVocabularySet @relation(fields: [userId, userVocabularySetId], references: [userId, vocabularySetId])
+  VocabularySet                    VocabularySet      @relation(fields: [vocabularySetId], references: [id])
+  UserVocabularySet                UserVocabularySet? @relation(fields: [userVocabularySetUserId, userVocabularySetVocabularySetId], references: [userId, vocabularySetId])
+  userVocabularySetUserId          Int?
+  userVocabularySetVocabularySetId Int?
 
-  @@id([userId, wordId, userVocabularySetId])
+  @@id([userId, wordId, vocabularySetId])
   @@map("userLearnedWords")
 }
 
@@ -287,12 +291,14 @@ model VocabularySet {
   Topic              Topic?              @relation(fields: [topicId], references: [id])
   User               User                @relation(fields: [userId], references: [id])
   UserVocabularySets UserVocabularySet[]
+  ReviewReminder     ReviewReminder[]
+  UserLearnedWord    UserLearnedWord[]
 
   @@map("vocabularySets")
 }
 
 model UserVocabularySet {
-  id              Int      @id @default(autoincrement())
+  // id              Int      @id @default(autoincrement())
   userId          Int
   vocabularySetId Int
   createdAt       DateTime @default(now())
@@ -300,22 +306,24 @@ model UserVocabularySet {
   User            User              @relation(fields: [userId], references: [id])
   VocabularySet   VocabularySet     @relation(fields: [vocabularySetId], references: [id])
   UserLearnedWord UserLearnedWord[]
-  ReviewReminder  ReviewReminder[]
 
+  @@id([userId, vocabularySetId])
+  @@unique([userId, vocabularySetId])
   @@map("userVocabularySets")
 }
 
 model ReviewReminder {
-  id                  Int      @id @default(autoincrement())
-  userVocabularySetId Int
-  userId              Int
-  isDone              Boolean  @default(false)
-  words               Word[]
-  reviewAt            DateTime
-  createdAt           DateTime @default(now())
+  id              Int      @id @default(autoincrement())
+  vocabularySetId Int
+  userId          Int
+  isDone          Boolean  @default(false)
+  words           Word[]
+  reviewAt        DateTime
+  createdAt       DateTime @default(now())
 
-  UserVocabularySet UserVocabularySet @relation(fields: [userVocabularySetId], references: [id])
-  User              User              @relation(fields: [userId], references: [id])
+  // UserVocabularySet UserVocabularySet @relation(fields: [userId, vocabularySetId], references: [userId, vocabularySetId])
+  VocabularySet VocabularySet @relation(fields: [vocabularySetId], references: [id])
+  User          User          @relation(fields: [userId], references: [id])
 
   @@map("reviewReminders")
 }

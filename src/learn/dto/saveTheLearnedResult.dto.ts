@@ -11,7 +11,8 @@ export class SaveTheLearnedResultDto {
     @ApiProperty()
     @IsNumber()
     @IsNotEmpty()
-    userVocabularySetId: number
+    // userVocabularySetId: number
+    vocabularySetId: number
 
     @ApiProperty()
     @IsArray()

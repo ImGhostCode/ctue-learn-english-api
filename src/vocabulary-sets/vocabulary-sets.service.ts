@@ -75,6 +75,7 @@ export class VocabularySetsService {
 
                 const isDownloaded = await prisma.userVocabularySet.findFirst({
                     where: {
+                        userId,
                         vocabularySetId: id,
                     },
                 });
@@ -112,10 +113,17 @@ export class VocabularySetsService {
     async rmDownloadedVocaSet(id: number, userId: number) {
         try {
             const res: any = await this.prismaService.userVocabularySet.delete({
-                where: { id, userId }
+                where: {
+                    userId_vocabularySetId: {
+                        userId,
+                        vocabularySetId: id
+                    }
+                }
+                , select: { VocabularySet: true }
             })
-            return new ResponseData<VocabularySet>(res, HttpStatus.OK, 'Xóa bộ từ thành công');
+            return new ResponseData<VocabularySet>(res.VocabularySet, HttpStatus.OK, 'Xóa bộ từ thành công');
         } catch (error) {
+            console.log(error);
             throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
             ;
         }
@@ -160,6 +168,7 @@ export class VocabularySetsService {
                         where: {
                             isDeleted: false
                         }
+
                     },
                 }
             })
@@ -179,8 +188,10 @@ export class VocabularySetsService {
                 },
 
             });
-            return new ResponseData<{ results: VocabularySet[] }>({ results: [...createdVocaSets.CreatedVocabularySet, ...downloadedVocaSets.map(set => set.VocabularySet)] }, HttpStatus.CREATED, 'Tìm thành công')
+            return new ResponseData<{ results: VocabularySet[] }>({ results: [...createdVocaSets.CreatedVocabularySet, ...downloadedVocaSets.map(set => set.VocabularySet)] }, HttpStatus.OK, 'Tìm thành công')
         } catch (error) {
+            console.log(error);
+
             throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -228,14 +239,20 @@ export class VocabularySetsService {
             }
             const data: any = {
                 title,
-                topicId,
-                specId,
-                picture,
-                words: {
-                    set: [],
-                    connect: words.map(id => ({ id: Number(id) }))
-                }
+                //  topicId,
+                //  specId,
+                //picture,
+                //  words: {
+                //     set: [],
+                //connect: words.map(id => ({ id: Number(id) }))
+                //}
             }
+            if (topicId) data.topicId = topicId;
+            if (specId) data.specId = specId;
+            if (words) data.words = {
+                set: [],
+                connect: words.map(id => ({ id: Number(id) }))
+            };
 
             if (account.accountType === ACCOUNT_TYPES.USER) {
                 whereCondition.userId = account.userId
@@ -253,6 +270,7 @@ export class VocabularySetsService {
             })
             return new ResponseData<VocabularySet>(res, HttpStatus.OK, 'Cập nhật thành công')
         } catch (error) {
+            console.log(error);
             throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
 
         }
@@ -262,8 +280,9 @@ export class VocabularySetsService {
             const vocaSet = await this.findOne(id)
             if (!vocaSet) throw new HttpException('Bộ từ không tồn tại', HttpStatus.NOT_FOUND);
 
-            return new ResponseData<VocabularySet>(await this.prismaService.vocabularySet.delete({ where: { id: id } }), HttpStatus.CREATED, 'Xóa thành công')
+            return new ResponseData<VocabularySet>(await this.prismaService.vocabularySet.delete({ where: { id: id } }), HttpStatus.OK, 'Xóa thành công')
         } catch (error) {
+            console.log(error);
             throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
 
         }
