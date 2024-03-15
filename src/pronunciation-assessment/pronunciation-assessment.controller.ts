@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { PronunciationAssessmentService } from './pronunciation-assessment.service';
 import { CreatePronunciationAssessmentDto } from './dto/create-pronunciation-assessment.dto';
 import { UpdatePronunciationAssessmentDto } from './dto/update-pronunciation-assessment.dto';
@@ -6,6 +6,8 @@ import { ApiTags } from '@nestjs/swagger';
 import { MyJWTGuard, RolesGuard } from 'src/auth/guard';
 import { GetAccount } from 'src/auth/decorator';
 import { Account } from '@prisma/client';
+import { AssessPronunciationDto } from './dto/assess-pronunciation.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('Pronunciation Assessment')
 @UseGuards(MyJWTGuard, RolesGuard)
@@ -13,9 +15,17 @@ import { Account } from '@prisma/client';
 export class PronunciationAssessmentController {
   constructor(private readonly pronunciationAssessmentService: PronunciationAssessmentService) { }
 
-  @Post()
-  create(@Body() createPronunciationAssessmentDto: CreatePronunciationAssessmentDto, @GetAccount() account: Account,) {
-    return this.pronunciationAssessmentService.create(createPronunciationAssessmentDto, account.userId);
+  // @Post('save')
+  // create(@Body() createPronunciationAssessmentDto: CreatePronunciationAssessmentDto, @GetAccount() account: Account,) {
+  //   return this.pronunciationAssessmentService.create(createPronunciationAssessmentDto, account.userId);
+  // }
+
+  @UseInterceptors(FileInterceptor('audio'))
+  @Post('assess')
+  assess(@Body() assessPronunciationDto: AssessPronunciationDto, @GetAccount() account: Account,
+    @UploadedFile() audio: Express.Multer.File
+  ) {
+    return this.pronunciationAssessmentService.assess(assessPronunciationDto, account.userId, audio);
   }
 
   @Get()
