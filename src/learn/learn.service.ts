@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateLearnDto } from './dto/create-learn.dto';
 import { UpdateLearnDto } from './dto/update-learn.dto';
 import { CreateReviewReminderDto } from './dto/createReviewReminder.dto';
@@ -37,10 +37,11 @@ export class LearnService {
 
       })
 
-      return new ResponseData<any>({ count: res.length, data: groupedWords }, 200, 'Lấy thống kê thành công')
+      return new ResponseData<any>({ count: res.length, detail: groupedWords }, HttpStatus.OK, 'Lấy thống kê thành công')
     } catch (error) {
       console.log(error);
-      return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+      throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
+
     }
   }
 
@@ -87,10 +88,11 @@ export class LearnService {
           }))
       ])
 
-      return new ResponseData<any>(res, 200, 'Tạo nhắc nhở thành công')
+      return new ResponseData<any>(res, HttpStatus.CREATED, 'Tạo nhắc nhở thành công')
     } catch (error) {
       console.log(error);
-      return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+      throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
+
     }
   }
 
@@ -100,10 +102,11 @@ export class LearnService {
         where: { id, userId },
         data: updateLearnDto
       })
-      return new ResponseData<any>(res, 200, 'Cập nhật nhắc nhở thành công')
+      return new ResponseData<any>(res, HttpStatus.OK, 'Cập nhật nhắc nhở thành công')
     } catch (error) {
       console.log(error);
-      return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+      throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
+
     }
   }
 
@@ -119,10 +122,11 @@ export class LearnService {
         }
       })
 
-      return new ResponseData<ReviewReminder | null>(res[0] ?? null, 200, 'Lấy nhắc nhở thành công')
+      return new ResponseData<ReviewReminder | null>(res[0] ?? null, HttpStatus.OK, 'Lấy nhắc nhở thành công')
     } catch (error) {
       console.log(error);
-      return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+      throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
+
     }
   }
 
@@ -136,9 +140,9 @@ export class LearnService {
           vocabularySetId,
           VocabularySet: {
             words: {
-              every: {
+              some: {
                 id: {
-                  in: [...wordIds]
+                  in: wordIds
                 }
               }
             }
@@ -148,8 +152,7 @@ export class LearnService {
       )
 
       if (isNotExistWord.length === 0) {
-        return new ResponseData<any>(null, 400, 'Không tồn tại từ này trong bộ')
-        // throw new Error('Không tồn tại từ này trong bộ')
+        throw new HttpException('Không tồn tại từ này trong bộ', HttpStatus.NOT_FOUND)
       }
 
       const saveData = wordIds.map((id, index) => ({
@@ -174,10 +177,11 @@ export class LearnService {
           })
         ),
       ]);
-      return new ResponseData<any>(transactionResult, 200, 'Lưu kết quả thành công')
+      return new ResponseData<any>(transactionResult, HttpStatus.CREATED, 'Lưu kết quả thành công')
     } catch (error) {
       console.log(error);
-      return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+      throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
+
     }
   }
 
@@ -193,10 +197,11 @@ export class LearnService {
           Word: true
         }
       })
-      return new ResponseData<UserLearnedWord>(res, 200, 'Tìm thành công')
+      return new ResponseData<UserLearnedWord>(res, HttpStatus.OK, 'Tìm thành công')
     } catch (error) {
       console.log(error);
-      return new ResponseData<string>(null, 500, 'Lỗi dịch vụ, thử lại sau')
+      throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
+
     }
   }
 

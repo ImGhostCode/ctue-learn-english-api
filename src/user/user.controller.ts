@@ -95,7 +95,7 @@ export class UserController {
     return this.userService.deleteUser(id);
   }
 
-  @Patch('reset-password')
+  @Patch('reset/password')
   resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
     return this.userService.resetPassword(resetPasswordDto);
   }

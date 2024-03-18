@@ -151,7 +151,7 @@ export class UserService {
             const verifyCode = await this.prismaService.verifyCode.findFirst({
                 where: { email, code }
             })
-            if (!verifyCode) throw new HttpException('Mã xác minh không tồn tại', HttpStatus.BAD_REQUEST)
+            if (!verifyCode) throw new HttpException('Mã xác minh không tồn tại', HttpStatus.NOT_FOUND)
             const createdAt = new Date(verifyCode.createdAt)
             createdAt.setMinutes(createdAt.getMinutes() + 5)
             if (createdAt <= currentDate) throw new HttpException('Quá thời gian của mã xác minh', HttpStatus.NOT_ACCEPTABLE)
