@@ -32,7 +32,8 @@ export class PronunciationAssessmentService {
       const recognitionPromise = new Promise((resolve, reject) => {
         reco.recognized = async (s, e) => {
           let result = null;
-          var pronunciation_result = sdk.PronunciationAssessmentResult.fromResult(e.result);
+          let pronunciation_result: any = sdk.PronunciationAssessmentResult.fromResult(e.result);
+          // console.log(JSON.stringify(pronunciation_result));
           let isIncluded: boolean = false;
           pronunciation_result.detailResult.Words.forEach(word => {
             if (assessPronunciationDto.text.includes(word.Word) && word.PronunciationAssessment.ErrorType !== 'Mispronunciation') {
@@ -41,10 +42,11 @@ export class PronunciationAssessmentService {
           })
 
           if (isIncluded) {
+
             const data: any = {
               userId,
               label: assessPronunciationDto.text,
-              score: pronunciation_result.completenessScore,
+              score: pronunciation_result.detailResult.Words[0].Syllables[0].PronunciationAssessment.AccuracyScore,
               phonemeAssessments: pronunciation_result.detailResult.Words[0].Phonemes.map(phonem => ({
                 label: phonem.Phoneme,
                 score: phonem.PronunciationAssessment['AccuracyScore']
