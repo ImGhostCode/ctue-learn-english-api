@@ -129,7 +129,7 @@ export class VocabularySetsService {
         }
     }
 
-    async findAll(option: {
+    async findAllPublicVocaSet(option: {
         spec: number;
         topic: number;
         key: string;
@@ -147,6 +147,34 @@ export class VocabularySetsService {
             const res = await this.prismaService.vocabularySet.findMany({
                 where: whereCondition, include: {
                     words: true, Specialization: true, Topic: true
+                }
+            })
+
+            return new ResponseData<{ results: VocabularySet[] }>({ results: res }, HttpStatus.OK, 'Tìm thành công')
+        } catch (error) {
+            throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
+
+        }
+    }
+
+    async findAllByAdmin(option: {
+        spec: number;
+        topic: number;
+        key: string;
+    },) {
+        try {
+            let { spec, topic, key } = option
+            let whereCondition: any = {
+                title: { contains: key },
+
+                isDeleted: false
+            };
+            if (topic) whereCondition.topicId = Number(topic);
+            if (spec) whereCondition.specId = Number(spec);
+
+            const res = await this.prismaService.vocabularySet.findMany({
+                where: whereCondition, include: {
+                    Specialization: true, Topic: true
                 }
             })
 
@@ -195,6 +223,21 @@ export class VocabularySetsService {
             throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    async getAdminVocaSets() {
+        return this.prismaService.vocabularySet.findMany({
+            where: {
+                User: {
+                    Account: {
+                        every: {
+                            accountType: ACCOUNT_TYPES.ADMIN
+                        }
+                    }
+                }
+            }
+        })
+    }
+
 
     async findOne(id: number) {
         try {

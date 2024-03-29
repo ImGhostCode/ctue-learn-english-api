@@ -40,7 +40,18 @@ export class VocabularySetsController {
     topic: number;
     key: string;
   },) {
-    return this.vocabularySetsService.findAll(option);
+    return this.vocabularySetsService.findAllPublicVocaSet(option);
+  }
+
+  @Roles(ACCOUNT_TYPES.ADMIN)
+  @Get('admin')
+  findAllByAdmin(@Query()
+  option: {
+    spec: number;
+    topic: number;
+    key: string;
+  },) {
+    return this.vocabularySetsService.findAllByAdmin(option);
   }
 
   @Get('user')

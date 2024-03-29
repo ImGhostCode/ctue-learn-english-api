@@ -177,7 +177,7 @@ export class LearnService {
           })
         ),
       ]);
-      return new ResponseData<any>(transactionResult, HttpStatus.CREATED, 'Lưu kết quả thành công')
+      return new ResponseData<any>({results: transactionResult}, HttpStatus.CREATED, 'Lưu kết quả thành công')
     } catch (error) {
       console.log(error);
       throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
