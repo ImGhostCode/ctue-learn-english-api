@@ -56,7 +56,11 @@ export class ContributionService {
 
   async findAll(type: string, status: number) {
     try {
-      let contributions = await this.prismaService.contribution.findMany({ where: { type, status, isDeleted: false } })
+      let contributions = await this.prismaService.contribution.findMany({
+        where: { type, status, isDeleted: false }, include: {
+          User: true
+        }
+      })
       //contributions.forEach((contribution) => contribution.content = JSON.parse(contribution.content as string))
       return new ResponseData<{ results: Contribution[] }>({ results: contributions }, HttpStatus.OK, 'Tìm thành công')
     } catch (error) {
