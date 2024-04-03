@@ -66,8 +66,8 @@ export class SentenceService {
                 where: whereClause,
             });
 
-            let totalPages = Math.ceil(totalCount / pageSize)
-            if (!totalPages) totalPages = 1
+            const totalPages = totalCount == 0 ? 1 : Math.ceil(totalCount / pageSize)
+
             if (!page || page < 1) page = 1
             if (page > totalPages) page = totalPages
             let next = (page - 1) * pageSize
@@ -84,7 +84,7 @@ export class SentenceService {
                     Type: true
                 }
             })
-            return new ResponseData<any>({ results:sentences, totalPages }, HttpStatus.OK, 'Tìm thành công')
+            return new ResponseData<any>({ data: sentences, totalPages, total: totalCount }, HttpStatus.OK, 'Tìm thành công')
         } catch (error) {
             throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }

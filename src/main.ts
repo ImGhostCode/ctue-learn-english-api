@@ -6,9 +6,19 @@ import {
   DocumentBuilder,
   SwaggerDocumentOptions,
 } from '@nestjs/swagger';
+import { initializeApp } from 'firebase-admin/app';
+import { credential } from 'firebase-admin';
+var serviceAccount = require(`${process.env.PATH_SERVICE_ACC_KEY}`);
 
 async function bootstrap() {
+
   const app = await NestFactory.create(AppModule);
+
+  initializeApp({
+    credential: credential.cert(serviceAccount),
+  });
+
+
   app.enableCors();
   app.useGlobalPipes(
     new ValidationPipe({

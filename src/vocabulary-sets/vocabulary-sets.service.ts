@@ -3,7 +3,7 @@ import { CreateVocaSetDto, UpdateVocaSetDto } from './dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { Account, UserLearnedWord, VocabularySet } from '@prisma/client';
-import { ACCOUNT_TYPES, ResponseData } from 'src/global';
+import { ACCOUNT_TYPES, PAGE_SIZE, ResponseData } from 'src/global';
 
 
 @Injectable()
@@ -158,12 +158,14 @@ export class VocabularySetsService {
     }
 
     async findAllByAdmin(option: {
-        spec: number;
-        topic: number;
-        key: string;
+        spec: number,
+        topic: number,
+        key: string,
+        page: number
     },) {
+        let pageSize = PAGE_SIZE.PAGE_USER
         try {
-            let { spec, topic, key } = option
+            let { spec, topic, key, page } = option
             let whereCondition: any = {
                 title: { contains: key },
 
@@ -172,13 +174,25 @@ export class VocabularySetsService {
             if (topic) whereCondition.topicId = Number(topic);
             if (spec) whereCondition.specId = Number(spec);
 
+            const totalCount = await this.prismaService.vocabularySet.count({
+                where: whereCondition
+            })
+
+                  const totalPages = totalCount == 0 ? 1 : Math.ceil(totalCount / pageSize)
+            if (!page || page < 1) page = 1
+            if (page > totalPages) page = totalPages
+            let next = (page - 1) * pageSize
+
+
             const res = await this.prismaService.vocabularySet.findMany({
+                skip: next,
+                take: pageSize,
                 where: whereCondition, include: {
                     Specialization: true, Topic: true
                 }
             })
 
-            return new ResponseData<{ results: VocabularySet[] }>({ results: res }, HttpStatus.OK, 'Tìm thành công')
+            return new ResponseData<any>({ data: res, totalPages, total: totalCount }, HttpStatus.OK, 'Tìm thành công')
         } catch (error) {
             throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
 

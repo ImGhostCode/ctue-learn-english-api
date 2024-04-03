@@ -29,7 +29,7 @@ export class UserService {
                     isDeleted: false
                 }
             })
-            const totalPages = Math.ceil(totalCount / pageSize)
+                  const totalPages = totalCount == 0 ? 1 : Math.ceil(totalCount / pageSize)
             if (!page || page < 1) page = 1
             if (page > totalPages) page = totalPages
             let next = (page - 1) * pageSize
@@ -42,7 +42,11 @@ export class UserService {
                     accountType: true,
                     authType: true,
                     isBan: true,
-                    User: true
+                    User: {
+                        include: {
+                            Contribution: true
+                        }
+                    }
                 },
                 where: {
                     accountType: 'user',
@@ -52,7 +56,7 @@ export class UserService {
                     userId: 'asc'
                 }
             })
-            return new ResponseData<any>({ accounts, totalPages }, HttpStatus.OK, 'Tìm thấy các người dùng')
+            return new ResponseData<any>({ data: accounts, totalPages, total: totalCount }, HttpStatus.OK, 'Tìm thấy các người dùng')
         } catch (error) {
             throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
