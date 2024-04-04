@@ -34,7 +34,7 @@ export class UpdateSentenceDto {
   @IsOptional()
   @IsString()
   @MaxLength(CONSTANTS_MAX.SENTENCE_MEAN_LEN)
-  mean?: string;
+  meaning?: string;
 
   @ApiProperty()
   @IsOptional()

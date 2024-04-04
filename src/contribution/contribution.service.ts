@@ -175,10 +175,10 @@ export class ContributionService {
         throw new HttpException("Đóng góp đã được duyệt", HttpStatus.CONFLICT)
       }
       if (body.status === CONTRIBUTION.APPROVED) {
-        const { topicId = [], content, meaning: mean, note, typeId } = JSON.parse(JSON.stringify(contribution.content))
+        const { topicId = [], content, meaning, note, typeId } = JSON.parse(JSON.stringify(contribution.content))
         const { userId } = contribution
 
-        const result = await this.sentenceService.create({ topicId: topicId.map(id => Number(id)), content, mean, note, userId, typeId })
+        const result = await this.sentenceService.create({ topicId: topicId.map(id => Number(id)), content, meaning, note, userId, typeId })
 
         if (result.statusCode === HttpStatus.CREATED) {
           await this.prismaService.contribution.update({ where: { id }, data: { status: Number(body.status), feedback: '' } })

@@ -59,6 +59,7 @@ export class WordService {
 
             return new ResponseData<Word>(word, HttpStatus.CREATED, 'Tạo từ thành công')
         } catch (error) {
+        console.log(error)
             throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

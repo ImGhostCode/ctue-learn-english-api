@@ -31,6 +31,7 @@ export class IrregularVerbService {
       let { key, page, sort } = option
       const totalCount = await this.prismaService.irregularVerb.count({
         where: {
+          isDeleted: false,
           OR: [
             { v1: { contains: key } },
             { v2: { contains: key } },
@@ -50,6 +51,7 @@ export class IrregularVerbService {
         skip: next,
         take: pageSize,
         where: {
+        isDeleted: false,
           OR: [
             { v1: { contains: key } },
             { v2: { contains: key } },
@@ -108,6 +110,7 @@ export class IrregularVerbService {
   async isExisted(content: string) {
     const verb = await this.prismaService.irregularVerb.findFirst({
       where: {
+        isDeleted: false,
         v1: {
           equals: content,
           mode: 'insensitive'
@@ -119,7 +122,7 @@ export class IrregularVerbService {
   }
 
   async findById(id: number) {
-    return this.prismaService.irregularVerb.findUnique({ where: { id } })
+    return this.prismaService.irregularVerb.findUnique({ where: { id, isDeleted: false, } })
   }
 
   // async searchByKey(key: string) {

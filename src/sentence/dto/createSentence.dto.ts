@@ -35,7 +35,7 @@ export class CreateSentenceDto {
   @IsString()
   @MaxLength(CONSTANTS_MAX.SENTENCE_MEAN_LEN)
   @IsNotEmpty()
-  mean: string;
+  meaning: string;
 
   @ApiProperty()
   @IsOptional()
