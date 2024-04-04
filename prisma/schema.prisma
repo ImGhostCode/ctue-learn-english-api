@@ -91,7 +91,7 @@ model Sentence {
   typeId    Int
   userId    Int?
   content   String
-  mean      String
+  meaning   String  @default("")
   note      String?
   isDeleted Boolean @default(false)
   Topic     Topic[]

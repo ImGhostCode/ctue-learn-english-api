@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
+import { Controller, Get, Post, Request, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
 import { LearnService } from './learn.service';
 import { CreateLearnDto } from './dto/create-learn.dto';
 import { UpdateLearnDto } from './dto/update-learn.dto';
@@ -24,17 +24,20 @@ export class LearnController {
   }
 
   @Post('review-reminder')
-  createReviewReminder(@Body() createReviewReminderDto: CreateReviewReminderDto, @GetAccount() account: Account) {
+  createReviewReminder(
+
+    @Body() createReviewReminderDto: CreateReviewReminderDto, @GetAccount() account: Account) {
+
     return this.learnService.createReivewReminder(createReviewReminderDto, account.userId)
   }
 
-  @Get('reminder-coming')
-  getReminderComing(@GetAccount() account: Account) {
-    return this.learnService.getReminderComing(account.userId)
+  @Get('upcoming-reminder')
+  getUpcomingReminder(@GetAccount() account: Account) {
+    return this.learnService.getUpcomingReminder(account.userId)
   }
 
   @Get('statistics')
-  getStatistics(@Query() query: { setId: number }, @GetAccount() account: Account) {
+  getStatistics(@Query() query: { setId?: number | undefined }, @GetAccount() account: Account) {
     return this.learnService.getStatistics(account.userId, +query.setId)
   }
 

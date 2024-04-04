@@ -10,7 +10,7 @@ export class SentenceService {
 
     async create(createSentenceDto: CreateSentenceDto) {
         try {
-            let { topicId, typeId, content, mean, note, userId } = createSentenceDto
+            let { topicId, typeId, content, meaning, note, userId } = createSentenceDto
             const isExisted = await this.isExisted(createSentenceDto.content)
             if (isExisted) throw new HttpException('Câu đã tồn tại', HttpStatus.CONFLICT);
             topicId = topicId.map((id) => Number(id))
@@ -20,7 +20,7 @@ export class SentenceService {
                     typeId: typeId,
                     userId: userId,
                     content: content,
-                    mean: mean,
+                    meaning: meaning,
                     note: note,
                     Topic: {
                         connect: topicId.map((id) => ({ id }))
@@ -44,6 +44,7 @@ export class SentenceService {
 
             const whereClause: any = {
                 Topic: {},
+                isDeleted: false
             };
 
             if (topic) {
@@ -66,8 +67,8 @@ export class SentenceService {
                 where: whereClause,
             });
 
-            let totalPages = Math.ceil(totalCount / pageSize)
-            if (!totalPages) totalPages = 1
+            const totalPages = totalCount == 0 ? 1 : Math.ceil(totalCount / pageSize)
+
             if (!page || page < 1) page = 1
             if (page > totalPages) page = totalPages
             let next = (page - 1) * pageSize
@@ -84,7 +85,7 @@ export class SentenceService {
                     Type: true
                 }
             })
-            return new ResponseData<any>({ results:sentences, totalPages }, HttpStatus.OK, 'Tìm thành công')
+            return new ResponseData<any>({ data: sentences, totalPages, total: totalCount }, HttpStatus.OK, 'Tìm thành công')
         } catch (error) {
             throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -102,7 +103,7 @@ export class SentenceService {
 
     async update(id: number, updateSentenceDto: UpdateSentenceDto) {
         try {
-            let { typeId, content, mean, note, topicId } = updateSentenceDto
+            let { typeId, content, meaning, note, topicId } = updateSentenceDto
             const sentence = await this.findById(id)
             if (!sentence) throw new HttpException('Câu không tồn tại', HttpStatus.NOT_FOUND);
             if (content && sentence.content !== content) {
@@ -126,7 +127,7 @@ export class SentenceService {
                 data: {
                     typeId,
                     content,
-                    mean,
+                    meaning,
                     note,
                     Topic: { connect: topicId.map((id) => ({ id })) }
                 },
@@ -158,7 +159,8 @@ export class SentenceService {
                 content: {
                     equals: content,
                     mode: 'insensitive'
-                }
+                },
+                isDeleted: false
             }
         })
         if (centence) return true
@@ -168,7 +170,7 @@ export class SentenceService {
     async findById(id: number) {
         return await this.prismaService.sentence.findUnique({
             where: {
-                id: id
+                id: id, isDeleted: false
             },
             include: {
                 //Practice: true,

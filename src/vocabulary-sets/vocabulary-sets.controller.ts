@@ -47,9 +47,10 @@ export class VocabularySetsController {
   @Get('admin')
   findAllByAdmin(@Query()
   option: {
-    spec: number;
-    topic: number;
-    key: string;
+    spec: number,
+    topic: number,
+    key: string,
+    page: number
   },) {
     return this.vocabularySetsService.findAllByAdmin(option);
   }

@@ -58,14 +58,14 @@ export class ContributionController {
 
   @Get()
   @Roles(ACCOUNT_TYPES.ADMIN)
-  findAll(@Query('type') type: string, @Query('status') status: number) {
-    return this.contributionService.findAll(type, status);
+  findAll(@Query() option: { page: number, type: string, status: number }) {
+    return this.contributionService.findAll(option);
   }
 
-  @Get('user')
+  @Get('user/:id')
   @Roles(ACCOUNT_TYPES.USER, ACCOUNT_TYPES.ADMIN)
-  findAllByUser(@Query('type') type: string, @GetAccount() account: Account) {
-    return this.contributionService.findAllByUser(type, account.userId);
+  findAllByUser(@Query() option: { type: string, page: number }, @Param('id', ParseIntPipe) id: number) {
+    return this.contributionService.findAllByUser(option, id);
   }
 
   @Get(':id')
@@ -100,4 +100,15 @@ export class ContributionController {
   ) {
     return this.contributionService.remove(id, account);
   }
+
+  @Post('send-notification')
+  @Roles(ACCOUNT_TYPES.ADMIN)
+  sendNotification(
+    @Body() body: { registrationToken: string },
+    @GetAccount() account: Account,
+  ) {
+    return this.contributionService.sendNotification(body.registrationToken, account);
+  }
 }
+
+

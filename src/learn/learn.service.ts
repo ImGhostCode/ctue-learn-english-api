@@ -12,18 +12,31 @@ import { UpdateReviewReminderDto } from './dto/update-reminder.dto';
 export class LearnService {
   constructor(private readonly prismaService: PrismaService) { }
 
-  async getStatistics(userId: number, setId: number) {
+  async getStatistics(userId: number, setId?: number | undefined) {
     try {
       const whereCondition: any = {
         userId
       }
+
       if (setId) whereCondition.vocabularySetId = setId
 
       const res = await this.prismaService.userLearnedWord.findMany({
         where: whereCondition,
-
         include: {
-          Word: true
+          Word: {
+            include: {
+              Level: {
+                select: {
+                  name: true
+                }
+              },
+              Specialization: {
+                select: {
+                  name: true
+                }
+              }
+            }
+          }
         }
       })
 
@@ -53,6 +66,8 @@ export class LearnService {
       const groupedReminders = {}
 
       data.forEach(item => {
+        // console.log(item.reviewAt);
+
         const time = item.reviewAt.toISOString()
 
         if (!groupedReminders[time]) {
@@ -71,6 +86,8 @@ export class LearnService {
       })
 
       const reminderData: any[] = Object.values(groupedReminders)
+      //console.log(JSON.stringify(reminderData));
+
 
       const res = await this.prismaService.$transaction([
         ...reminderData.map(data =>
@@ -82,9 +99,9 @@ export class LearnService {
               reviewAt: data.reviewAt,
               words: data.words
             },
-            // include: {
-            //   words: true
-            // }
+            include: {
+              words: true
+            }
           }))
       ])
 
@@ -110,12 +127,37 @@ export class LearnService {
     }
   }
 
-  async getReminderComing(userId: number) {
+  async getUpcomingReminder(userId: number) {
     try {
       const res = await this.prismaService.reviewReminder.findMany({
         where: {
           userId,
           isDone: false
+        },
+        include: {
+          words: {
+            include: {
+              Level: {
+                select: {
+                  name: true
+                }
+              },
+              Specialization: {
+                select: {
+                  name: true
+                }
+              },
+              meanings: {
+              
+                select: {
+                typeId: true,
+                wordId: true,
+                meaning: true,
+                  Type: true
+                }
+              }
+            }
+          }
         },
         orderBy: {
           reviewAt: 'asc'
@@ -177,7 +219,7 @@ export class LearnService {
           })
         ),
       ]);
-      return new ResponseData<any>({results: transactionResult}, HttpStatus.CREATED, 'Lưu kết quả thành công')
+      return new ResponseData<any>({ results: transactionResult }, HttpStatus.CREATED, 'Lưu kết quả thành công')
     } catch (error) {
       console.log(error);
       throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
