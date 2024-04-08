@@ -25,6 +25,7 @@ model User {
   id        Int      @id @default(autoincrement())
   name      String?
   avt       String?
+  fcmToken  String?
   isDeleted Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -40,6 +41,7 @@ model User {
   CreatedVocabularySet     VocabularySet[]
   UserVocabularySets       UserVocabularySet[]
   ReviewReminder           ReviewReminder[]
+  Notification             Notification[]
 
   @@map("users")
 }
@@ -326,4 +328,15 @@ model ReviewReminder {
   User          User          @relation(fields: [userId], references: [id])
 
   @@map("reviewReminders")
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  title     String
+  body      String
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  User      User     @relation(fields: [userId], references: [id])
 }

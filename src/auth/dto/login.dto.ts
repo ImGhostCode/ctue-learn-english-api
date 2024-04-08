@@ -19,4 +19,10 @@ export class LoginDto {
   @IsString()
   @MinLength(CONSTANTS_MIN.PASSWORD_LEN)
   password: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  fcmToken: string;
+
 }

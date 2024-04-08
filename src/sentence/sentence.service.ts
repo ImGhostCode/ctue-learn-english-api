@@ -31,7 +31,7 @@ export class SentenceService {
                     Topic: true
                 }
             })
-            return new ResponseData<Sentence>(sentence, HttpStatus.OK, 'Tạo câu thành công')
+            return new ResponseData<Sentence>(sentence, HttpStatus.CREATED, 'Tạo câu thành công')
         } catch (error) {
             throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }

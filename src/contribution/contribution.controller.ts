@@ -101,14 +101,7 @@ export class ContributionController {
     return this.contributionService.remove(id, account);
   }
 
-  @Post('send-notification')
-  @Roles(ACCOUNT_TYPES.ADMIN)
-  sendNotification(
-    @Body() body: { registrationToken: string },
-    @GetAccount() account: Account,
-  ) {
-    return this.contributionService.sendNotification(body.registrationToken, account);
-  }
+
 }
 
 

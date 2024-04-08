@@ -6,8 +6,7 @@ import { Account, Contribution, Sentence, Word } from '@prisma/client';
 import { WordService } from '../word/word.service';
 import { SentenceService } from '../sentence/sentence.service';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
-import { getMessaging, getToken, onMessage, Messaging } from "@firebase/messaging";
-import { messaging } from 'firebase-admin';
+
 
 @Injectable()
 export class ContributionService {
@@ -152,12 +151,12 @@ export class ContributionService {
         const result = await this.wordService.create({ topicId: topicId.map(id => Number(id)), levelId, specializationId, content, meanings, note, phonetic, synonyms, antonyms, userId, examples, pictures }, null)
 
         if (result.statusCode === HttpStatus.CREATED) {
-          await this.prismaService.contribution.update({ where: { id }, data: { status: Number(body.status), feedback: '' } })
-          return new ResponseData<Word>(result.data, HttpStatus.OK, 'Duyệt thành công')
+          const updatedCon = await this.prismaService.contribution.update({ where: { id }, data: { status: Number(body.status), feedback: '' } })
+          return new ResponseData<Contribution>(updatedCon, HttpStatus.OK, 'Duyệt thành công')
         }
       } else if (body.status === CONTRIBUTION.REFUSED) {
-        await this.prismaService.contribution.update({ where: { id }, data: { status: Number(body.status), feedback: body.feedback } })
-        return new ResponseData<string>(null, HttpStatus.OK, 'Từ chối thành công')
+        const updatedCon = await this.prismaService.contribution.update({ where: { id }, data: { status: Number(body.status), feedback: body.feedback } })
+        return new ResponseData<Contribution>(updatedCon, HttpStatus.OK, 'Từ chối thành công')
       }
     } catch (error) {
       throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
@@ -179,14 +178,13 @@ export class ContributionService {
         const { userId } = contribution
 
         const result = await this.sentenceService.create({ topicId: topicId.map(id => Number(id)), content, meaning, note, userId, typeId })
-
         if (result.statusCode === HttpStatus.CREATED) {
-          await this.prismaService.contribution.update({ where: { id }, data: { status: Number(body.status), feedback: '' } })
-          return new ResponseData<Sentence>(result.data, HttpStatus.OK, 'Duyệt thành công')
+          const updatedCon = await this.prismaService.contribution.update({ where: { id }, data: { status: Number(body.status), feedback: '' } })
+          return new ResponseData<Contribution>(updatedCon, HttpStatus.OK, 'Duyệt thành công')
         }
       } else if (body.status === CONTRIBUTION.REFUSED) {
-        await this.prismaService.contribution.update({ where: { id }, data: { status: Number(body.status), feedback: body.feedback } })
-        return new ResponseData<string>(null, HttpStatus.OK, 'Từ chối thành công')
+        const updatedCon = await this.prismaService.contribution.update({ where: { id }, data: { status: Number(body.status), feedback: body.feedback } })
+        return new ResponseData<Contribution>(updatedCon, HttpStatus.OK, 'Từ chối thành công')
       }
     } catch (error) {
       throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
@@ -213,31 +211,5 @@ export class ContributionService {
     return contribution
   }
 
-  async sendNotification(registrationToken: string, account: Account) {
-    // This registration token comes from the client FCM SDKs.
-    // const registrationToken = 'YOUR_REGISTRATION_TOKEN';
 
-    const message = {
-      data: {
-        score: '850',
-        time: '2:45'
-      },
-      notification: { title: "testtt", body: "Duyet dong gop thanh cong" },
-      token: registrationToken
-    };
-
-    console.log(registrationToken);
-
-    // Send a message to the device corresponding to the provided
-    // registration token.
-    messaging()
-      .send(message)
-      .then((response) => {
-        // Response is a message ID string.
-        console.log('Successfully sent message:', response);
-      })
-      .catch((error) => {
-        console.log('Error sending message:', error);
-      });
-  }
 }

@@ -38,14 +38,16 @@ export class UpdateVocaSetDto {
 
     @ApiProperty()
     @IsOptional()
-    @IsBoolean()
+   //@IsBoolean()
     // @IsBooleanString()
-    @Transform(({ value }) => {
-        if (value === 'true') return true;
-        if (value === 'false') return false;
-        return value;
-    })
-    isPublic?: boolean
+    @IsString()
+   // @Transform(({ value }) => {
+   // console.log(value)
+    //    if (value === 'true') return true;
+  //   if (value === 'false') return false;
+      // return value;
+  // })
+    isPublic?: string
 
     @ApiProperty()
     @IsArray()
