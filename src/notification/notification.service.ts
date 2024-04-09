@@ -3,10 +3,9 @@ import { CreateNotificationDto } from './dto/create-notification.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
 import { PAGE_SIZE, ResponseData } from 'src/global';
 import { PrismaService } from 'nestjs-prisma';
-import { Account, Notification } from '@prisma/client';
-import { getMessaging, getToken, onMessage, Messaging } from "@firebase/messaging";
-import { messaging } from 'firebase-admin';
+import { Notification } from '@prisma/client';
 import * as admin from 'firebase-admin';
+
 
 
 @Injectable()
@@ -62,6 +61,7 @@ export class NotificationService {
       })
       return new ResponseData<any>({ data: notifications, totalPages, total: totalCount }, HttpStatus.OK, 'Tìm thành công')
     } catch (error) {
+      console.log(error)
       throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -129,33 +129,28 @@ export class NotificationService {
 
   async sendNotification(registrationToken: string, createNotificationDto: CreateNotificationDto) {
     try {
-      // 1. Kiểm tra tính hợp lệ của registrationToken
-      if (!registrationToken) {
-        throw new HttpException('Registration Token không hợp lệ', HttpStatus.BAD_REQUEST);
-      }
-      // 2. Tạo nội dung thông báo
-      const message: any = {
-        data: createNotificationDto.data, // Sử dụng dữ liệu tùy chỉnh từ dto
-        notification: {
-          title: createNotificationDto.title,
-          body: createNotificationDto.body,
-
-        },
-        token: registrationToken
-      };
-
-      // 4. Lưu thông báo đã gửi (tùy chọn)
       await this.create(createNotificationDto);
 
-      // 3. Gửi thông báo sử dụng Firebase Admin SDK
-      await admin.messaging().send(message);
+      if (registrationToken) {
+        // throw new HttpException('Registration Token không hợp lệ', HttpStatus.BAD_REQUEST);
+        // } else {
+        const message: any = {
+          data: { ...createNotificationDto.data, data: JSON.stringify(createNotificationDto.data.data) },
+          notification: {
+            title: createNotificationDto.title,
+            body: createNotificationDto.body,
+          },
+          token: registrationToken
+        };
 
+        await admin.messaging().send(message);
+      }
       return new ResponseData(null, HttpStatus.OK, 'Gửi thông báo thành công');
     } catch (error) {
+      console.log(error)
       if (error.code === 'messaging/registration-token-not-registered') {
         return new ResponseData(null, HttpStatus.CREATED, 'Thông báo đã được tạo');
       } else {
-
         throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
       }
     }
