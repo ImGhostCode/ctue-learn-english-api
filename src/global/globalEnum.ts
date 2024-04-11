@@ -41,7 +41,8 @@ export enum PAGE_SIZE {
     PAGE_SENTENCE = 20,
     PAGE_IRREGULAR = 20,
     PAGE_FAVORITE = 20,
-    PAGE_PRACTICE = 20
+    PAGE_PRACTICE = 20,
+    PAGE_NOTIFICATION = 20
 
 }
 export enum PRACTICE_SIZE {
@@ -66,4 +67,10 @@ export enum VOCABULARY_SET {
 export enum PRO_ASSESSMENT {
     NEED_TO_IMPROVE_THRESHOLD = 80,
     NUM_OF_SUGGESTS = 10
+}
+
+export enum STATISTICS_GROUPBY {
+    MONTH = 'month',
+    YEAR = 'year',
+    CUSTOM = 'custom'
 }

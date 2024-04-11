@@ -6,13 +6,14 @@ import { Account, Contribution, Sentence, Word } from '@prisma/client';
 import { WordService } from '../word/word.service';
 import { SentenceService } from '../sentence/sentence.service';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
-import { getMessaging, getToken, onMessage, Messaging } from "@firebase/messaging";
-import { messaging } from 'firebase-admin';
+import { NotificationService } from 'src/notification/notification.service';
+import { CreateNotificationDto } from 'src/notification/dto/create-notification.dto';
+
 
 @Injectable()
 export class ContributionService {
 
-  constructor(private prismaService: PrismaService, private wordService: WordService, private sentenceService: SentenceService, private cloudinaryService: CloudinaryService) { }
+  constructor(private prismaService: PrismaService, private wordService: WordService, private sentenceService: SentenceService, private cloudinaryService: CloudinaryService, private notificationService: NotificationService) { }
 
   async createWordCon(createWordContributionDto: CreateWordContributionDto, userId: number, pictureFiles: Express.Multer.File[]) {
 
@@ -145,23 +146,56 @@ export class ContributionService {
       if (contribution.status !== CONTRIBUTION.PENDING) {
         throw new HttpException("Đóng góp đã được duyệt", HttpStatus.CONFLICT)
       }
+
+      const user = await this.prismaService.user.findUnique({
+        where: { id: contribution.userId }, select: {
+          fcmToken: true,
+          name: true
+        }
+      })
+
       if (body.status === CONTRIBUTION.APPROVED) {
         const { topicId = [], levelId, specializationId, content, meanings = [], note, phonetic, examples = [], synonyms = [], antonyms = [], pictures = [] } = JSON.parse(JSON.stringify(contribution.content))
         const { userId } = contribution
 
         const result = await this.wordService.create({ topicId: topicId.map(id => Number(id)), levelId, specializationId, content, meanings, note, phonetic, synonyms, antonyms, userId, examples, pictures }, null)
 
+
         if (result.statusCode === HttpStatus.CREATED) {
-          await this.prismaService.contribution.update({ where: { id }, data: { status: Number(body.status), feedback: '' } })
-          return new ResponseData<Word>(result.data, HttpStatus.OK, 'Duyệt thành công')
+          const updatedCon = await this.prismaService.contribution.update({ where: { id }, data: { status: Number(body.status), feedback: null } })
+
+          this.sendNotification(`Hey ${user.name}`, `Đóng góp #${content} của bạn đã được duyệt!`, {
+            type: 'contribution',
+            data: { reason: body.feedback ?? "" }
+          }, userId, user.fcmToken)
+
+          return new ResponseData<Contribution>(updatedCon, HttpStatus.OK, 'Duyệt thành công')
         }
       } else if (body.status === CONTRIBUTION.REFUSED) {
-        await this.prismaService.contribution.update({ where: { id }, data: { status: Number(body.status), feedback: body.feedback } })
-        return new ResponseData<string>(null, HttpStatus.OK, 'Từ chối thành công')
+        const updatedCon = await this.prismaService.contribution.update({ where: { id }, data: { status: Number(body.status), feedback: body.feedback } })
+
+        this.sendNotification(`Hey ${user.name}`, `Chúng tôi rất tiết. Đóng góp #${JSON.parse(JSON.stringify(contribution.content)).content} của bạn đã bị từ chối!`, {
+          type: 'contribution',
+          data: { reason: body.feedback ?? "" }
+        }, contribution.userId, user.fcmToken)
+
+        return new ResponseData<Contribution>(updatedCon, HttpStatus.OK, 'Từ chối thành công')
       }
     } catch (error) {
+      console.log(error)
       throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
     }
+  }
+
+  async sendNotification(title: string, body: string, data: any, userId: number, fcmToken: string) {
+    const createNotificationDto: CreateNotificationDto = {
+      title,
+      body,
+      data,
+      userId
+    }
+
+    this.notificationService.sendNotification(fcmToken, createNotificationDto)
   }
 
 
@@ -174,21 +208,41 @@ export class ContributionService {
       if (contribution.status !== CONTRIBUTION.PENDING) {
         throw new HttpException("Đóng góp đã được duyệt", HttpStatus.CONFLICT)
       }
+
+      const user = await this.prismaService.user.findUnique({
+        where: { id: contribution.userId }, select: {
+          fcmToken: true,
+          name: true
+        }
+      })
+
       if (body.status === CONTRIBUTION.APPROVED) {
         const { topicId = [], content, meaning, note, typeId } = JSON.parse(JSON.stringify(contribution.content))
         const { userId } = contribution
 
         const result = await this.sentenceService.create({ topicId: topicId.map(id => Number(id)), content, meaning, note, userId, typeId })
-
         if (result.statusCode === HttpStatus.CREATED) {
-          await this.prismaService.contribution.update({ where: { id }, data: { status: Number(body.status), feedback: '' } })
-          return new ResponseData<Sentence>(result.data, HttpStatus.OK, 'Duyệt thành công')
+          const updatedCon = await this.prismaService.contribution.update({ where: { id }, data: { status: Number(body.status), feedback: body.feedback } })
+
+          this.sendNotification(`Hey ${user.name}`, `Đóng góp #${content} của bạn đã được duyệt!`, {
+            type: 'contribution',
+            data: { reason: body.feedback ?? "" }
+          }, userId, user.fcmToken)
+
+          return new ResponseData<Contribution>(updatedCon, HttpStatus.OK, 'Duyệt thành công')
         }
       } else if (body.status === CONTRIBUTION.REFUSED) {
-        await this.prismaService.contribution.update({ where: { id }, data: { status: Number(body.status), feedback: body.feedback } })
-        return new ResponseData<string>(null, HttpStatus.OK, 'Từ chối thành công')
+        const updatedCon = await this.prismaService.contribution.update({ where: { id }, data: { status: Number(body.status), feedback: body.feedback } })
+
+        this.sendNotification(`Hey ${user.name}`, `Chúng tôi rất tiết. Đóng góp #${JSON.parse(JSON.stringify(contribution.content)).content} của bạn đã bị từ chối!`, {
+          type: 'contribution',
+          data: { reason: body.feedback ?? "" }
+        }, contribution.userId, user.fcmToken)
+
+        return new ResponseData<Contribution>(updatedCon, HttpStatus.OK, 'Từ chối thành công')
       }
     } catch (error) {
+      console.log(error)
       throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -213,31 +267,5 @@ export class ContributionService {
     return contribution
   }
 
-  async sendNotification(registrationToken: string, account: Account) {
-    // This registration token comes from the client FCM SDKs.
-    // const registrationToken = 'YOUR_REGISTRATION_TOKEN';
 
-    const message = {
-      data: {
-        score: '850',
-        time: '2:45'
-      },
-      notification: { title: "testtt", body: "Duyet dong gop thanh cong" },
-      token: registrationToken
-    };
-
-    console.log(registrationToken);
-
-    // Send a message to the device corresponding to the provided
-    // registration token.
-    messaging()
-      .send(message)
-      .then((response) => {
-        // Response is a message ID string.
-        console.log('Successfully sent message:', response);
-      })
-      .catch((error) => {
-        console.log('Error sending message:', error);
-      });
-  }
 }

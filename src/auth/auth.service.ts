@@ -8,6 +8,7 @@ import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
+
     constructor(private prismaService: PrismaService, private jwtService: JwtService, private configService: ConfigService) { }
 
     async register(registerDto: RegisterDto) {
@@ -59,8 +60,28 @@ export class AuthService {
 
             if (account.isBan) return new ResponseData<any>({ feedback: account.feedback }, HttpStatus.FORBIDDEN, 'Tài khoản đã bị khóa')
 
+            const test = await this.prismaService.user.update({ where: { id: account.userId }, data: { fcmToken: loginDto.fcmToken } })
+
             const data = await this.signJwtToken(account.userId, account.email)
+
             return new ResponseData<any>(data, HttpStatus.OK, 'Đăng nhập thành công')
+        } catch (error) {
+            throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    async logout(userId: number) {
+        try {
+            const user = await this.prismaService.user.findUnique({ where: { id: userId, isDeleted: false } })
+            if (!user) {
+                throw new HttpException('Tài khoản không tồn tại', HttpStatus.NOT_FOUND);
+            }
+            await this.prismaService.user.update({
+                where: { id: userId, }, data: {
+                    fcmToken: null
+                }
+            })
+            return new ResponseData<any>(null, HttpStatus.OK, 'Đăng xuất thành công')
         } catch (error) {
             throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }

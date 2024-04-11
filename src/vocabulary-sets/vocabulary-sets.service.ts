@@ -188,7 +188,7 @@ export class VocabularySetsService {
                 skip: next,
                 take: pageSize,
                 where: whereCondition, include: {
-                    Specialization: true, Topic: true
+                    Specialization: true, Topic: true, words: true
                 }
             })
 
@@ -281,9 +281,8 @@ export class VocabularySetsService {
     async update(id: number, updateVocaSetDto: UpdateVocaSetDto, newPictureFile: Express.Multer.File, account: Account) {
         try {
             let { title, topicId = null, specId = null, words = [], picture = null, oldPicture = null, isPublic = false } = updateVocaSetDto
-
             if (account.accountType === ACCOUNT_TYPES.USER) {
-                const isOwner = await this.prismaService.vocabularySet.findUnique({ where: { id, userId: account.userId } })
+                const isOwner = await this.prismaService.vocabularySet.findUnique({ where: { id, userId: account.userId, isDeleted: false } })
                 if (!isOwner) {
                     throw new HttpException('Bộ từ không tồn tại hoặc không thể chỉnh sửa', HttpStatus.NOT_ACCEPTABLE);
                 }
@@ -298,7 +297,7 @@ export class VocabularySetsService {
                 title,
                 //  topicId,
                 //  specId,
-                //picture,
+                picture,
                 //  words: {
                 //     set: [],
                 //connect: words.map(id => ({ id: Number(id) }))
@@ -310,12 +309,13 @@ export class VocabularySetsService {
                 set: [],
                 connect: words.map(id => ({ id: Number(id) }))
             };
+            
 
             if (account.accountType === ACCOUNT_TYPES.USER) {
                 whereCondition.userId = account.userId
 
             } else if (account.accountType === ACCOUNT_TYPES.ADMIN) {
-                data.isPublic = isPublic
+                data.isPublic = isPublic === 'true' ? true : false
             }
 
             const res = await this.prismaService.vocabularySet.update({
@@ -327,7 +327,7 @@ export class VocabularySetsService {
             })
             return new ResponseData<VocabularySet>(res, HttpStatus.OK, 'Cập nhật thành công')
         } catch (error) {
-            console.log(error);
+       
             throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
 
         }

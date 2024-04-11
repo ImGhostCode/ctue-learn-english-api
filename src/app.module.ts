@@ -19,9 +19,11 @@ import { PracticeModule } from './practice/practice.module';
 import { VocabularySetsModule } from './vocabulary-sets/vocabulary-sets.module';
 import { PronunciationAssessmentModule } from './pronunciation-assessment/pronunciation-assessment.module';
 import { LearnModule } from './learn/learn.module';
+import { NotificationModule } from './notification/notification.module';
+import { StatisticsModule } from './statistics/statistics.module';
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }), PrismaModule, AuthModule, UserModule, SentenceModule, WordModule, TypeModule, LevelModule, TopicModule, SpecializationModule, ContributionModule, IrregularVerbModule, FavoriteItemModule, CloudinaryModule, MailingModule, PracticeModule, VocabularySetsModule, PronunciationAssessmentModule, LearnModule]
+  imports: [ConfigModule.forRoot({ isGlobal: true }), PrismaModule, AuthModule, UserModule, SentenceModule, WordModule, TypeModule, LevelModule, TopicModule, SpecializationModule, ContributionModule, IrregularVerbModule, FavoriteItemModule, CloudinaryModule, MailingModule, PracticeModule, VocabularySetsModule, PronunciationAssessmentModule, LearnModule, NotificationModule, StatisticsModule]
 })
 export class AppModule {
   static port: number
