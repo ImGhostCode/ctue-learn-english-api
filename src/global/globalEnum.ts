@@ -68,3 +68,9 @@ export enum PRO_ASSESSMENT {
     NEED_TO_IMPROVE_THRESHOLD = 80,
     NUM_OF_SUGGESTS = 10
 }
+
+export enum STATISTICS_GROUPBY {
+    MONTH = 'month',
+    YEAR = 'year',
+    CUSTOM = 'custom'
+}
