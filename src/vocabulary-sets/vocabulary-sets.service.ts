@@ -178,7 +178,7 @@ export class VocabularySetsService {
                 where: whereCondition
             })
 
-                  const totalPages = totalCount == 0 ? 1 : Math.ceil(totalCount / pageSize)
+            const totalPages = totalCount == 0 ? 1 : Math.ceil(totalCount / pageSize)
             if (!page || page < 1) page = 1
             if (page > totalPages) page = totalPages
             let next = (page - 1) * pageSize
@@ -309,7 +309,7 @@ export class VocabularySetsService {
                 set: [],
                 connect: words.map(id => ({ id: Number(id) }))
             };
-            
+
 
             if (account.accountType === ACCOUNT_TYPES.USER) {
                 whereCondition.userId = account.userId
@@ -327,7 +327,7 @@ export class VocabularySetsService {
             })
             return new ResponseData<VocabularySet>(res, HttpStatus.OK, 'Cập nhật thành công')
         } catch (error) {
-       
+
             throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
 
         }
