@@ -243,6 +243,7 @@ model UserLearnedWord {
   memoryLevel                      Int
   createdAt                        DateTime           @default(now())
   updatedAt                        DateTime           @updatedAt
+  isDeleted                        Boolean            @default(false)
   userVocabularySetUserId          Int?
   userVocabularySetVocabularySetId Int?
   vocabularySetId                  Int
@@ -282,6 +283,7 @@ model UserVocabularySet {
   userId          Int
   vocabularySetId Int
   createdAt       DateTime          @default(now())
+  isDeleted       Boolean           @default(false)
   UserLearnedWord UserLearnedWord[]
   User            User              @relation(fields: [userId], references: [id])
   VocabularySet   VocabularySet     @relation(fields: [vocabularySetId], references: [id])
@@ -299,6 +301,7 @@ model ReviewReminder {
   userId          Int
   vocabularySetId Int
   updatedAt       DateTime      @default(now()) @updatedAt
+  isDeleted       Boolean       @default(false)
   User            User          @relation(fields: [userId], references: [id])
   VocabularySet   VocabularySet @relation(fields: [vocabularySetId], references: [id])
   words           Word[]        @relation("ReviewReminderToWord")

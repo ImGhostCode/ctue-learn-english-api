@@ -15,7 +15,8 @@ export class LearnService {
   async getStatistics(userId: number, setId?: number | undefined) {
     try {
       const whereCondition: any = {
-        userId
+        userId,
+        isDeleted: false
       }
 
       if (setId) whereCondition.vocabularySetId = setId
@@ -129,7 +130,9 @@ export class LearnService {
 
   async getUpcomingReminder(userId: number, setId?: number | undefined) {
     try {
-      const whereCondition: any = {}
+      const whereCondition: any = {
+        isDeleted: false
+      }
       whereCondition.userId = userId
       whereCondition.isDone = false
       if (setId) whereCondition.vocabularySetId = setId
@@ -178,6 +181,7 @@ export class LearnService {
       const isNotExistWord = await this.prismaService.userVocabularySet.findMany({
         where: {
           userId,
+          isDeleted: false,
           vocabularySetId,
           VocabularySet: {
             words: {
@@ -202,13 +206,17 @@ export class LearnService {
         wordId: id,
         vocabularySetId,
         userId,
-        memoryLevel: memoryLevels[index]
+        memoryLevel: memoryLevels[index],
+        isDeleted: false
       }));
 
 
       const transactionResult = await this.prismaService.$transaction([
         ...saveData.map(data =>
           this.prismaService.userLearnedWord.upsert({
+
+            create: data,
+            update: data,
             where: {
               userId_wordId_vocabularySetId: {
                 userId: data.userId,
@@ -216,8 +224,6 @@ export class LearnService {
                 vocabularySetId: data.vocabularySetId
               }
             },
-            update: data,
-            create: data
           })
         ),
       ]);
@@ -235,7 +241,9 @@ export class LearnService {
 
   async getUserLearnedWords(setId: number | undefined = undefined, userId: number) {
     try {
-      const whereCondition: any = {}
+      const whereCondition: any = {
+        isDeleted: false
+      }
       whereCondition.userId = userId
       if (setId) whereCondition.vocabularySetId = setId
 
