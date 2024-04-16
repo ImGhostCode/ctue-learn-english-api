@@ -25,7 +25,7 @@ export class VocabularySetsService {
             }
             let createdVocaSet: VocabularySet | null = null
             const data: any = {
-                title, userId, picture, isPublic: false, words: {
+                title, userId, isPublic: false, words: {
                     connect: words.map(id => ({ id }))
                 },
             }
@@ -63,7 +63,7 @@ export class VocabularySetsService {
     async downloadVocaSet(id: number, userId: number) {
         try {
             const result = await this.prismaService.$transaction(async (prisma) => {
-                const vocabularySet = await prisma.vocabularySet.findUnique({ where: { id } });
+                const vocabularySet = await prisma.vocabularySet.findUnique({ where: { id, isDeleted: false } });
 
                 if (!vocabularySet) {
                     throw new HttpException('Bộ từ không tồn tại', HttpStatus.NOT_FOUND);
@@ -77,6 +77,7 @@ export class VocabularySetsService {
                     where: {
                         userId,
                         vocabularySetId: id,
+                        isDeleted: false
                     },
                 });
 
@@ -178,7 +179,7 @@ export class VocabularySetsService {
                 where: whereCondition
             })
 
-                  const totalPages = totalCount == 0 ? 1 : Math.ceil(totalCount / pageSize)
+            const totalPages = totalCount == 0 ? 1 : Math.ceil(totalCount / pageSize)
             if (!page || page < 1) page = 1
             if (page > totalPages) page = totalPages
             let next = (page - 1) * pageSize
@@ -217,6 +218,7 @@ export class VocabularySetsService {
 
             const downloadedVocaSets: any = await this.prismaService.userVocabularySet.findMany({
                 where: {
+                    isDeleted: false,
                     userId: userId,
                     vocabularySetId: {
                         notIn: createdVocaSets.CreatedVocabularySet.map(set => set.id)
@@ -241,6 +243,7 @@ export class VocabularySetsService {
     async getAdminVocaSets() {
         return this.prismaService.vocabularySet.findMany({
             where: {
+                isDeleted: false,
                 User: {
                     Account: {
                         every: {
@@ -280,7 +283,8 @@ export class VocabularySetsService {
     }
     async update(id: number, updateVocaSetDto: UpdateVocaSetDto, newPictureFile: Express.Multer.File, account: Account) {
         try {
-            let { title, topicId = null, specId = null, words = [], picture = null, oldPicture = null, isPublic = false } = updateVocaSetDto
+
+            let { title, topicId = null, specId = null, words, oldWords, picture = null, oldPicture = null, isPublic = false } = updateVocaSetDto
             if (account.accountType === ACCOUNT_TYPES.USER) {
                 const isOwner = await this.prismaService.vocabularySet.findUnique({ where: { id, userId: account.userId, isDeleted: false } })
                 if (!isOwner) {
@@ -293,7 +297,7 @@ export class VocabularySetsService {
             const whereCondition: any = {
                 id: id,
             }
-            const data: any = {
+            const dataUpdate: any = {
                 title,
                 //  topicId,
                 //  specId,
@@ -303,33 +307,69 @@ export class VocabularySetsService {
                 //connect: words.map(id => ({ id: Number(id) }))
                 //}
             }
-            if (topicId) data.topicId = topicId;
-            if (specId) data.specId = specId;
-            if (words) data.words = {
-                set: [],
-                connect: words.map(id => ({ id: Number(id) }))
-            };
-            
+            if (topicId) dataUpdate.topicId = topicId;
+            if (specId) dataUpdate.specId = specId;
+            if (words) {
+                words = words.map(id => Number(id))
+                dataUpdate.words = {
+                    set: [],
+                    connect: words.map(id => ({ id: id }))
+                };
+
+            }
+
+            let deletedWords = []
+
+            if (words) {
+                oldWords = oldWords.map(id => Number(id))
+                deletedWords = oldWords.filter(id => !words.includes(id))
+            }
+
 
             if (account.accountType === ACCOUNT_TYPES.USER) {
                 whereCondition.userId = account.userId
 
             } else if (account.accountType === ACCOUNT_TYPES.ADMIN) {
-                data.isPublic = isPublic === 'true' ? true : false
+                dataUpdate.isPublic = isPublic === 'true' ? true : false
             }
 
-            const res = await this.prismaService.vocabularySet.update({
-                where: whereCondition, data: data, include: {
-                    Specialization: true
-                    , Topic: true,
-                    words: true
-                }
-            })
+            // how to get ids of review reminders to modify
+            const reviewReminderToWordRows = []
+            if (deletedWords.length > 0) {
+                const reviewReminderIds = await this.prismaService.reviewReminder.findMany({ where: { vocabularySetId: id, words: { some: { id: { in: deletedWords } } } }, select: { id: true } })
+                deletedWords.forEach(wordId => {
+                    reviewReminderIds.forEach(reminderId => {
+                        reviewReminderToWordRows.push(this.prismaService.$queryRaw`DELETE FROM "_ReviewReminderToWord" WHERE "A" = ${reminderId.id} AND "B" = ${wordId}`)
+                    })
+                })
+            }
+
+            const [res, res2, res3] = await this.prismaService.$transaction([
+                this.prismaService.vocabularySet.update({
+                    where: whereCondition,
+                    data: {
+                        ...dataUpdate,
+                    },
+                    include: {
+                        Specialization: true,
+                        Topic: true,
+                        words: true
+                    }
+                }),
+                this.prismaService.userLearnedWord.deleteMany({ where: { vocabularySetId: id, wordId: { in: deletedWords } } }),
+                ...(words.length === 0 ? [
+                    this.prismaService.reviewReminder.deleteMany({ where: { vocabularySetId: id } })
+                ] : reviewReminderToWordRows)
+            ])
+
+            // delete review reminders if no words in the review reminders
+            await this.prismaService.reviewReminder.deleteMany({ where: { vocabularySetId: id, words: { none: {} } } });
+
             return new ResponseData<VocabularySet>(res, HttpStatus.OK, 'Cập nhật thành công')
         } catch (error) {
-       
-            throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
+            console.log(error);
 
+            throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
     async remove(id: number) {
@@ -337,7 +377,14 @@ export class VocabularySetsService {
             const vocaSet = await this.findOne(id)
             if (!vocaSet) throw new HttpException('Bộ từ không tồn tại', HttpStatus.NOT_FOUND);
 
-            return new ResponseData<VocabularySet>(await this.prismaService.vocabularySet.delete({ where: { id: id } }), HttpStatus.OK, 'Xóa thành công')
+            const [deletedVocaSet] = await this.prismaService.$transaction([
+                this.prismaService.vocabularySet.delete({ where: { id: id } }),
+                this.prismaService.userVocabularySet.deleteMany({ where: { vocabularySetId: id } }),
+                this.prismaService.reviewReminder.deleteMany({ where: { vocabularySetId: id } }),
+                this.prismaService.userLearnedWord.deleteMany({ where: { vocabularySetId: id } })
+            ])
+
+            return new ResponseData<VocabularySet>(deletedVocaSet, HttpStatus.OK, 'Xóa thành công')
         } catch (error) {
             console.log(error);
             throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);

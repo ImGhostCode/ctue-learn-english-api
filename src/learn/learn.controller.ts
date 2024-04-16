@@ -32,8 +32,8 @@ export class LearnController {
   }
 
   @Get('upcoming-reminder')
-  getUpcomingReminder(@GetAccount() account: Account) {
-    return this.learnService.getUpcomingReminder(account.userId)
+  getUpcomingReminder(@GetAccount() account: Account, @Query('setId') setId?: number) {
+    return this.learnService.getUpcomingReminder(account.userId, setId)
   }
 
   @Get('statistics')

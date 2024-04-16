@@ -15,7 +15,8 @@ export class LearnService {
   async getStatistics(userId: number, setId?: number | undefined) {
     try {
       const whereCondition: any = {
-        userId
+        userId,
+        isDeleted: false
       }
 
       if (setId) whereCondition.vocabularySetId = setId
@@ -127,35 +128,21 @@ export class LearnService {
     }
   }
 
-  async getUpcomingReminder(userId: number) {
+  async getUpcomingReminder(userId: number, setId?: number | undefined) {
     try {
+      const whereCondition: any = {
+        isDeleted: false
+      }
+      whereCondition.userId = userId
+      whereCondition.isDone = false
+      if (setId) whereCondition.vocabularySetId = setId
+
       const res = await this.prismaService.reviewReminder.findMany({
-        where: {
-          userId,
-          isDone: false
-        },
+        where: whereCondition,
         include: {
           words: {
-            include: {
-              Level: {
-                select: {
-                  name: true
-                }
-              },
-              Specialization: {
-                select: {
-                  name: true
-                }
-              },
-              meanings: {
-              
-                select: {
-                typeId: true,
-                wordId: true,
-                meaning: true,
-                  Type: true
-                }
-              }
+            select: {
+              id: true,
             }
           }
         },
@@ -163,8 +150,17 @@ export class LearnService {
           reviewAt: 'asc'
         }
       })
+      const learnedWords = [];
+      if (res[0]) {
+        const results = await this.getUserLearnedWords(res[0].vocabularySetId, userId)
+        results.data.forEach(item => {
+          if (res[0].words.find(word => word.id === item.wordId)) {
+            learnedWords.push(item)
+          }
+        })
+      }
 
-      return new ResponseData<ReviewReminder | null>(res[0] ?? null, HttpStatus.OK, 'Lấy nhắc nhở thành công')
+      return new ResponseData<any | null>(res[0] ? { ...res[0], learnedWords } : null, HttpStatus.OK, 'Lấy nhắc nhở thành công')
     } catch (error) {
       console.log(error);
       throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
@@ -174,11 +170,18 @@ export class LearnService {
 
   async saveTheLearnedResult(saveTheLearnedResultDto: SaveTheLearnedResultDto, userId: number) {
     try {
-      const { wordIds, vocabularySetId, memoryLevels } = saveTheLearnedResultDto
+      const { wordIds, vocabularySetId, memoryLevels, reviewReminderId } = saveTheLearnedResultDto
+
+      memoryLevels.forEach(level => {
+        if (level < 1 || level > 6) {
+          throw new HttpException('Cấp độ nhớ phải nằm trong khoảng từ 1 đến 6', HttpStatus.BAD_REQUEST)
+        }
+      })
 
       const isNotExistWord = await this.prismaService.userVocabularySet.findMany({
         where: {
           userId,
+          isDeleted: false,
           vocabularySetId,
           VocabularySet: {
             words: {
@@ -197,16 +200,23 @@ export class LearnService {
         throw new HttpException('Không tồn tại từ này trong bộ', HttpStatus.NOT_FOUND)
       }
 
+
+
       const saveData = wordIds.map((id, index) => ({
         wordId: id,
         vocabularySetId,
         userId,
-        memoryLevel: memoryLevels[index]
+        memoryLevel: memoryLevels[index],
+        isDeleted: false
       }));
+
 
       const transactionResult = await this.prismaService.$transaction([
         ...saveData.map(data =>
           this.prismaService.userLearnedWord.upsert({
+
+            create: data,
+            update: data,
             where: {
               userId_wordId_vocabularySetId: {
                 userId: data.userId,
@@ -214,32 +224,47 @@ export class LearnService {
                 vocabularySetId: data.vocabularySetId
               }
             },
-            update: data,
-            create: data
           })
         ),
       ]);
+
+      if (reviewReminderId) {
+        await this.updateReminder(reviewReminderId, { isDone: true }, userId)
+      }
+
       return new ResponseData<any>({ results: transactionResult }, HttpStatus.CREATED, 'Lưu kết quả thành công')
     } catch (error) {
       console.log(error);
       throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
-
     }
   }
 
   async getUserLearnedWords(setId: number | undefined = undefined, userId: number) {
     try {
-      const whereCondition: any = {}
+      const whereCondition: any = {
+        isDeleted: false
+      }
       whereCondition.userId = userId
       if (setId) whereCondition.vocabularySetId = setId
 
       const res = await this.prismaService.userLearnedWord.findMany({
         where: whereCondition,
         include: {
-          Word: true
+          Word: {
+            include: {
+              Level: true,
+              Specialization: true,
+              Topic: true,
+              meanings: {
+                include: {
+                  Type: true
+                }
+              }
+            }
+          },
         }
       })
-      return new ResponseData<UserLearnedWord>(res, HttpStatus.OK, 'Tìm thành công')
+      return new ResponseData<UserLearnedWord[]>(res, HttpStatus.OK, 'Tìm thành công')
     } catch (error) {
       console.log(error);
       throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);

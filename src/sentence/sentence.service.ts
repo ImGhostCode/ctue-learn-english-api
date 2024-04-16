@@ -48,15 +48,15 @@ export class SentenceService {
             };
 
             if (topic) {
-                if (topic.length > 1) {
-                    whereClause.Topic = {
-                        some: { id: { in: topic.map(topic => Number(topic)) } }
-                    };
-                } else {
-                    whereClause.Topic = {
-                        some: { id: Number(topic) }
-                    };
-                }
+                // if (topic.length > 1) {
+                whereClause.Topic = {
+                    some: { id: { in: topic.map(topic => Number(topic)) } }
+                };
+                // } else {
+                //     whereClause.Topic = {
+                //         some: { id: Number(topic) }
+                //     };
+                // }
             }
 
             if (type) {

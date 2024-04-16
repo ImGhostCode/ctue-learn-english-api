@@ -5,53 +5,59 @@ import { VOCABULARY_SET } from "src/global";
 
 export class UpdateVocaSetDto {
 
-    @ApiProperty()
-    @IsString()
-    @IsNotEmpty()
-    @MaxLength(VOCABULARY_SET.TITLE_LEN)
-    title: string;
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(VOCABULARY_SET.TITLE_LEN)
+  title: string;
 
-    // @ApiProperty()
-    // @IsNumber()
-    // @IsOptional()
-    // userId?: number;
+  // @ApiProperty()
+  // @IsNumber()
+  // @IsOptional()
+  // userId?: number;
 
-    @ApiProperty()
-    @IsNumber()
-    @IsOptional()
-    topicId?: number;
+  @ApiProperty()
+  @IsNumber()
+  @IsOptional()
+  topicId?: number;
 
-    @ApiProperty()
-    @IsNumber()
-    @IsOptional()
-    specId?: number;
+  @ApiProperty()
+  @IsNumber()
+  @IsOptional()
+  specId?: number;
 
-    @ApiProperty()
-    @IsString()
-    @IsOptional()
-    oldPicture?: string;
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  oldPicture?: string;
 
-    @ApiProperty()
-    @IsString()
-    @IsOptional()
-    picture?: string;
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  picture?: string;
 
-    @ApiProperty()
-    @IsOptional()
-   //@IsBoolean()
-    // @IsBooleanString()
-    @IsString()
-   // @Transform(({ value }) => {
-   // console.log(value)
-    //    if (value === 'true') return true;
+  @ApiProperty()
+  @IsOptional()
+  //@IsBoolean()
+  // @IsBooleanString()
+  @IsString()
+  // @Transform(({ value }) => {
+  // console.log(value)
+  //    if (value === 'true') return true;
   //   if (value === 'false') return false;
-      // return value;
+  // return value;
   // })
-    isPublic?: string
+  isPublic?: string
 
-    @ApiProperty()
-    @IsArray()
-    @IsOptional()
-    @ArrayMaxSize(VOCABULARY_SET.MAX_WORDS)
-    words: number[]
+  @ApiProperty()
+  @IsArray()
+  @IsOptional()
+  @ArrayMaxSize(VOCABULARY_SET.MAX_WORDS)
+  words: number[]
+
+  @ApiProperty()
+  @IsArray()
+  @IsOptional()
+  @ArrayMaxSize(VOCABULARY_SET.MAX_WORDS)
+  oldWords: number[]
 }

@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { ArrayNotEmpty, IsArray, IsDate, IsNotEmpty, IsNumber } from "class-validator";
+import { ArrayNotEmpty, IsArray, IsDate, IsNotEmpty, IsNumber, IsOptional } from "class-validator";
 
 export class SaveTheLearnedResultDto {
     @ApiProperty()
@@ -19,4 +19,10 @@ export class SaveTheLearnedResultDto {
     @IsNotEmpty()
     @ArrayNotEmpty()
     memoryLevels: number[]
+
+    @ApiProperty()
+    @IsNumber()
+    @IsOptional()
+    // userVocabularySetId: number
+    reviewReminderId?: number
 }

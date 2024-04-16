@@ -14,7 +14,17 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
         })
 
         this.$use(async (params, next) => {
-            if (params.model == 'Contribution' || params.model == 'IrregularVerb' || params.model == 'Account' || params.model == 'Sentence' || params.model == 'User' || params.model == 'Word' || params.model == 'VocabularySet') {
+            if (params.model == 'Contribution' ||
+                params.model == 'IrregularVerb' ||
+                params.model == 'Account' ||
+                params.model == 'Sentence' ||
+                params.model == 'User' ||
+                params.model == 'Word' ||
+                params.model == 'VocabularySet' ||
+                params.model == 'ReviewReminder' ||
+                params.model == 'UserLearnedWord' ||
+                params.model == 'UserVocabularySet'
+            ) {
 
                 if (params.action == 'delete') {
                     // Delete queries

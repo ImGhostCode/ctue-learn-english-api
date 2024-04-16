@@ -59,7 +59,7 @@ export class WordService {
 
             return new ResponseData<Word>(word, HttpStatus.CREATED, 'Tạo từ thành công')
         } catch (error) {
-        console.log(error)
+            console.log(error)
             throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -70,12 +70,13 @@ export class WordService {
 
             let { sort, type, level, specialization, topic, page, key } = option
             let whereCondition: any = {
-                OR: [
-                    { content: { contains: key } },
-                    // { meanings: { some: { contains: key } } }
-                ],
+
                 isDeleted: false
             };
+            if (key) whereCondition.OR = [
+                { content: { contains: key } },
+                // { meanings: { some: { contains: key } } }
+            ]
             if (level) whereCondition.levelId = Number(level);
             if (specialization) whereCondition.specializationId = Number(specialization);
             if (type) {
@@ -90,15 +91,9 @@ export class WordService {
                 }
             }
             if (topic) {
-                if (topic.length > 1) {
-                    whereCondition.Topic = {
-                        some: { id: { in: topic.map(topic => Number(topic)) } }
-                    };
-                } else {
-                    whereCondition.Topic = {
-                        some: { id: Number(topic) }
-                    };
-                }
+                whereCondition.Topic = {
+                    some: { id: { in: topic.map(topic => Number(topic)) } }
+                };
             }
 
             const totalCount = await this.prismaService.word.count({
