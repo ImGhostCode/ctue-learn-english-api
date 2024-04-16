@@ -20,7 +20,10 @@ export class AuthService {
 
             const newUser = await this.prismaService.user.create({
                 data: {
-                    name: registerDto.name
+                    name: registerDto.name,
+                    interestTopics: {
+                        connect: registerDto.interestTopics?.map((id) => ({ id }))
+                    }
                 }
             })
             if (!newUser) throw new HttpException('Tạo tài khoản thất bại, thử lại', HttpStatus.BAD_REQUEST);

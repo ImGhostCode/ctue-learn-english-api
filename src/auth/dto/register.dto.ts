@@ -1,6 +1,8 @@
 import {
+  IsArray,
   IsEmail,
   IsNotEmpty,
+  IsOptional,
   IsString,
   MaxLength,
   MinLength,
@@ -26,4 +28,9 @@ export class RegisterDto {
   @MinLength(CONSTANTS_MIN.PASSWORD_LEN)
   @IsNotEmpty()
   password: string;
+
+  @ApiProperty()
+  @IsArray()
+  @IsOptional()
+  interestTopics?: number[];
 }

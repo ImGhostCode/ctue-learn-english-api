@@ -29,7 +29,7 @@ export class UserService {
                     isDeleted: false
                 }
             })
-                  const totalPages = totalCount == 0 ? 1 : Math.ceil(totalCount / pageSize)
+            const totalPages = totalCount == 0 ? 1 : Math.ceil(totalCount / pageSize)
             if (!page || page < 1) page = 1
             if (page > totalPages) page = totalPages
             let next = (page - 1) * pageSize
@@ -83,7 +83,7 @@ export class UserService {
 
     async updateProfile(id: number, updateProfileDto: UpdateProfileDto, avt: Express.Multer.File) {
         try {
-            const data: { name?: string, avt?: string } = { ...updateProfileDto }
+            const data: { name?: string, avt?: string, interestTopics?: number[] } = { ...updateProfileDto }
 
             const account = await this.prismaService.account.findFirst({
                 where: { userId: id, isDeleted: false }
@@ -97,13 +97,17 @@ export class UserService {
             const dataUpdate: any = {}
             if (data.name) dataUpdate.name = data.name
             if (data.avt) dataUpdate.avt = data.avt
+            if (data.interestTopics) dataUpdate.interestTopics = { set: [], connect: data.interestTopics.map((id) => ({ id: Number(id) })) }
 
             const result = await this.prismaService.user.update({
                 where: { id: id },
-                data: dataUpdate
+                data: dataUpdate,
+                include: {interestTopics: true}
             })
             return new ResponseData<any>(result, HttpStatus.OK, 'Cập nhật thông tin thành công')
         } catch (error) {
+            console.log(error);
+
             throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

@@ -23,6 +23,7 @@ model User {
   updatedAt                DateTime                  @updatedAt
   isDeleted                Boolean                   @default(false)
   fcmToken                 String?
+  interestTopics           Topic[]
   FavoriteList             FavoriteItem[]
   Notification             Notification[]
   Account                  Account[]
@@ -146,6 +147,7 @@ model Topic {
   Practice      Practice[]      @relation("PracticeToTopic")
   Sentence      Sentence[]      @relation("SentenceToTopic")
   Word          Word[]          @relation("TopicToWord")
+  User          User[]
 
   @@map("topics")
 }
