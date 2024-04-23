@@ -11,6 +11,7 @@ import {
   UploadedFile,
   UseGuards,
   UseInterceptors,
+  Version,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { GetAccount, Roles } from '../auth/decorator';
@@ -35,6 +36,7 @@ export class UserController {
   @UseGuards(MyJWTGuard, RolesGuard)
   @Roles(ACCOUNT_TYPES.USER, ACCOUNT_TYPES.ADMIN)
   @Get('me')
+  @Version('1')
   getMe(@GetAccount() account: Account) {
     return this.userService.getUser(account);
   }
@@ -42,13 +44,15 @@ export class UserController {
   @UseGuards(MyJWTGuard, RolesGuard)
   @Roles(ACCOUNT_TYPES.ADMIN)
   @Get()
-  getAllUsers(@Query() option: { page: number }) {
+  @Version('1')
+  getAllUsers(@Query() option: { page: number, name: string, isBanned: boolean }) {
     return this.userService.getAllUsers(option);
   }
 
   @UseGuards(MyJWTGuard, RolesGuard)
   @Roles(ACCOUNT_TYPES.ADMIN)
   @Patch('toggle-ban/:id')
+  @Version('1')
   toggleBanUser(
     @Param('id', ParseIntPipe) id: number,
     @Body() toggleBanUserDto: ToggleBanUserDto,
@@ -60,6 +64,7 @@ export class UserController {
   @Roles(ACCOUNT_TYPES.USER, ACCOUNT_TYPES.ADMIN)
   @UseInterceptors(FileInterceptor('avt'))
   @Patch(':id')
+  @Version('1')
   updateProfile(
     @Param('id', ParseIntPipe) id: number,
     @GetAccount() account: Account,
@@ -78,6 +83,7 @@ export class UserController {
   @UseGuards(MyJWTGuard, RolesGuard)
   @Roles(ACCOUNT_TYPES.USER, ACCOUNT_TYPES.ADMIN)
   @Patch('update-password/:id')
+  @Version('1')
   updatePassword(
     @Param('id', ParseIntPipe) id: number,
     @GetAccount() account: Account,
@@ -91,17 +97,29 @@ export class UserController {
   @UseGuards(MyJWTGuard, RolesGuard)
   @Roles(ACCOUNT_TYPES.ADMIN)
   @Delete(':id')
+  @Version('1')
   deleteUser(@Param('id', ParseIntPipe) id: number) {
     return this.userService.deleteUser(id);
   }
 
   @Patch('reset/password')
+  @Version('1')
   resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
     return this.userService.resetPassword(resetPasswordDto);
   }
 
   @Post('verify-code')
+  @Version('1')
   sendVerifyCode(@Body() verifyCodeDto: VerifyCodeDto) {
     return this.userService.sendVerifyCode(verifyCodeDto);
+  }
+
+
+  @UseGuards(MyJWTGuard, RolesGuard)
+  @Roles(ACCOUNT_TYPES.ADMIN)
+  @Get(':id')
+  @Version('1')
+  getAccountDetailByAdmin(@Param('id', ParseIntPipe) id: number,) {
+    return this.userService.getAccountDetailByAdmin(id);
   }
 }

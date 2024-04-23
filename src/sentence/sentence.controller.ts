@@ -9,6 +9,7 @@ import {
   Post,
   Query,
   UseGuards,
+  Version,
 } from '@nestjs/common';
 import { SentenceService } from './sentence.service';
 import { CreateSentenceDto, UpdateSentenceDto } from './dto';
@@ -18,11 +19,12 @@ import { ACCOUNT_TYPES } from '../global';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Sentence')
-@Controller('sentence')
+@Controller('sentences')
 export class SentenceController {
-  constructor(private sentenceService: SentenceService) {}
+  constructor(private sentenceService: SentenceService) { }
 
   @Post()
+  @Version('1')
   @UseGuards(MyJWTGuard, RolesGuard)
   @Roles(ACCOUNT_TYPES.ADMIN)
   create(@Body() createSentenceDto: CreateSentenceDto) {
@@ -30,18 +32,21 @@ export class SentenceController {
   }
 
   @Get()
+  @Version('1')
   findAll(
-    @Query() option: { topic: []; type: number; page: number; sort: any },
+    @Query() option: { topic: []; type: number; page: number; sort: any, key?: string },
   ) {
     return this.sentenceService.findAll(option);
   }
 
   @Get(':id')
+  @Version('1')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.sentenceService.findOne(id);
   }
 
   @Patch(':id')
+  @Version('1')
   @UseGuards(MyJWTGuard, RolesGuard)
   @Roles(ACCOUNT_TYPES.ADMIN)
   update(
@@ -52,6 +57,7 @@ export class SentenceController {
   }
 
   @Delete(':id')
+  @Version('1')
   @UseGuards(MyJWTGuard, RolesGuard)
   @Roles(ACCOUNT_TYPES.ADMIN)
   remove(@Param('id', ParseIntPipe) id: number) {

@@ -40,7 +40,7 @@ export class AuthService {
             })
             if (!newAccount) throw new HttpException('Tạo tài khoản thất bại, thử lại', HttpStatus.BAD_REQUEST);
 
-            await this.prismaService.favoriteItem.create({ data: { userId: newUser.id } })
+            // await this.prismaService.favorite.create({ data: { userId: newUser.id } })
             delete newAccount.password
             delete newUser.id
             const data = { ...newAccount }
@@ -61,9 +61,7 @@ export class AuthService {
             // if (!passwordMatched) return new ResponseData<string>(null, HttpStatus.BAD_REQUEST, 'Mật khẩu không chính xác')
             if (!passwordMatched) throw new HttpException('Mật khẩu không chính xác', HttpStatus.BAD_REQUEST);
 
-            if (account.isBan) return new ResponseData<any>({ feedback: account.feedback }, HttpStatus.FORBIDDEN, 'Tài khoản đã bị khóa')
-
-            const test = await this.prismaService.user.update({ where: { id: account.userId }, data: { fcmToken: loginDto.fcmToken } })
+            if (account.isBanned) return new ResponseData<any>({ feedback: account.feedback }, HttpStatus.FORBIDDEN, 'Tài khoản đã bị khóa')
 
             const data = await this.signJwtToken(account.userId, account.email)
 

@@ -1,13 +1,13 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { ArrayMaxSize, IsArray, IsBoolean, IsNotEmpty, IsNumber, IsOptional, IsString, Max, MaxLength } from "class-validator";
-import { VOCABULARY_SET } from "src/global";
+import { VOCABULARY_PACK } from "src/global";
 
-export class CreateVocaSetDto {
+export class CreateVocabPackDto {
 
     @ApiProperty()
     @IsString()
     @IsNotEmpty()
-    @MaxLength(VOCABULARY_SET.TITLE_LEN)
+    @MaxLength(VOCABULARY_PACK.TITLE_LEN)
     title: string;
 
     // @ApiProperty()
@@ -38,6 +38,6 @@ export class CreateVocaSetDto {
     @ApiProperty()
     @IsArray()
     @IsOptional()
-    @ArrayMaxSize(VOCABULARY_SET.MAX_WORDS)
+    @ArrayMaxSize(VOCABULARY_PACK.MAX_WORDS)
     words: number[]
 }

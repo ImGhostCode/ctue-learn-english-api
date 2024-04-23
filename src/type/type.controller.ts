@@ -9,6 +9,8 @@ import {
   ParseIntPipe,
   ParseBoolPipe,
   UseGuards,
+  Version,
+  Query,
 } from '@nestjs/common';
 import { TypeService } from './type.service';
 import { CreateTypeDto, UpdateTypeDto } from './dto';
@@ -18,23 +20,26 @@ import { ACCOUNT_TYPES } from '../global';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Type')
-@Controller('type')
+@Controller('types')
 export class TypeController {
-  constructor(private readonly typeService: TypeService) {}
+  constructor(private readonly typeService: TypeService) { }
 
   @Post()
+  @Version('1')
   @UseGuards(MyJWTGuard, RolesGuard)
   @Roles(ACCOUNT_TYPES.ADMIN)
   create(@Body() createTypeDto: CreateTypeDto) {
     return this.typeService.create(createTypeDto);
   }
 
-  @Get(':isword')
-  findAll(@Param('isword', ParseBoolPipe) isWord: boolean) {
+  @Get('')
+  @Version('1')
+  findAll(@Query('isWord', ParseBoolPipe) isWord: boolean) {
     return this.typeService.findAll(isWord);
   }
 
   @Patch(':id')
+  @Version('1')
   @UseGuards(MyJWTGuard, RolesGuard)
   @Roles(ACCOUNT_TYPES.ADMIN)
   update(
@@ -45,6 +50,7 @@ export class TypeController {
   }
 
   @Delete(':id')
+  @Version('1')
   @UseGuards(MyJWTGuard, RolesGuard)
   @Roles(ACCOUNT_TYPES.ADMIN)
   remove(@Param('id', ParseIntPipe) id: number) {

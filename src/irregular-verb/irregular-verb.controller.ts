@@ -9,6 +9,7 @@ import {
   ParseIntPipe,
   UseGuards,
   Query,
+  Version,
 } from '@nestjs/common';
 import { IrregularVerbService } from './irregular-verb.service';
 import { CreateIrregularVerbDto, UpdateIrregularVerbDto } from './dto';
@@ -18,11 +19,12 @@ import { ACCOUNT_TYPES } from '../global';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Irregular Verb')
-@Controller('irregular-verb')
+@Controller('irregular-verbs')
 export class IrregularVerbController {
-  constructor(private irregularVerbService: IrregularVerbService) {}
+  constructor(private irregularVerbService: IrregularVerbService) { }
 
   @Post()
+  @Version('1')
   @UseGuards(MyJWTGuard, RolesGuard)
   @Roles(ACCOUNT_TYPES.ADMIN)
   create(@Body() createIrregularVerbDto: CreateIrregularVerbDto) {
@@ -30,16 +32,19 @@ export class IrregularVerbController {
   }
 
   @Get()
+  @Version('1')
   findAll(@Query() option: { page: number; sort: any; key: string }) {
     return this.irregularVerbService.findAll(option);
   }
 
   @Get(':id')
+  @Version('1')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.irregularVerbService.findOne(id);
   }
 
   @Patch(':id')
+  @Version('1')
   @UseGuards(MyJWTGuard, RolesGuard)
   @Roles(ACCOUNT_TYPES.ADMIN)
   update(

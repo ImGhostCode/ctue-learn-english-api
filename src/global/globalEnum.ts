@@ -58,7 +58,7 @@ export enum CONTRIBUTION {
     SENTENCE = 'sentence'
 }
 
-export enum VOCABULARY_SET {
+export enum VOCABULARY_PACK {
     MAX_WORDS = 100,
     TITLE_LEN = 100
 

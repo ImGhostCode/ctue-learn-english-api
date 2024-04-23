@@ -74,8 +74,8 @@ export class WordService {
                 isDeleted: false
             };
             if (key) whereCondition.OR = [
-                { content: { contains: key } },
-                // { meanings: { some: { contains: key } } }
+                { content: { contains: key, mode: 'insensitive' } },
+               // { meanings: { some: { contains: key, mode: 'insensitive' } }}
             ]
             if (level) whereCondition.levelId = Number(level);
             if (specialization) whereCondition.specializationId = Number(specialization);
@@ -345,7 +345,7 @@ export class WordService {
                 where: {
                     OR: [
                         {
-                            content: { contains: key }
+                            content: { contains: key, mode: 'insensitive' }
                         },
                         // {
                         //     mean: { contains: key }

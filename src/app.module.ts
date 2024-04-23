@@ -11,19 +11,19 @@ import { TopicModule } from './topic/topic.module';
 import { SpecializationModule } from './specialization/specialization.module';
 import { ContributionModule } from './contribution/contribution.module';
 import { IrregularVerbModule } from './irregular-verb/irregular-verb.module';
-import { FavoriteItemModule } from './favorite-item/favorite-item.module';
+import { FavoriteModule } from './favorite/favorite.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { MailingModule } from './mailing/mailing.module';
 import { PracticeModule } from './practice/practice.module';
 
-import { VocabularySetsModule } from './vocabulary-sets/vocabulary-sets.module';
+import { VocabularyPackModule } from './vocabulary-pack/vocabulary-pack.module';
 import { PronunciationAssessmentModule } from './pronunciation-assessment/pronunciation-assessment.module';
 import { LearnModule } from './learn/learn.module';
 import { NotificationModule } from './notification/notification.module';
 import { StatisticsModule } from './statistics/statistics.module';
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }), PrismaModule, AuthModule, UserModule, SentenceModule, WordModule, TypeModule, LevelModule, TopicModule, SpecializationModule, ContributionModule, IrregularVerbModule, FavoriteItemModule, CloudinaryModule, MailingModule, PracticeModule, VocabularySetsModule, PronunciationAssessmentModule, LearnModule, NotificationModule, StatisticsModule]
+  imports: [ConfigModule.forRoot({ isGlobal: true }), PrismaModule, AuthModule, UserModule, SentenceModule, WordModule, TypeModule, LevelModule, TopicModule, SpecializationModule, ContributionModule, IrregularVerbModule, FavoriteModule, CloudinaryModule, MailingModule, PracticeModule, VocabularyPackModule, PronunciationAssessmentModule, LearnModule, NotificationModule, StatisticsModule]
 })
 export class AppModule {
   static port: number

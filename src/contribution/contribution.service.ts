@@ -1,8 +1,8 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateSenContributionDto, CreateWordContributionDto } from './dto';
 import { PrismaService } from '../prisma/prisma.service';
-import { CONSTANTS_MAX, CONTRIBUTION, PAGE_SIZE, ResponseData } from '../global';
-import { Account, Contribution, Sentence, Word } from '@prisma/client';
+import { CONTRIBUTION, PAGE_SIZE, ResponseData } from '../global';
+import { Account, Contribution } from '@prisma/client';
 import { WordService } from '../word/word.service';
 import { SentenceService } from '../sentence/sentence.service';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
@@ -63,12 +63,12 @@ export class ContributionService {
 
     try {
       let { page,
-        // type,
-        // status
+         type,
+         status
       } = option
       const totalCount = await this.prismaService.contribution.count({
         where: {
-          // type, status: Number(status),
+           type, status: Number(status),
           isDeleted: false
         }
       })
@@ -80,7 +80,7 @@ export class ContributionService {
         skip: next,
         take: pageSize,
         where: {
-          // type, status: Number(status),
+           type, status: Number(status),
           isDeleted: false
         }, include: {
           User: true

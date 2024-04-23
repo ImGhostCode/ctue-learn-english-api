@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { CONTRIBUTION, ResponseData, STATISTICS_GROUPBY } from 'src/global';
+import { CONTRIBUTION, ResponseData } from 'src/global';
 import { PrismaService } from 'src/prisma/prisma.service'; // Nhớ import PrismaService
 
 @Injectable()
@@ -21,7 +21,7 @@ export class StatisticsService {
                 }
             });
             const activeUsers = await this.prisma.account.count({ where: { isDeleted: false, createdAt: selectedTime } });
-            const bannedUsers = await this.prisma.account.count({ where: { isBan: true, createdAt: selectedTime } });
+            const bannedUsers = await this.prisma.account.count({ where: { isBanned: true, createdAt: selectedTime } });
             const deletedUsers = await this.prisma.account.count({ where: { isDeleted: true, createdAt: selectedTime } });
 
 
@@ -243,34 +243,34 @@ export class StatisticsService {
     }
 
     // Hàm thống kê từ, câu, bộ từ
-    async getVocaSetStatistics(startDate: string, endDate: string) {
+    async getVocabPackStatistics(startDate: string, endDate: string) {
         try {
             const selectedTime: any = {};
             if (startDate) selectedTime.gte = new Date(startDate);
             if (endDate) selectedTime.lte = new Date(endDate);
 
-            const [totalCount, totalPublic, totalPrivate, vocabularySetstatsBySpec, vocabularySetstatsByTopic] = await Promise.all([
-                this.prisma.vocabularySet.count({
+            const [totalCount, totalPublic, totalPrivate, vocabularyPackstatsBySpec, vocabularyPackstatsByTopic] = await Promise.all([
+                this.prisma.vocabularyPack.count({
                     where: {
                         isDeleted: false,
                         createdAt: selectedTime,
                     },
                 }),
-                this.prisma.vocabularySet.count({
+                this.prisma.vocabularyPack.count({
                     where: {
                         isPublic: true,
                         isDeleted: false,
                         createdAt: selectedTime,
                     },
                 }),
-                this.prisma.vocabularySet.count({
+                this.prisma.vocabularyPack.count({
                     where: {
                         isPublic: false,
                         isDeleted: false,
                         createdAt: selectedTime,
                     },
                 }),
-                this.prisma.vocabularySet.groupBy({
+                this.prisma.vocabularyPack.groupBy({
                     by: ['specId'],
                     where: {
                         isDeleted: false,
@@ -280,7 +280,7 @@ export class StatisticsService {
                         _all: true,
                     },
                 }),
-                this.prisma.vocabularySet.groupBy({
+                this.prisma.vocabularyPack.groupBy({
                     by: ['topicId'],
                     where: {
                         isDeleted: false,
@@ -300,12 +300,12 @@ export class StatisticsService {
                 total: totalCount,
                 totalPublic: totalPublic,
                 totalPrivate: totalPrivate,
-                bySpecialization: vocabularySetstatsBySpec
+                bySpecialization: vocabularyPackstatsBySpec
                     .map(item => ({
                         specializationName: specializations.find(s => s.id === item.specId)?.name ?? 'Chưa xác định',
                         count: item._count._all,
                     })),
-                byTopic: vocabularySetstatsByTopic.map(item => ({
+                byTopic: vocabularyPackstatsByTopic.map(item => ({
                     topicName: topics.find(s => s.id === item.topicId)?.name ?? 'Chưa xác định',
                     count: item._count._all,
                 })),

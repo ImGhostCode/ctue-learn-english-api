@@ -10,25 +10,26 @@ import {
   Query,
   UseGuards,
   UseInterceptors,
-  UploadedFile,
   UploadedFiles,
+  Version,
 } from '@nestjs/common';
 import { ContributionService } from './contribution.service';
 import { CreateSenContributionDto, CreateWordContributionDto } from './dto';
 import { GetAccount, Roles } from '../auth/decorator';
 import { Account } from '@prisma/client';
 import { MyJWTGuard, RolesGuard } from '../auth/guard';
-import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { ACCOUNT_TYPES } from '../global';
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Contribution')
 @UseGuards(MyJWTGuard, RolesGuard)
-@Controller('contribution')
+@Controller('contributions')
 export class ContributionController {
   constructor(private readonly contributionService: ContributionService) { }
 
   @Post('word')
+  @Version('1')
   @ApiConsumes('multipart/form-data')
   @Roles(ACCOUNT_TYPES.USER, ACCOUNT_TYPES.ADMIN)
   @UseInterceptors(FilesInterceptor('pictures'))
@@ -45,6 +46,7 @@ export class ContributionController {
   }
 
   @Post('sentence')
+  @Version('1')
   @Roles(ACCOUNT_TYPES.USER, ACCOUNT_TYPES.ADMIN)
   createSenContribution(
     @Body() createSenConDto: CreateSenContributionDto,
@@ -58,23 +60,27 @@ export class ContributionController {
 
   @Get()
   @Roles(ACCOUNT_TYPES.ADMIN)
+  @Version('1')
   findAll(@Query() option: { page: number, type: string, status: number }) {
     return this.contributionService.findAll(option);
   }
 
   @Get('user/:id')
+  @Version('1')
   @Roles(ACCOUNT_TYPES.USER, ACCOUNT_TYPES.ADMIN)
   findAllByUser(@Query() option: { type: string, page: number }, @Param('id', ParseIntPipe) id: number) {
     return this.contributionService.findAllByUser(option, id);
   }
 
   @Get(':id')
+  @Version('1')
   @Roles(ACCOUNT_TYPES.ADMIN)
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.contributionService.findOne(id);
   }
 
   @Patch('verify/word/:id')
+  @Version('1')
   @Roles(ACCOUNT_TYPES.ADMIN)
   verifyWordContribution(
     @Param('id', ParseIntPipe) id: number,
@@ -84,6 +90,7 @@ export class ContributionController {
   }
 
   @Patch('verify/sentence/:id')
+  @Version('1')
   @Roles(ACCOUNT_TYPES.ADMIN)
   verifySenContribution(
     @Param('id', ParseIntPipe) id: number,
@@ -93,6 +100,7 @@ export class ContributionController {
   }
 
   @Delete(':id')
+  @Version('1')
   @Roles(ACCOUNT_TYPES.ADMIN)
   remove(
     @Param('id', ParseIntPipe) id: number,
@@ -100,8 +108,6 @@ export class ContributionController {
   ) {
     return this.contributionService.remove(id, account);
   }
-
-
 }
 
 

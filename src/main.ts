@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, VersioningType } from '@nestjs/common';
 import {
   SwaggerModule,
   DocumentBuilder,
@@ -18,6 +18,9 @@ async function bootstrap() {
     credential: credential.cert(serviceAccount),
   });
 
+  app.enableVersioning({
+    type: VersioningType.URI, // Choose your preferred type
+  });
 
   app.enableCors();
   app.useGlobalPipes(
@@ -26,9 +29,9 @@ async function bootstrap() {
       transformOptions: { enableImplicitConversion: true },
     }),
   );
-  app.setGlobalPrefix('apis');
+  app.setGlobalPrefix('api');
   const config = new DocumentBuilder()
-    .setTitle('CTUe API')
+    .setTitle('CTUE API')
     .setDescription('A server built with Nestjs, Postgresql, Docker')
     .setVersion('1.0')
     .build();
@@ -37,7 +40,7 @@ async function bootstrap() {
     operationIdFactory: (controllerKey: string, methodKey: string) => methodKey,
   };
   const document = SwaggerModule.createDocument(app, config, options);
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('api-swagger', app, document);
 
   await app.listen(AppModule.port || 8888);
 }

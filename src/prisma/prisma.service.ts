@@ -20,10 +20,10 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
                 params.model == 'Sentence' ||
                 params.model == 'User' ||
                 params.model == 'Word' ||
-                params.model == 'VocabularySet' ||
+                params.model == 'VocabularyPack' ||
                 params.model == 'ReviewReminder' ||
                 params.model == 'UserLearnedWord' ||
-                params.model == 'UserVocabularySet'
+                params.model == 'UserVocabularyPack'
             ) {
 
                 if (params.action == 'delete') {

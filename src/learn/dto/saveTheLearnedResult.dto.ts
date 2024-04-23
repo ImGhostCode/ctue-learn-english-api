@@ -11,8 +11,8 @@ export class SaveTheLearnedResultDto {
     @ApiProperty()
     @IsNumber()
     @IsNotEmpty()
-    // userVocabularySetId: number
-    vocabularySetId: number
+    // userVocabularyPackId: number
+    vocabularyPackId: number
 
     @ApiProperty()
     @IsArray()
@@ -23,6 +23,6 @@ export class SaveTheLearnedResultDto {
     @ApiProperty()
     @IsNumber()
     @IsOptional()
-    // userVocabularySetId: number
+    // userVocabularyPackId: number
     reviewReminderId?: number
 }

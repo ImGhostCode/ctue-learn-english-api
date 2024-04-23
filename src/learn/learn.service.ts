@@ -5,21 +5,21 @@ import { CreateReviewReminderDto } from './dto/createReviewReminder.dto';
 import { PrismaService } from 'nestjs-prisma';
 import { SaveTheLearnedResultDto } from './dto/saveTheLearnedResult.dto';
 import { ResponseData } from 'src/global';
-import { ReviewReminder, UserLearnedWord } from '@prisma/client';
+import { UserLearnedWord } from '@prisma/client';
 import { UpdateReviewReminderDto } from './dto/update-reminder.dto';
 
 @Injectable()
 export class LearnService {
   constructor(private readonly prismaService: PrismaService) { }
 
-  async getStatistics(userId: number, setId?: number | undefined) {
+  async getStatistics(userId: number, packId?: number | undefined) {
     try {
       const whereCondition: any = {
         userId,
         isDeleted: false
       }
 
-      if (setId) whereCondition.vocabularySetId = setId
+      if (packId) whereCondition.vocabularyPackId = packId
 
       const res = await this.prismaService.userLearnedWord.findMany({
         where: whereCondition,
@@ -63,7 +63,7 @@ export class LearnService {
 
   async createReivewReminder(createReviewReminderDto: CreateReviewReminderDto, userId: number) {
     try {
-      const { vocabularySetId, data } = createReviewReminderDto
+      const { vocabularyPackId, data } = createReviewReminderDto
       const groupedReminders = {}
 
       data.forEach(item => {
@@ -74,7 +74,7 @@ export class LearnService {
         if (!groupedReminders[time]) {
           groupedReminders[time] = {
             userId,
-            vocabularySetId,
+            vocabularyPackId,
             isDone: false,
             reviewAt: item.reviewAt,
             words: {
@@ -95,7 +95,7 @@ export class LearnService {
           this.prismaService.reviewReminder.create({
             data: {
               userId,
-              vocabularySetId,
+              vocabularyPackId,
               isDone: false,
               reviewAt: data.reviewAt,
               words: data.words
@@ -128,14 +128,14 @@ export class LearnService {
     }
   }
 
-  async getUpcomingReminder(userId: number, setId?: number | undefined) {
+  async getUpcomingReminder(userId: number, packId?: number | undefined) {
     try {
       const whereCondition: any = {
         isDeleted: false
       }
       whereCondition.userId = userId
       whereCondition.isDone = false
-      if (setId) whereCondition.vocabularySetId = setId
+      if (packId) whereCondition.vocabularyPackId = packId
 
       const res = await this.prismaService.reviewReminder.findMany({
         where: whereCondition,
@@ -152,7 +152,7 @@ export class LearnService {
       })
       const learnedWords = [];
       if (res[0]) {
-        const results = await this.getUserLearnedWords(res[0].vocabularySetId, userId)
+        const results = await this.getUserLearnedWords(res[0].vocabularyPackId, userId)
         results.data.forEach(item => {
           if (res[0].words.find(word => word.id === item.wordId)) {
             learnedWords.push(item)
@@ -170,7 +170,7 @@ export class LearnService {
 
   async saveTheLearnedResult(saveTheLearnedResultDto: SaveTheLearnedResultDto, userId: number) {
     try {
-      const { wordIds, vocabularySetId, memoryLevels, reviewReminderId } = saveTheLearnedResultDto
+      const { wordIds, vocabularyPackId, memoryLevels, reviewReminderId } = saveTheLearnedResultDto
 
       memoryLevels.forEach(level => {
         if (level < 1 || level > 6) {
@@ -178,12 +178,12 @@ export class LearnService {
         }
       })
 
-      const isNotExistWord = await this.prismaService.userVocabularySet.findMany({
+      const isNotExistWord = await this.prismaService.userVocabularyPack.findMany({
         where: {
           userId,
           isDeleted: false,
-          vocabularySetId,
-          VocabularySet: {
+          vocabularyPackId,
+          VocabularyPack: {
             words: {
               some: {
                 id: {
@@ -204,7 +204,7 @@ export class LearnService {
 
       const saveData = wordIds.map((id, index) => ({
         wordId: id,
-        vocabularySetId,
+        vocabularyPackId,
         userId,
         memoryLevel: memoryLevels[index],
         isDeleted: false
@@ -218,10 +218,10 @@ export class LearnService {
             create: data,
             update: data,
             where: {
-              userId_wordId_vocabularySetId: {
+              userId_wordId_vocabularyPackId: {
                 userId: data.userId,
                 wordId: data.wordId,
-                vocabularySetId: data.vocabularySetId
+                vocabularyPackId: data.vocabularyPackId
               }
             },
           })
@@ -239,13 +239,13 @@ export class LearnService {
     }
   }
 
-  async getUserLearnedWords(setId: number | undefined = undefined, userId: number) {
+  async getUserLearnedWords(packId: number | undefined = undefined, userId: number) {
     try {
       const whereCondition: any = {
         isDeleted: false
       }
       whereCondition.userId = userId
-      if (setId) whereCondition.vocabularySetId = setId
+      if (packId) whereCondition.vocabularyPackId = packId
 
       const res = await this.prismaService.userLearnedWord.findMany({
         where: whereCondition,

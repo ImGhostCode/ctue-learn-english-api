@@ -1,14 +1,14 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Transform } from "class-transformer";
 import { ArrayMaxSize, IsArray, IsBoolean, IsBooleanString, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength } from "class-validator";
-import { VOCABULARY_SET } from "src/global";
+import { VOCABULARY_PACK } from "src/global";
 
-export class UpdateVocaSetDto {
+export class UpdateVocabPackDto {
 
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  @MaxLength(VOCABULARY_SET.TITLE_LEN)
+  @MaxLength(VOCABULARY_PACK.TITLE_LEN)
   title: string;
 
   // @ApiProperty()
@@ -52,12 +52,12 @@ export class UpdateVocaSetDto {
   @ApiProperty()
   @IsArray()
   @IsOptional()
-  @ArrayMaxSize(VOCABULARY_SET.MAX_WORDS)
+  @ArrayMaxSize(VOCABULARY_PACK.MAX_WORDS)
   words: number[]
 
   @ApiProperty()
   @IsArray()
   @IsOptional()
-  @ArrayMaxSize(VOCABULARY_SET.MAX_WORDS)
+  @ArrayMaxSize(VOCABULARY_PACK.MAX_WORDS)
   oldWords: number[]
 }

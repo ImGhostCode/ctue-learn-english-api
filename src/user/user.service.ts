@@ -9,6 +9,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class UserService {
+
     constructor(private prismaService: PrismaService, private cloudinaryService: CloudinaryService, private mailerService: MailerService) { }
 
     async getUser(account: Account) {
@@ -19,14 +20,35 @@ export class UserService {
         }
     }
 
-    async getAllUsers(option: { page: number }) {
+    async getAccountDetailByAdmin(id: number) {
+        try {
+            const account = await this.prismaService.account.findFirst({
+                where: { userId: id }, include: {
+                    User: true
+                }
+            })
+            return new ResponseData<any>(account, HttpStatus.OK, 'Tài khoản tồn tại')
+        } catch (error) {
+            throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    async getAllUsers(option: { page: number, name: string, isBanned: boolean }) {
         let pageSize = PAGE_SIZE.PAGE_USER
         try {
             let { page } = option
             const totalCount = await this.prismaService.account.count({
                 where: {
                     accountType: 'user',
-                    isDeleted: false
+                    isDeleted: false,
+                    isBanned: typeof option.isBanned === 'string' ? (option.isBanned === 'false' ? false : true) : option.isBanned,
+                    User: {
+                        name: {
+                            contains: option.name,
+                            mode: 'insensitive'
+                        }
+                    },
                 }
             })
             const totalPages = totalCount == 0 ? 1 : Math.ceil(totalCount / pageSize)
@@ -41,7 +63,7 @@ export class UserService {
                     userId: true,
                     accountType: true,
                     authType: true,
-                    isBan: true,
+                    isBanned: true,
                     User: {
                         include: {
                             Contribution: true
@@ -50,7 +72,16 @@ export class UserService {
                 },
                 where: {
                     accountType: 'user',
-                    isDeleted: false
+                    isDeleted: false,
+                    isBanned: typeof option.isBanned === 'string' ? (option.isBanned === 'false' ? false : true) : option.isBanned,
+
+                    User: {
+                        name: {
+                            contains: option.name,
+                            mode: 'insensitive'
+                        },
+
+                    },
                 },
                 orderBy: {
                     userId: 'asc'
@@ -68,13 +99,13 @@ export class UserService {
                 where: { userId: id }
             })
             let feedback = toggleBanUserDto.feedback
-            if (account.isBan) feedback = ''
+            if (account.isBanned) feedback = ''
             if (!account) throw new HttpException('Tài khoản không tồn tại', HttpStatus.NOT_FOUND)
             await this.prismaService.account.update({
                 where: { email: account.email },
-                data: { isBan: !account.isBan, feedback: feedback }
+                data: { isBanned: !account.isBanned, feedback: feedback }
             })
-            if (!account.isBan) return new ResponseData<any>(null, HttpStatus.OK, 'Khóa người dùng thành công')
+            if (!account.isBanned) return new ResponseData<any>(null, HttpStatus.OK, 'Khóa người dùng thành công')
             return new ResponseData<any>(null, HttpStatus.OK, 'Mở khóa người dùng thành công')
         } catch (error) {
             throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
@@ -102,7 +133,7 @@ export class UserService {
             const result = await this.prismaService.user.update({
                 where: { id: id },
                 data: dataUpdate,
-                include: {interestTopics: true}
+                include: { interestTopics: true }
             })
             return new ResponseData<any>(result, HttpStatus.OK, 'Cập nhật thông tin thành công')
         } catch (error) {

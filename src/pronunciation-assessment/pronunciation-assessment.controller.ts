@@ -1,6 +1,5 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UseInterceptors, UploadedFile, Version } from '@nestjs/common';
 import { PronunciationAssessmentService } from './pronunciation-assessment.service';
-import { CreatePronunciationAssessmentDto } from './dto/create-pronunciation-assessment.dto';
 import { UpdatePronunciationAssessmentDto } from './dto/update-pronunciation-assessment.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { MyJWTGuard, RolesGuard } from 'src/auth/guard';
@@ -11,7 +10,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('Pronunciation Assessment')
 @UseGuards(MyJWTGuard, RolesGuard)
-@Controller('pronunciation-assessment')
+@Controller('pronunciation-assessments')
 export class PronunciationAssessmentController {
   constructor(private readonly pronunciationAssessmentService: PronunciationAssessmentService) { }
 
@@ -22,6 +21,7 @@ export class PronunciationAssessmentController {
 
   @UseInterceptors(FileInterceptor('audio'))
   @Post('assess')
+  @Version('1')
   assess(@Body() assessPronunciationDto: AssessPronunciationDto, @GetAccount() account: Account,
     @UploadedFile() audio: Express.Multer.File
   ) {
@@ -29,32 +29,38 @@ export class PronunciationAssessmentController {
   }
 
   @Get()
+  @Version('1')
   findAll() {
     return this.pronunciationAssessmentService.findAll();
   }
 
   @Get('user')
+  @Version('1')
   findAllByUser(@GetAccount() account: Account,) {
     return this.pronunciationAssessmentService.findAllByUser(account.userId
     );
   }
 
   @Get(':id')
+  @Version('1')
   findOne(@Param('id') id: string) {
     return this.pronunciationAssessmentService.findOne(+id);
   }
 
   @Patch(':id')
+  @Version('1')
   update(@Param('id') id: string, @Body() updatePronunciationAssessmentDto: UpdatePronunciationAssessmentDto) {
     return this.pronunciationAssessmentService.update(+id, updatePronunciationAssessmentDto);
   }
 
   @Delete(':id')
+  @Version('1')
   remove(@Param('id') id: string) {
     return this.pronunciationAssessmentService.remove(+id);
   }
 
   @Get('user/statistics')
+  @Version('1')
   getUserProStatistics(@GetAccount() account: Account) {
     return this.pronunciationAssessmentService.getUserProStatistics(account.userId);
   }
