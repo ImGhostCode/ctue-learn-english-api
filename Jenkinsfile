@@ -52,8 +52,8 @@ pipeline {
                     sh 'docker network create dev || echo "this network exists"'
                     sh 'echo y | docker container prune '
 
-                    sh "cat ${FIREBASE_ADMIN_KEY} > /tmp/firebase-admin.json"
-                    sh 'docker container run --rm --env-file ${ENV_FILE} -v /tmp/firebase-admin.json:/app/ctue-mobile-app-firebase-adminsdk-jhlko-2ca507a4a8.json -p 8000:8000 --name ctue-nestjs-app --network dev imghostcode/ctue-learn-english-api'
+                    sh "cat ${FIREBASE_ADMIN_KEY} > /var/jenkins_home/workspace/test_dev/firebase-admin.json"
+                    sh 'docker container run --rm --env-file ${ENV_FILE} -v /var/jenkins_home/workspace/test_dev/firebase-admin.json:/app/ctue-mobile-app-firebase-adminsdk-jhlko-2ca507a4a8.json -p 8000:8000 --name ctue-nestjs-app --network dev imghostcode/ctue-learn-english-api'
                 }
             }
         }
