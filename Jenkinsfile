@@ -2,9 +2,9 @@ pipeline {
 
     agent any
 
-    // tools { 
-    //     nodejs 'nodejs' 
-    // }
+    tools { 
+        nodejs 'nodejs' 
+    }
     environment {
         POSTGRES_ROOT_LOGIN = credentials('cre-postgres')
     }
