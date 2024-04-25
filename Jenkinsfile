@@ -38,7 +38,7 @@ pipeline {
                 sh 'echo y | docker container prune '
                 sh 'docker volume rm ctue-postgres-data || echo "no volume"'
 
-                sh "docker run --name ctue-postgres --rm --network dev -v ctue-postgres-data:/var/lib/postgresql/data -e POSTGRES_USER=${POSTGRES_ROOT_LOGIN_USR} POSTGRES_PASSWORD=${POSTGRES_ROOT_LOGIN_PSW} -e POSTGRES_DB=ctue_db  -d postgres "
+                sh "docker run --name ctue-postgres --rm --network dev -v ctue-postgres-data:/var/lib/postgresql/data -e POSTGRES_USER=${POSTGRES_ROOT_LOGIN_USR} -e POSTGRES_PASSWORD=${POSTGRES_ROOT_LOGIN_PSW} -e POSTGRES_DB=ctue_db  -d postgres "
                 sh 'sleep 20'
                 sh "docker exec -i ctue-postgres psql -h ctue-postgres -U postgres --dbname=ctue_db --password=${POSTGRES_ROOT_LOGIN_PSW} < script"
             }
