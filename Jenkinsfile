@@ -10,6 +10,14 @@ pipeline {
         ENV_FILE = credentials('env-file')
         FIREBASE_KEY = credentials('ctue-firebase-admin')
     }
+    stage('Debug') {
+    steps {
+        sh 'printenv' // Print all environment variables
+        // Add additional echo statements to verify values:
+        echo "ENV_FILE value: $ENV_FILE"
+        echo "FIREBASE_KEY value: $FIREBASE_KEY"
+        }
+    }
     stages {
 
         stage('Build with Nodejs') {
@@ -51,7 +59,7 @@ pipeline {
                 sh 'docker network create dev || echo "this network exists"'
                 sh 'echo y | docker container prune '
 
-                sh 'docker container run --rm --env-file ${ENV_FILE} -v ${FIREBASE_KEY}:/app/ctue-mobile-app-firebase-adminsdk-jhlko-2ca507a4a8.json -p ${ENV_FILE.PORT}:8000 --name ctue-nestjs-app --network dev imghostcode/ctue-learn-english-api'
+                sh 'docker container run --rm --env-file ${ENV_FILE} -v ${FIREBASE_KEY}:/app/ctue-mobile-app-firebase-adminsdk-jhlko-2ca507a4a8.json -p 8000:8000 --name ctue-nestjs-app --network dev imghostcode/ctue-learn-english-api'
             }
         }
     }
