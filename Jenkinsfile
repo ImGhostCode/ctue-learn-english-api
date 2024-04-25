@@ -22,7 +22,7 @@ pipeline {
 
         stage('Packaging/Pushing image') {
             steps {
-                withDockerRegistry(credentialsId: 'dockerhub', url: 'https://index.docker.io/v1/') {
+                withDockerRegistry(credentialsId: '	cre-dockerhub', url: 'https://index.docker.io/v1/') {
                     sh 'docker build -t imghostcode/ctue-learn-english-api .'
                     sh 'docker push imghostcode/ctue-learn-english-api'
                 }
