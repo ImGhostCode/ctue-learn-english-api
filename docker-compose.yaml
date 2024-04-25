@@ -25,7 +25,7 @@ services:
       - '${PORT}:${PORT}'
     depends_on:
       - postgres
-      - pgadmin
+      # - pgadmin
     volumes:
       - ./src:/app/src
     # networks:

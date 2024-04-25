@@ -1,0 +1,2 @@
+CREATE USER imghost WITH PASSWORD 'password123_DONG';
+GRANT ALL PRIVILEGES ON DATABASE "ctue_db" TO imghost;

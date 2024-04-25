@@ -4,13 +4,52 @@ import { UpdateLearnDto } from './dto/update-learn.dto';
 import { CreateReviewReminderDto } from './dto/createReviewReminder.dto';
 import { PrismaService } from 'nestjs-prisma';
 import { SaveTheLearnedResultDto } from './dto/saveTheLearnedResult.dto';
-import { ResponseData } from 'src/global';
+import { PAGE_SIZE, ResponseData } from 'src/global';
 import { UserLearnedWord } from '@prisma/client';
 import { UpdateReviewReminderDto } from './dto/update-reminder.dto';
 
 @Injectable()
 export class LearnService {
+
   constructor(private readonly prismaService: PrismaService) { }
+
+  async getLeaningHistory(option: { level?: number | undefined; page: number, sort?: string | undefined }, userId?: number | undefined) {
+    let pageSize = PAGE_SIZE.PAGE_LEARN_HISTORY
+    try {
+      let { page,
+        level = 1,
+        sort = 'desc'
+      } = option
+      const whereCondition: any = {
+        memoryLevel: Number(level),
+        isDeleted: false
+
+      }
+      if (userId) whereCondition.userId = userId
+      const totalCount = await this.prismaService.userLearnedWord.count({
+        where: whereCondition
+      })
+      const totalPages = totalCount == 0 ? 1 : Math.ceil(totalCount / pageSize)
+      if (!page || page < 1) page = 1
+      if (page > totalPages) page = totalPages
+      let next = (page - 1) * pageSize
+      let words = await this.prismaService.userLearnedWord.findMany({
+        skip: next,
+        take: pageSize,
+        where: whereCondition, include: {
+          User:true,
+          Word: true
+        },
+        orderBy: {
+          updatedAt: sort === 'asc' ? 'asc' : 'desc'
+        }
+      })
+      return new ResponseData<any>({ data: words, totalPages, total: totalCount }, HttpStatus.OK, 'Tìm thành công')
+    } catch (error) {
+      console.log(error)
+      throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
 
   async getStatistics(userId: number, packId?: number | undefined) {
     try {
