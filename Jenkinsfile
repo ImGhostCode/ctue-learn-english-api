@@ -8,19 +8,10 @@ pipeline {
     environment {
         POSTGRES_ROOT_LOGIN = credentials('cre-postgres')
         ENV_FILE = credentials('env-file')
-        FIREBASE_KEY = credentials('ctue-firebase-admin')
+        // FIREBASE_KEY = credentials('ctue-firebase-admin')
     }
     
     stages {
-        stage('Debug') {
-            steps {
-                sh 'printenv' // Print all environment variables
-                // Add additional echo statements to verify values:
-                echo "ENV_FILE value: $ENV_FILE"
-                echo "FIREBASE_KEY value: $FIREBASE_KEY"
-            }
-        }
-
         stage('Build with Nodejs') {
             steps {
                 sh 'npm install'
@@ -54,13 +45,17 @@ pipeline {
 
         stage('Deploy NestJS to DEV') {
             steps {
-                echo 'Deploying and cleaning'
-                sh 'docker image pull imghostcode/ctue-learn-english-api'
-                sh 'docker container stop ctue-nestjs-app || echo "this container does not exist" '
-                sh 'docker network create dev || echo "this network exists"'
-                sh 'echo y | docker container prune '
+                withCredentials([file(credentialsId: 'ctue-firebase-admin', variable: 'firebase-admin-key')]) {
+                     echo 'Deploying and cleaning'
+                    sh 'docker image pull imghostcode/ctue-learn-english-api'
+                    sh 'docker container stop ctue-nestjs-app || echo "this container does not exist" '
+                    sh 'docker network create dev || echo "this network exists"'
+                    sh 'echo y | docker container prune '
 
-                sh 'docker container run --rm --env-file ${ENV_FILE} -v ${FIREBASE_KEY}:/app/ctue-mobile-app-firebase-adminsdk-jhlko-2ca507a4a8.json -p 8000:8000 --name ctue-nestjs-app --network dev imghostcode/ctue-learn-english-api'
+                    sh "cp \$firebase-admin-key /app/ctue-mobile-app-firebase-adminsdk-jhlko-2ca507a4a8.json"
+                    sh 'docker container run --rm --env-file ${ENV_FILE} -p 8000:8000 --name ctue-nestjs-app --network dev imghostcode/ctue-learn-english-api'
+   
+                }
             }
         }
     }
