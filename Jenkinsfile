@@ -45,16 +45,14 @@ pipeline {
 
         stage('Deploy NestJS to DEV') {
             steps {
-                withCredentials([file(credentialsId: 'ctue-firebase-admin', variable: 'firebase-admin-key')]) {
+                withCredentials([file(credentialsId: 'ctue-firebase-admin', variable: 'FIREBASE_ADMIN_KEY')]) {
                      echo 'Deploying and cleaning'
                     sh 'docker image pull imghostcode/ctue-learn-english-api'
                     sh 'docker container stop ctue-nestjs-app || echo "this container does not exist" '
                     sh 'docker network create dev || echo "this network exists"'
                     sh 'echo y | docker container prune '
 
-                    sh "cp \$firebase-admin-key /app/ctue-mobile-app-firebase-adminsdk-jhlko-2ca507a4a8.json"
-                    sh 'docker container run --rm --env-file ${ENV_FILE} -p 8000:8000 --name ctue-nestjs-app --network dev imghostcode/ctue-learn-english-api'
-   
+                    sh 'docker container run --rm --env-file ${ENV_FILE} -v ${FIREBASE_ADMIN_KEY}:/app/ctue-mobile-app-firebase-adminsdk-jhlko-2ca507a4a8.json -p 8000:8000 --name ctue-nestjs-app --network dev imghostcode/ctue-learn-english-api'
                 }
             }
         }
