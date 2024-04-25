@@ -52,7 +52,7 @@ pipeline {
                     sh 'docker network create dev || echo "this network exists"'
                     sh 'echo y | docker container prune '
 
-                    sh "cp ${FIREBASE_ADMIN_KEY} /tmp/firebase-admin.json"
+                    sh "cat ${FIREBASE_ADMIN_KEY} > /tmp/firebase-admin.json"
                     sh 'docker container run --rm --env-file ${ENV_FILE} -v /tmp/firebase-admin.json:/app/ctue-mobile-app-firebase-adminsdk-jhlko-2ca507a4a8.json -p 8000:8000 --name ctue-nestjs-app --network dev imghostcode/ctue-learn-english-api'
                 }
             }
