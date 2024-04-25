@@ -40,7 +40,7 @@ pipeline {
 
                 sh "docker run --name ctue-postgres --rm --network dev -v ctue-postgres-data:/var/lib/postgresql/data -e POSTGRES_USER=${POSTGRES_ROOT_LOGIN_USR} -e POSTGRES_PASSWORD=${POSTGRES_ROOT_LOGIN_PSW} -e POSTGRES_DB=ctue_db  -d postgres "
                 sh 'sleep 20'
-                sh "docker exec -i ctue-postgres psql -h ctue-postgres -U postgres --dbname=ctue_db --password=${POSTGRES_ROOT_LOGIN_PSW} < script"
+                sh "docker exec -i -e PGPASSWORD=${POSTGRES_ROOT_LOGIN_PSW} ctue-postgres psql -h ctue-postgres -U postgres --dbname=ctue_db < script"
             }
         }
 
