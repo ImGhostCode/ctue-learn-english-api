@@ -42,7 +42,8 @@ export enum PAGE_SIZE {
     PAGE_IRREGULAR = 20,
     PAGE_FAVORITE = 20,
     PAGE_PRACTICE = 20,
-    PAGE_NOTIFICATION = 20
+    PAGE_NOTIFICATION = 20,
+    PAGE_LEARN_HISTORY = 20,
 
 }
 export enum PRACTICE_SIZE {
@@ -58,7 +59,7 @@ export enum CONTRIBUTION {
     SENTENCE = 'sentence'
 }
 
-export enum VOCABULARY_SET {
+export enum VOCABULARY_PACK {
     MAX_WORDS = 100,
     TITLE_LEN = 100
 

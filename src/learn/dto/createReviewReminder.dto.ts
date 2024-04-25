@@ -18,8 +18,8 @@ export class CreateReviewReminderDto {
     @ApiProperty()
     @IsNumber()
     @IsNotEmpty()
-    // userVocabularySetId: number
-    vocabularySetId: number
+    // userVocabularyPackId: number
+    vocabularyPackId: number
 
     @ApiProperty()
     @Type(() => DataRemind)

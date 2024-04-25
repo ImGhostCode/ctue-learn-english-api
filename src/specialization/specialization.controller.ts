@@ -8,6 +8,7 @@ import {
   Delete,
   ParseIntPipe,
   UseGuards,
+  Version,
 } from '@nestjs/common';
 import { SpecializationService } from './specialization.service';
 import { CreateSpecializationDto, UpdateSpecializationDto } from './dto';
@@ -17,11 +18,12 @@ import { ACCOUNT_TYPES } from '../global';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Specialization')
-@Controller('specialization')
+@Controller('specializations')
 export class SpecializationController {
-  constructor(private readonly specializationService: SpecializationService) {}
+  constructor(private readonly specializationService: SpecializationService) { }
 
   @Post()
+  @Version('1')
   @UseGuards(MyJWTGuard, RolesGuard)
   @Roles(ACCOUNT_TYPES.ADMIN)
   create(@Body() createSpecializationDto: CreateSpecializationDto) {
@@ -29,11 +31,13 @@ export class SpecializationController {
   }
 
   @Get()
+  @Version('1')
   findAll() {
     return this.specializationService.findAll();
   }
 
   @Patch(':id')
+  @Version('1')
   @UseGuards(MyJWTGuard, RolesGuard)
   @Roles(ACCOUNT_TYPES.ADMIN)
   update(
@@ -44,6 +48,7 @@ export class SpecializationController {
   }
 
   @Delete(':id')
+  @Version('1')
   @UseGuards(MyJWTGuard, RolesGuard)
   @Roles(ACCOUNT_TYPES.ADMIN)
   remove(@Param('id', ParseIntPipe) id: number) {

@@ -37,12 +37,16 @@ export class SentenceService {
         }
     }
 
-    async findAll(option: { topic: [], type?: number, page: number, sort?: any }) {
+    async findAll(option: { topic: [], type?: number, page: number, sort?: any, key?: string }) {
         let pageSize = PAGE_SIZE.PAGE_SENTENCE
         try {
-            let { sort, type, topic, page } = option
+            let { sort, type, topic, page, key } = option
 
             const whereClause: any = {
+                content: {
+                    contains: key || ''
+                    , mode: 'insensitive'
+                },
                 Topic: {},
                 isDeleted: false
             };

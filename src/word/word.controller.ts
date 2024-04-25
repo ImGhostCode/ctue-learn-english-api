@@ -8,26 +8,26 @@ import {
   Patch,
   Post,
   Query,
-  UploadedFile,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
+  Version,
 } from '@nestjs/common';
 import { WordService } from './word.service';
 import { CreateWordDto, UpdateWordDto } from './dto';
-import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { MyJWTGuard, RolesGuard } from '../auth/guard';
 import { GetAccount, Roles } from '../auth/decorator';
 import { ACCOUNT_TYPES } from '../global';
 import { Account } from '@prisma/client';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
-import { FilesUploadDto } from './dto/uploadFile.dto';
+import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Word')
-@Controller('word')
+@Controller('words')
 export class WordController {
   constructor(private wordServive: WordService) { }
 
+  @Version('1')
   @Post()
   @UseInterceptors(FilesInterceptor('pictures'))
   @ApiConsumes('multipart/form-data')
@@ -41,11 +41,13 @@ export class WordController {
     return this.wordServive.create(createWordDto, pictures);
   }
 
+  @Version('1')
   @Get('id/:id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.wordServive.findOne(id)
   }
 
+  @Version('1')
   @Get()
   findAll(
     @Query()
@@ -62,6 +64,7 @@ export class WordController {
     return this.wordServive.findAll(option);
   }
 
+  @Version('1')
   @Get('words-pack')
   @UseGuards(MyJWTGuard, RolesGuard)
   @Roles(ACCOUNT_TYPES.USER, ACCOUNT_TYPES.ADMIN)
@@ -81,6 +84,7 @@ export class WordController {
 
 
 
+  @Version('1')
   @Patch(':id')
   @UseGuards(MyJWTGuard, RolesGuard)
   @Roles(ACCOUNT_TYPES.ADMIN)
@@ -94,6 +98,7 @@ export class WordController {
     return this.wordServive.update(id, updateWordDto, newPictures);
   }
 
+  @Version('1')
   @Delete(':id')
   @UseGuards(MyJWTGuard, RolesGuard)
   @Roles(ACCOUNT_TYPES.ADMIN)
@@ -101,6 +106,7 @@ export class WordController {
     return this.wordServive.delete(id);
   }
 
+  @Version('1')
   @Get('look-up-dictionary')
   lookUpDictionary(@Query('key') key: string) {
     return this.wordServive.lookUpDictionary(key);

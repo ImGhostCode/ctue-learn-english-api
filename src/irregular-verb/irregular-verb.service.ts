@@ -33,9 +33,9 @@ export class IrregularVerbService {
         where: {
           isDeleted: false,
           OR: [
-            { v1: { contains: key } },
-            { v2: { contains: key } },
-            { v3: { contains: key } },
+            { v1: { contains: key, mode: 'insensitive' } },
+            { v2: { contains: key, mode: 'insensitive' } },
+            { v3: { contains: key, mode: 'insensitive' } },
           ]
         }
       })
@@ -51,12 +51,12 @@ export class IrregularVerbService {
         skip: next,
         take: pageSize,
         where: {
-        isDeleted: false,
+          isDeleted: false,
           OR: [
-            { v1: { contains: key } },
-            { v2: { contains: key } },
-            { v3: { contains: key } },
-            { meaning: { contains: key } },
+            { v1: { contains: key, mode: 'insensitive' } },
+            { v2: { contains: key, mode: 'insensitive' } },
+            { v3: { contains: key, mode: 'insensitive' } },
+            { meaning: { contains: key, mode: 'insensitive' } },
           ]
         },
       })

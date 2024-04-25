@@ -8,6 +8,7 @@ import {
   Delete,
   ParseIntPipe,
   UseGuards,
+  Version,
 } from '@nestjs/common';
 import { LevelService } from './level.service';
 import { CreateLevelDto, UpdateLevelDto } from './dto';
@@ -17,11 +18,12 @@ import { ACCOUNT_TYPES } from '../global';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Level')
-@Controller('level')
+@Controller('levels')
 export class LevelController {
-  constructor(private levelService: LevelService) {}
+  constructor(private levelService: LevelService) { }
 
   @Post()
+  @Version('1')
   @UseGuards(MyJWTGuard, RolesGuard)
   @Roles(ACCOUNT_TYPES.ADMIN)
   create(@Body() createLevelDto: CreateLevelDto) {
@@ -29,11 +31,13 @@ export class LevelController {
   }
 
   @Get()
+  @Version('1')
   findAll() {
     return this.levelService.findAll();
   }
 
   @Patch(':id')
+  @Version('1')
   @UseGuards(MyJWTGuard, RolesGuard)
   @Roles(ACCOUNT_TYPES.ADMIN)
   update(
@@ -44,6 +48,7 @@ export class LevelController {
   }
 
   @Delete(':id')
+  @Version('1')
   @UseGuards(MyJWTGuard, RolesGuard)
   @Roles(ACCOUNT_TYPES.ADMIN)
   remove(@Param('id', ParseIntPipe) id: number) {

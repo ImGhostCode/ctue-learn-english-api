@@ -7,12 +7,15 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model FavoriteItem {
-  id       Int        @id @default(autoincrement())
-  userId   Int?
-  User     User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  Sentence Sentence[] @relation("FavoriteItemToSentence")
-  Word     Word[]     @relation("FavoriteItemToWord")
+model Favorite {
+  id         Int   @id @default(autoincrement())
+  userId     Int?
+  wordId     Int?
+  sentenceId Int?
+  User       User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  Sentence Sentence? @relation(fields: [sentenceId], references: [id])
+  Word     Word?     @relation(fields: [wordId], references: [id])
 }
 
 model User {
@@ -24,7 +27,7 @@ model User {
   isDeleted                Boolean                   @default(false)
   fcmToken                 String?
   interestTopics           Topic[]
-  FavoriteList             FavoriteItem[]
+  FavoriteList             Favorite[]
   Notification             Notification[]
   Account                  Account[]
   Contribution             Contribution[]
@@ -33,8 +36,8 @@ model User {
   ReviewReminder           ReviewReminder[]
   Sentence                 Sentence[]
   userLearnedWords         UserLearnedWord[]
-  UserVocabularySets       UserVocabularySet[]
-  CreatedVocabularySet     VocabularySet[]
+  UserVocabularyPacks      UserVocabularyPack[]
+  CreatedVocabularyPack    VocabularyPack[]
   Word                     Word[]
 
   @@map("users")
@@ -46,7 +49,7 @@ model Account {
   password    String
   authType    String
   accountType String
-  isBan       Boolean  @default(false)
+  isBanned    Boolean  @default(false)
   feedback    String?
   isDeleted   Boolean  @default(false)
   createdAt   DateTime @default(now())
@@ -81,20 +84,20 @@ model Contribution {
 }
 
 model Sentence {
-  id           Int            @id @default(autoincrement())
-  typeId       Int
-  userId       Int?
-  content      String
-  note         String?
-  isDeleted    Boolean        @default(false)
-  meaning      String         @default("")
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @default(now()) @updatedAt
-  Type         Type           @relation(fields: [typeId], references: [id])
-  User         User?          @relation(fields: [userId], references: [id])
-  FavoriteItem FavoriteItem[] @relation("FavoriteItemToSentence")
-  Practice     Practice[]     @relation("PracticeToSentence")
-  Topic        Topic[]        @relation("SentenceToTopic")
+  id        Int        @id @default(autoincrement())
+  typeId    Int
+  userId    Int?
+  content   String
+  note      String?
+  isDeleted Boolean    @default(false)
+  meaning   String     @default("")
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @default(now()) @updatedAt
+  Type      Type       @relation(fields: [typeId], references: [id])
+  User      User?      @relation(fields: [userId], references: [id])
+  Favorite  Favorite[]
+  Practice  Practice[] @relation("PracticeToSentence")
+  Topic     Topic[]    @relation("SentenceToTopic")
 
   @@map("sentences")
 }
@@ -119,11 +122,11 @@ model Word {
   Level            Level             @relation(fields: [levelId], references: [id])
   Specialization   Specialization    @relation(fields: [specializationId], references: [id])
   User             User?             @relation(fields: [userId], references: [id])
-  FavoriteItem     FavoriteItem[]    @relation("FavoriteItemToWord")
+  Favorite         Favorite[]
   Practice         Practice[]        @relation("PracticeToWord")
   ReviewReminder   ReviewReminder[]  @relation("ReviewReminderToWord")
   Topic            Topic[]           @relation("TopicToWord")
-  Vocabulary       VocabularySet[]   @relation("VocabularySetToWord")
+  Vocabulary       VocabularyPack[]  @relation("VocabularyPackToWord")
 
   @@map("words")
 }
@@ -139,15 +142,15 @@ model WordMeaning {
 }
 
 model Topic {
-  id            Int             @id @default(autoincrement())
-  name          String
-  isWord        Boolean
-  image         String
-  VocabularySet VocabularySet[]
-  Practice      Practice[]      @relation("PracticeToTopic")
-  Sentence      Sentence[]      @relation("SentenceToTopic")
-  Word          Word[]          @relation("TopicToWord")
-  User          User[]
+  id             Int              @id @default(autoincrement())
+  name           String
+  isWord         Boolean
+  image          String
+  VocabularyPack VocabularyPack[]
+  Practice       Practice[]       @relation("PracticeToTopic")
+  Sentence       Sentence[]       @relation("SentenceToTopic")
+  Word           Word[]           @relation("TopicToWord")
+  User           User[]
 
   @@map("topics")
 }
@@ -162,11 +165,11 @@ model Level {
 }
 
 model Specialization {
-  id            Int             @id @default(autoincrement())
-  name          String
-  Practice      Practice[]
-  VocabularySet VocabularySet[]
-  Word          Word[]
+  id             Int              @id @default(autoincrement())
+  name           String
+  Practice       Practice[]
+  VocabularyPack VocabularyPack[]
+  Word           Word[]
 
   @@map("specializations")
 }
@@ -240,73 +243,73 @@ model PhonemeAssessment {
 }
 
 model UserLearnedWord {
-  userId                           Int
-  wordId                           Int
-  memoryLevel                      Int
-  createdAt                        DateTime           @default(now())
-  updatedAt                        DateTime           @updatedAt
-  isDeleted                        Boolean            @default(false)
-  userVocabularySetUserId          Int?
-  userVocabularySetVocabularySetId Int?
-  vocabularySetId                  Int
-  User                             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  UserVocabularySet                UserVocabularySet? @relation(fields: [userVocabularySetUserId, userVocabularySetVocabularySetId], references: [userId, vocabularySetId])
-  VocabularySet                    VocabularySet      @relation(fields: [vocabularySetId], references: [id])
-  Word                             Word               @relation(fields: [wordId], references: [id])
+  userId                             Int
+  wordId                             Int
+  memoryLevel                        Int
+  createdAt                          DateTime            @default(now())
+  updatedAt                          DateTime            @updatedAt
+  isDeleted                          Boolean             @default(false)
+  userVocabularyPackUserId           Int?
+  userVocabularyPackVocabularyPackId Int?
+  vocabularyPackId                   Int                 @default(1)
+  User                               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  UserVocabularyPack                 UserVocabularyPack? @relation(fields: [userVocabularyPackUserId, userVocabularyPackVocabularyPackId], references: [userId, vocabularyPackId])
+  VocabularyPack                     VocabularyPack      @relation(fields: [vocabularyPackId], references: [id])
+  Word                               Word                @relation(fields: [wordId], references: [id])
 
-  @@id([userId, wordId, vocabularySetId])
+  @@id([userId, wordId, vocabularyPackId])
   @@map("userLearnedWords")
 }
 
-model VocabularySet {
-  id                 Int                 @id @default(autoincrement())
-  userId             Int
-  isPublic           Boolean             @default(false)
-  createdAt          DateTime            @default(now())
-  isDeleted          Boolean             @default(false)
-  title              String
-  picture            String?
-  specId             Int?
-  topicId            Int?
-  downloads          Int                 @default(0)
-  updatedAt          DateTime            @default(now()) @updatedAt
-  ReviewReminder     ReviewReminder[]
-  UserLearnedWord    UserLearnedWord[]
-  UserVocabularySets UserVocabularySet[]
-  Specialization     Specialization?     @relation(fields: [specId], references: [id])
-  Topic              Topic?              @relation(fields: [topicId], references: [id])
-  User               User                @relation(fields: [userId], references: [id])
-  words              Word[]              @relation("VocabularySetToWord")
+model VocabularyPack {
+  id                  Int                  @id @default(autoincrement())
+  userId              Int
+  isPublic            Boolean              @default(false)
+  createdAt           DateTime             @default(now())
+  isDeleted           Boolean              @default(false)
+  title               String
+  picture             String?
+  specId              Int?
+  topicId             Int?
+  downloads           Int                  @default(0)
+  updatedAt           DateTime             @default(now()) @updatedAt
+  ReviewReminder      ReviewReminder[]
+  UserLearnedWord     UserLearnedWord[]
+  UserVocabularyPacks UserVocabularyPack[]
+  Specialization      Specialization?      @relation(fields: [specId], references: [id])
+  Topic               Topic?               @relation(fields: [topicId], references: [id])
+  User                User                 @relation(fields: [userId], references: [id])
+  words               Word[]               @relation("VocabularyPackToWord")
 
-  @@map("vocabularySets")
+  @@map("vocabularyPacks")
 }
 
-model UserVocabularySet {
-  userId          Int
-  vocabularySetId Int
-  createdAt       DateTime          @default(now())
-  isDeleted       Boolean           @default(false)
-  UserLearnedWord UserLearnedWord[]
-  User            User              @relation(fields: [userId], references: [id])
-  VocabularySet   VocabularySet     @relation(fields: [vocabularySetId], references: [id])
+model UserVocabularyPack {
+  userId           Int
+  vocabularyPackId Int
+  createdAt        DateTime          @default(now())
+  isDeleted        Boolean           @default(false)
+  UserLearnedWord  UserLearnedWord[]
+  User             User              @relation(fields: [userId], references: [id])
+  VocabularyPack   VocabularyPack    @relation(fields: [vocabularyPackId], references: [id])
 
-  @@id([userId, vocabularySetId])
-  @@unique([userId, vocabularySetId])
-  @@map("userVocabularySets")
+  @@id([userId, vocabularyPackId])
+  @@unique([userId, vocabularyPackId])
+  @@map("userVocabularyPacks")
 }
 
 model ReviewReminder {
-  id              Int           @id @default(autoincrement())
-  isDone          Boolean       @default(false)
-  reviewAt        DateTime
-  createdAt       DateTime      @default(now())
-  userId          Int
-  vocabularySetId Int
-  updatedAt       DateTime      @default(now()) @updatedAt
-  isDeleted       Boolean       @default(false)
-  User            User          @relation(fields: [userId], references: [id])
-  VocabularySet   VocabularySet @relation(fields: [vocabularySetId], references: [id])
-  words           Word[]        @relation("ReviewReminderToWord")
+  id               Int            @id @default(autoincrement())
+  isDone           Boolean        @default(false)
+  reviewAt         DateTime
+  createdAt        DateTime       @default(now())
+  userId           Int
+  vocabularyPackId Int            @default(1)
+  updatedAt        DateTime       @default(now()) @updatedAt
+  isDeleted        Boolean        @default(false)
+  User             User           @relation(fields: [userId], references: [id])
+  VocabularyPack   VocabularyPack @relation(fields: [vocabularyPackId], references: [id])
+  words            Word[]         @relation("ReviewReminderToWord")
 
   @@map("reviewReminders")
 }

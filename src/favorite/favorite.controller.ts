@@ -7,9 +7,10 @@ import {
   Query,
   ParseIntPipe,
   Param,
+  Version,
 } from '@nestjs/common';
-import { FavoriteItemService } from './favorite-item.service';
-import { ToggleFavoritesListDto } from './dto';
+import { FavoriteService } from './favorite.service';
+import { ToggleFavoriteDto } from './dto';
 import { GetAccount, Roles } from '../auth/decorator';
 import { Account } from '@prisma/client';
 import { MyJWTGuard, RolesGuard } from '../auth/guard';
@@ -18,23 +19,25 @@ import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Favorite')
 @UseGuards(MyJWTGuard, RolesGuard)
-@Controller('favorite')
-export class FavoriteItemController {
-  constructor(private favoriteItemService: FavoriteItemService) { }
+@Controller('favorites')
+export class FavoriteController {
+  constructor(private favoriteItemService: FavoriteService) { }
 
   @Patch('/user')
+  @Version('1')
   @Roles(ACCOUNT_TYPES.USER, ACCOUNT_TYPES.ADMIN)
-  toggleFavoritesList(
-    @Body() toggleFavoritesListDto: ToggleFavoritesListDto,
+  toggleFavorite(
+    @Body() toggleFavoriteDto: ToggleFavoriteDto,
     @GetAccount() account: Account,
   ) {
-    return this.favoriteItemService.toggleFavoritesList(
-      toggleFavoritesListDto,
+    return this.favoriteItemService.toggleFavorite(
+      toggleFavoriteDto,
       account.userId,
     );
   }
 
   @Get('/user')
+  @Version('1')
   @Roles(ACCOUNT_TYPES.USER, ACCOUNT_TYPES.ADMIN)
   findAllByUserId(
     @GetAccount() accout: Account,
@@ -51,6 +54,7 @@ export class FavoriteItemController {
   }
 
   @Get('/user/is-favorite/:wordId')
+  @Version('1')
   @Roles(ACCOUNT_TYPES.USER, ACCOUNT_TYPES.ADMIN)
   checkIsFavorite(@Param('wordId', ParseIntPipe) wordId: number, @GetAccount() accout: Account) {
     return this.favoriteItemService.checkIsFavorite(accout.userId, wordId);

@@ -1,19 +1,19 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { CreateVocaSetDto, UpdateVocaSetDto } from './dto';
+import { CreateVocabPackDto, UpdateVocabPackDto } from './dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
-import { Account, UserLearnedWord, VocabularySet } from '@prisma/client';
+import { Account, VocabularyPack } from '@prisma/client';
 import { ACCOUNT_TYPES, PAGE_SIZE, ResponseData } from 'src/global';
 
 
 @Injectable()
-export class VocabularySetsService {
+export class VocabularyPackService {
 
     constructor(private readonly prismaService: PrismaService, private readonly cloudinaryService: CloudinaryService) { }
 
-    async create(userId: number, createVocaSetDto: CreateVocaSetDto, pictureFile: Express.Multer.File) {
+    async create(userId: number, createVocabPackDto: CreateVocabPackDto, pictureFile: Express.Multer.File) {
         try {
-            let { title, topicId = null, specId = null, picture = null, words = [] } = createVocaSetDto
+            let { title, topicId = null, specId = null, picture = null, words = [] } = createVocabPackDto
 
             if (words) {
                 words = words.map(id => Number(id))
@@ -23,7 +23,7 @@ export class VocabularySetsService {
                 const file = await this.cloudinaryService.uploadFile(pictureFile)
                 picture = file.url
             }
-            let createdVocaSet: VocabularySet | null = null
+            let createdVocabPack: VocabularyPack | null = null
             const data: any = {
                 title, userId, isPublic: false, words: {
                     connect: words.map(id => ({ id }))
@@ -34,7 +34,7 @@ export class VocabularySetsService {
             if (picture) data.picture = picture
 
             await this.prismaService.$transaction(async (tx) => {
-                createdVocaSet = await this.prismaService.vocabularySet.create({
+                createdVocabPack = await this.prismaService.vocabularyPack.create({
                     data: data,
                     include: {
                         Topic: true,
@@ -45,38 +45,38 @@ export class VocabularySetsService {
 
                 })
 
-                await this.prismaService.userVocabularySet.create({
+                await this.prismaService.userVocabularyPack.create({
                     data: {
                         userId,
-                        vocabularySetId: createdVocaSet.id
+                        vocabularyPackId: createdVocabPack.id
                     }
                 })
             });
 
 
-            return new ResponseData<VocabularySet>(createdVocaSet, HttpStatus.CREATED, 'Tạo bộ từ thành công')
+            return new ResponseData<VocabularyPack>(createdVocabPack, HttpStatus.CREATED, 'Tạo bộ từ thành công')
         } catch (error) {
             throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    async downloadVocaSet(id: number, userId: number) {
+    async downloadVocabPack(id: number, userId: number) {
         try {
             const result = await this.prismaService.$transaction(async (prisma) => {
-                const vocabularySet = await prisma.vocabularySet.findUnique({ where: { id, isDeleted: false } });
+                const vocabularyPack = await prisma.vocabularyPack.findUnique({ where: { id, isDeleted: false } });
 
-                if (!vocabularySet) {
+                if (!vocabularyPack) {
                     throw new HttpException('Bộ từ không tồn tại', HttpStatus.NOT_FOUND);
                 }
 
-                if (vocabularySet.userId === userId) {
+                if (vocabularyPack.userId === userId) {
                     throw new HttpException('Bạn đã sở hữu bộ từ này', HttpStatus.CONFLICT);
                 }
 
-                const isDownloaded = await prisma.userVocabularySet.findFirst({
+                const isDownloaded = await prisma.userVocabularyPack.findFirst({
                     where: {
                         userId,
-                        vocabularySetId: id,
+                        vocabularyPackId: id,
                         isDeleted: false
                     },
                 });
@@ -85,14 +85,14 @@ export class VocabularySetsService {
                     throw new HttpException('Bạn đã tải bộ từ này', HttpStatus.CONFLICT);
                 }
 
-                await prisma.userVocabularySet.create({
+                await prisma.userVocabularyPack.create({
                     data: {
                         userId,
-                        vocabularySetId: id
+                        vocabularyPackId: id
                     }
                 })
 
-                const updatedVocabularySet = await prisma.vocabularySet.update({
+                const updatedVocabularyPack = await prisma.vocabularyPack.update({
                     where: { id },
                     data: {
                         downloads: {
@@ -101,7 +101,7 @@ export class VocabularySetsService {
                     },
                 });
 
-                return new ResponseData<VocabularySet>(updatedVocabularySet, HttpStatus.OK, 'Tải bộ từ thành công');
+                return new ResponseData<VocabularyPack>(updatedVocabularyPack, HttpStatus.OK, 'Tải bộ từ thành công');
             });
 
             return result;
@@ -111,18 +111,18 @@ export class VocabularySetsService {
         }
     }
 
-    async rmDownloadedVocaSet(id: number, userId: number) {
+    async rmDownloadedVocabPack(id: number, userId: number) {
         try {
-            const res: any = await this.prismaService.userVocabularySet.delete({
+            const res: any = await this.prismaService.userVocabularyPack.delete({
                 where: {
-                    userId_vocabularySetId: {
+                    userId_vocabularyPackId: {
                         userId,
-                        vocabularySetId: id
+                        vocabularyPackId: id
                     }
                 }
-                , select: { VocabularySet: true }
+                , select: { VocabularyPack: true }
             })
-            return new ResponseData<VocabularySet>(res.VocabularySet, HttpStatus.OK, 'Xóa bộ từ thành công');
+            return new ResponseData<VocabularyPack>(res.VocabularyPack, HttpStatus.OK, 'Xóa bộ từ thành công');
         } catch (error) {
             console.log(error);
             throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
@@ -130,7 +130,7 @@ export class VocabularySetsService {
         }
     }
 
-    async findAllPublicVocaSet(option: {
+    async findAllPublicVocabPack(option: {
         spec: number;
         topic: number;
         key: string;
@@ -138,20 +138,20 @@ export class VocabularySetsService {
         try {
             let { spec, topic, key } = option
             let whereCondition: any = {
-                title: { contains: key },
+                title: { contains: key, mode: 'insensitive' },
                 isPublic: true,
                 isDeleted: false
             };
             if (topic) whereCondition.topicId = Number(topic);
             if (spec) whereCondition.specId = Number(spec);
 
-            const res = await this.prismaService.vocabularySet.findMany({
+            const res = await this.prismaService.vocabularyPack.findMany({
                 where: whereCondition, include: {
                     words: true, Specialization: true, Topic: true
                 }
             })
 
-            return new ResponseData<{ results: VocabularySet[] }>({ results: res }, HttpStatus.OK, 'Tìm thành công')
+            return new ResponseData<{ results: VocabularyPack[] }>({ results: res }, HttpStatus.OK, 'Tìm thành công')
         } catch (error) {
             throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
 
@@ -168,14 +168,14 @@ export class VocabularySetsService {
         try {
             let { spec, topic, key, page } = option
             let whereCondition: any = {
-                title: { contains: key },
+                title: { contains: key, mode: 'insensitive' },
 
                 isDeleted: false
             };
             if (topic) whereCondition.topicId = Number(topic);
             if (spec) whereCondition.specId = Number(spec);
 
-            const totalCount = await this.prismaService.vocabularySet.count({
+            const totalCount = await this.prismaService.vocabularyPack.count({
                 where: whereCondition
             })
 
@@ -185,7 +185,7 @@ export class VocabularySetsService {
             let next = (page - 1) * pageSize
 
 
-            const res = await this.prismaService.vocabularySet.findMany({
+            const res = await this.prismaService.vocabularyPack.findMany({
                 skip: next,
                 take: pageSize,
                 where: whereCondition, include: {
@@ -202,12 +202,12 @@ export class VocabularySetsService {
 
     async findAllByUser(userId: number) {
         try {
-            const createdVocaSets: any = await this.prismaService.user.findUnique({
+            const createdVocabPacks: any = await this.prismaService.user.findUnique({
                 where: {
                     id: userId,
                 },
                 select: {
-                    CreatedVocabularySet: {
+                    CreatedVocabularyPack: {
                         where: {
                             isDeleted: false
                         }
@@ -216,23 +216,23 @@ export class VocabularySetsService {
                 }
             })
 
-            const downloadedVocaSets: any = await this.prismaService.userVocabularySet.findMany({
+            const downloadedVocabPacks: any = await this.prismaService.userVocabularyPack.findMany({
                 where: {
                     isDeleted: false,
                     userId: userId,
-                    vocabularySetId: {
-                        notIn: createdVocaSets.CreatedVocabularySet.map(set => set.id)
+                    vocabularyPackId: {
+                        notIn: createdVocabPacks.CreatedVocabularyPack.map(set => set.id)
                     },
-                    VocabularySet: {
+                    VocabularyPack: {
                         isDeleted: false
                     }
                 },
                 select: {
-                    VocabularySet: true
+                    VocabularyPack: true
                 },
 
             });
-            return new ResponseData<{ results: VocabularySet[] }>({ results: [...createdVocaSets.CreatedVocabularySet, ...downloadedVocaSets.map(set => set.VocabularySet)] }, HttpStatus.OK, 'Tìm thành công')
+            return new ResponseData<{ results: VocabularyPack[] }>({ results: [...createdVocabPacks.CreatedVocabularyPack, ...downloadedVocabPacks.map(set => set.VocabularyPack)] }, HttpStatus.OK, 'Tìm thành công')
         } catch (error) {
             console.log(error);
 
@@ -240,8 +240,8 @@ export class VocabularySetsService {
         }
     }
 
-    async getAdminVocaSets() {
-        return this.prismaService.vocabularySet.findMany({
+    async getAdminVocabPacks() {
+        return this.prismaService.vocabularyPack.findMany({
             where: {
                 isDeleted: false,
                 User: {
@@ -258,7 +258,7 @@ export class VocabularySetsService {
 
     async findOne(id: number) {
         try {
-            const res = await this.prismaService.vocabularySet.findUnique({
+            const res = await this.prismaService.vocabularyPack.findUnique({
                 where: { id: id, isDeleted: false }, include: {
                     words: {
                         include: {
@@ -274,19 +274,19 @@ export class VocabularySetsService {
                     }
                 }
             })
-            return new ResponseData<VocabularySet>(res, HttpStatus.OK, 'Tìm thành công')
+            return new ResponseData<VocabularyPack>(res, HttpStatus.OK, 'Tìm thành công')
         } catch (error) {
             console.log(error);
             throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
 
         }
     }
-    async update(id: number, updateVocaSetDto: UpdateVocaSetDto, newPictureFile: Express.Multer.File, account: Account) {
+    async update(id: number, updateVocabPackDto: UpdateVocabPackDto, newPictureFile: Express.Multer.File, account: Account) {
         try {
 
-            let { title, topicId = null, specId = null, words, oldWords, picture = null, oldPicture = null, isPublic = false } = updateVocaSetDto
+            let { title, topicId = null, specId = null, words, oldWords, picture = null, oldPicture = null, isPublic = false } = updateVocabPackDto
             if (account.accountType === ACCOUNT_TYPES.USER) {
-                const isOwner = await this.prismaService.vocabularySet.findUnique({ where: { id, userId: account.userId, isDeleted: false } })
+                const isOwner = await this.prismaService.vocabularyPack.findUnique({ where: { id, userId: account.userId, isDeleted: false } })
                 if (!isOwner) {
                     throw new HttpException('Bộ từ không tồn tại hoặc không thể chỉnh sửa', HttpStatus.NOT_ACCEPTABLE);
                 }
@@ -336,7 +336,7 @@ export class VocabularySetsService {
             // how to get ids of review reminders to modify
             const reviewReminderToWordRows = []
             if (deletedWords.length > 0) {
-                const reviewReminderIds = await this.prismaService.reviewReminder.findMany({ where: { vocabularySetId: id, words: { some: { id: { in: deletedWords } } } }, select: { id: true } })
+                const reviewReminderIds = await this.prismaService.reviewReminder.findMany({ where: { vocabularyPackId: id, words: { some: { id: { in: deletedWords } } } }, select: { id: true } })
                 deletedWords.forEach(wordId => {
                     reviewReminderIds.forEach(reminderId => {
                         reviewReminderToWordRows.push(this.prismaService.$queryRaw`DELETE FROM "_ReviewReminderToWord" WHERE "A" = ${reminderId.id} AND "B" = ${wordId}`)
@@ -344,28 +344,33 @@ export class VocabularySetsService {
                 })
             }
 
-            const [res, res2, res3] = await this.prismaService.$transaction([
-                this.prismaService.vocabularySet.update({
-                    where: whereCondition,
-                    data: {
-                        ...dataUpdate,
-                    },
-                    include: {
-                        Specialization: true,
-                        Topic: true,
-                        words: true
-                    }
-                }),
-                this.prismaService.userLearnedWord.deleteMany({ where: { vocabularySetId: id, wordId: { in: deletedWords } } }),
-                ...(words.length === 0 ? [
-                    this.prismaService.reviewReminder.deleteMany({ where: { vocabularySetId: id } })
-                ] : reviewReminderToWordRows)
-            ])
+            const jobs: any = [this.prismaService.vocabularyPack.update({
+                where: whereCondition,
+                data: {
+                    ...dataUpdate,
+                },
+                include: {
+                    Specialization: true,
+                    Topic: true,
+                    words: true
+                }
+            }),]
+
+            if (words) {
+                jobs.push(
+                    this.prismaService.userLearnedWord.deleteMany({ where: { vocabularyPackId: id, wordId: { in: deletedWords } } }),
+                    ...(words.length === 0 ? [
+                        this.prismaService.reviewReminder.deleteMany({ where: { vocabularyPackId: id } })
+                    ] : reviewReminderToWordRows)
+                )
+            }
+
+            const [res, res2, res3] = await this.prismaService.$transaction(jobs)
 
             // delete review reminders if no words in the review reminders
-            await this.prismaService.reviewReminder.deleteMany({ where: { vocabularySetId: id, words: { none: {} } } });
+            await this.prismaService.reviewReminder.deleteMany({ where: { vocabularyPackId: id, words: { none: {} } } });
 
-            return new ResponseData<VocabularySet>(res, HttpStatus.OK, 'Cập nhật thành công')
+            return new ResponseData<VocabularyPack>(res, HttpStatus.OK, 'Cập nhật thành công')
         } catch (error) {
             console.log(error);
 
@@ -374,17 +379,17 @@ export class VocabularySetsService {
     }
     async remove(id: number) {
         try {
-            const vocaSet = await this.findOne(id)
-            if (!vocaSet) throw new HttpException('Bộ từ không tồn tại', HttpStatus.NOT_FOUND);
+            const vocabPack = await this.findOne(id)
+            if (!vocabPack) throw new HttpException('Bộ từ không tồn tại', HttpStatus.NOT_FOUND);
 
-            const [deletedVocaSet] = await this.prismaService.$transaction([
-                this.prismaService.vocabularySet.delete({ where: { id: id } }),
-                this.prismaService.userVocabularySet.deleteMany({ where: { vocabularySetId: id } }),
-                this.prismaService.reviewReminder.deleteMany({ where: { vocabularySetId: id } }),
-                this.prismaService.userLearnedWord.deleteMany({ where: { vocabularySetId: id } })
+            const [deletedVocabPack] = await this.prismaService.$transaction([
+                this.prismaService.vocabularyPack.delete({ where: { id: id } }),
+                this.prismaService.userVocabularyPack.deleteMany({ where: { vocabularyPackId: id } }),
+                this.prismaService.reviewReminder.deleteMany({ where: { vocabularyPackId: id } }),
+                this.prismaService.userLearnedWord.deleteMany({ where: { vocabularyPackId: id } })
             ])
 
-            return new ResponseData<VocabularySet>(deletedVocaSet, HttpStatus.OK, 'Xóa thành công')
+            return new ResponseData<VocabularyPack>(deletedVocabPack, HttpStatus.OK, 'Xóa thành công')
         } catch (error) {
             console.log(error);
             throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
