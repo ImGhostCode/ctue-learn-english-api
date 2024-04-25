@@ -12,9 +12,6 @@ pipeline {
 
         stage('Build with Nodejs') {
             steps {
-                // sh 'mvn --version'
-                // sh 'java -version'
-                // sh 'mvn clean package -Dmaven.test.failure.ignore=true'
                 sh 'npm install'
                 sh 'npm run build'
             }
@@ -22,7 +19,7 @@ pipeline {
 
         stage('Packaging/Pushing image') {
             steps {
-                withDockerRegistry(credentialsId: '	cre-dockerhub', url: 'https://index.docker.io/v1/') {
+                withDockerRegistry(credentialsId: 'cre-dockerhub', url: 'https://index.docker.io/v1/') {
                     sh 'docker build -t imghostcode/ctue-learn-english-api .'
                     sh 'docker push imghostcode/ctue-learn-english-api'
                 }
@@ -52,10 +49,9 @@ pipeline {
                 sh 'docker network create dev || echo "this network exists"'
                 sh 'echo y | docker container prune '
 
-                sh 'docker container run -d --rm --name ctue-nestjs-app -p 8000:8000 --network dev imghostcode/ctue-learn-english-api'
+                sh 'docker container run --rm --env-file /etc/secrets/.env -v /etc/secrets/ctue-mobile-app-firebase-adminsdk-jhlko-2ca507a4a8.json:/app/ctue-mobile-app-firebase-adminsdk-jhlko-2ca507a4a8.json -p ${PORT}:8000 --name ctue-nestjs-app --network dev imghostcode/ctue-learn-english-api'
             }
         }
- 
     }
     post {
         // Clean after build
