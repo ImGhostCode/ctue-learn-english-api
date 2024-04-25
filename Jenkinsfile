@@ -11,12 +11,12 @@ pipeline {
         FIREBASE_KEY = credentials('ctue-firebase-admin')
     }
     stage('Debug') {
-    steps {
-        sh 'printenv' // Print all environment variables
-        // Add additional echo statements to verify values:
-        echo "ENV_FILE value: $ENV_FILE"
-        echo "FIREBASE_KEY value: $FIREBASE_KEY"
-        }
+            steps {
+                sh 'printenv' // Print all environment variables
+                // Add additional echo statements to verify values:
+                echo "ENV_FILE value: $ENV_FILE"
+                echo "FIREBASE_KEY value: $FIREBASE_KEY"
+            }
     }
     stages {
 
