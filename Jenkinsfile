@@ -21,9 +21,12 @@ pipeline {
 
         stage('Packaging/Pushing image') {
             steps {
-                withDockerRegistry(credentialsId: 'cre-dockerhub', url: 'https://index.docker.io/v1/') {
-                    sh 'docker build -t imghostcode/ctue-learn-english-api .'
-                    sh 'docker push imghostcode/ctue-learn-english-api'
+                withCredentials([file(credentialsId: 'ctue-firebase-admin', variable: 'FIREBASE_ADMIN_KEY')]) {
+                    withDockerRegistry(credentialsId: 'cre-dockerhub', url: 'https://index.docker.io/v1/') {
+                        sh "cat ${FIREBASE_ADMIN_KEY} > firebase_key.json"
+                        sh 'docker build --secret id=firebase_key,type=file,src=firebase_key.json -t imghostcode/ctue-learn-english-api .'
+                        sh 'docker push imghostcode/ctue-learn-english-api'
+                    }
                 }
             }
         }
@@ -46,14 +49,14 @@ pipeline {
         stage('Deploy NestJS to DEV') {
             steps {
                 withCredentials([file(credentialsId: 'ctue-firebase-admin', variable: 'FIREBASE_ADMIN_KEY')]) {
-                     echo 'Deploying and cleaning'
+                    echo 'Deploying and cleaning'
                     sh 'docker image pull imghostcode/ctue-learn-english-api'
                     sh 'docker container stop ctue-nestjs-app || echo "this container does not exist" '
                     sh 'docker network create dev || echo "this network exists"'
                     sh 'echo y | docker container prune '
 
-                    sh "cat ${FIREBASE_ADMIN_KEY} > /var/jenkins_home/workspace/test_dev/firebase-admin.json"
-                    sh 'docker container run --rm --env-file ${ENV_FILE} -v /var/jenkins_home/workspace/test_dev/firebase-admin.json:/app/ctue-mobile-app-firebase-adminsdk-jhlko-2ca507a4a8.json -p 8000:8000 --name ctue-nestjs-app --network dev imghostcode/ctue-learn-english-api'
+                    // sh "cat ${FIREBASE_ADMIN_KEY} > firebase_key.json"
+                    sh 'docker container run --rm --env-file ${ENV_FILE} -p 8000:8000 --name ctue-nestjs-app --network dev imghostcode/ctue-learn-english-api'
                 }
             }
         }
