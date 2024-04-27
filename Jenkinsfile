@@ -8,25 +8,21 @@ pipeline {
     environment {
         POSTGRES_ROOT_LOGIN = credentials('cre-postgres')
         ENV_FILE = credentials('env-file')
-        // FIREBASE_KEY = credentials('ctue-firebase-admin')
+        FIREBASE_KEY = credentials('ctue-firebase-admin')
     }
     
     stages {
         stage('Build with Nodejs') {
             steps {
                 sh 'npm install'
-                sh 'npm run build'
             }
         }
 
         stage('Packaging/Pushing image') {
             steps {
-                withCredentials([file(credentialsId: 'ctue-firebase-admin', variable: 'FIREBASE_ADMIN_KEY')]) {
-                    withDockerRegistry(credentialsId: 'cre-dockerhub', url: 'https://index.docker.io/v1/') {
-                        sh "cat ${FIREBASE_ADMIN_KEY} > firebase_key.json"
-                        sh 'docker build --secret id=firebase_key,src=$FIREBASE_ADMIN_KEY --secret id=env_file,src=$ENV_FILE -t imghostcode/ctue-learn-english-api .'
-                        sh 'docker push imghostcode/ctue-learn-english-api'
-                    }
+                withDockerRegistry(credentialsId: 'cre-dockerhub', url: 'https://index.docker.io/v1/') {
+                    sh 'docker build --secret id=firebase_key,src=$FIREBASE_ADMIN_KEY --secret id=env_file,src=$ENV_FILE -t imghostcode/ctue-learn-english-api .'
+                    sh 'docker push imghostcode/ctue-learn-english-api'
                 }
             }
         }
@@ -48,17 +44,14 @@ pipeline {
 
         stage('Deploy NestJS to DEV') {
             steps {
-                withCredentials([file(credentialsId: 'ctue-firebase-admin', variable: 'FIREBASE_ADMIN_KEY')]) {
-                    echo 'Deploying and cleaning'
-                    sh 'docker image pull imghostcode/ctue-learn-english-api'
-                    sh 'docker container stop ctue-nestjs-app || echo "this container does not exist" '
-                    sh 'docker network create dev || echo "this network exists"'
-                    sh 'echo y | docker container prune '
+                echo 'Deploying and cleaning'
+                sh 'docker image pull imghostcode/ctue-learn-english-api'
+                sh 'docker container stop ctue-nestjs-app || echo "this container does not exist" '
+                sh 'docker network create dev || echo "this network exists"'
+                sh 'echo y | docker container prune '
 
-                    // sh "cat ${FIREBASE_ADMIN_KEY} > firebase_key.json"
-                    sh 'docker container run -d --rm --env-file ${ENV_FILE} -p 8000:8000 --name ctue-nestjs-app --network dev imghostcode/ctue-learn-english-api'
-                    sh 'docker logs -f ctue-nestjs-app'
-                }
+                sh 'port=$(grep "^PORT=" ${ENV_FILE} | cut -d "=" -f2)'
+                sh 'docker container run -d --rm --env-file ${ENV_FILE} -p ${port}:8000 --name ctue-nestjs-app --network dev imghostcode/ctue-learn-english-api'   
             }
         }
     }
