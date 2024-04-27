@@ -5,8 +5,6 @@ WORKDIR /app
 
 RUN --mount=type=secret,id=firebase_key cp /run/secrets/firebase_key /app
 
-RUN ls -l /run/secrets
-
 RUN ls -l /app
 
 # A wildcard is used to ensure both package.json AND package-lock.json are copied
