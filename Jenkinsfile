@@ -15,6 +15,7 @@ pipeline {
         stage('Build with Nodejs') {
             steps {
                 sh 'npm install'
+                sh 'npm run build'
             }
         }
 
@@ -44,14 +45,16 @@ pipeline {
 
         stage('Deploy NestJS to DEV') {
             steps {
-                echo 'Deploying and cleaning'
-                sh 'docker image pull imghostcode/ctue-learn-english-api'
-                sh 'docker container stop ctue-nestjs-app || echo "this container does not exist" '
-                sh 'docker network create dev || echo "this network exists"'
-                sh 'echo y | docker container prune '
+                withDockerRegistry(credentialsId: 'cre-dockerhub', url: 'https://index.docker.io/v1/') {
+                    echo 'Deploying and cleaning'
+                    sh 'docker image pull imghostcode/ctue-learn-english-api'
+                    sh 'docker container stop ctue-nestjs-app || echo "this container does not exist" '
+                    sh 'docker network create dev || echo "this network exists"'
+                    sh 'echo y | docker container prune '
 
-                sh 'port=$(grep "^PORT=" ${ENV_FILE} | cut -d "=" -f2)'
-                sh 'docker container run -d --rm --env-file ${ENV_FILE} -p ${port}:8000 --name ctue-nestjs-app --network dev imghostcode/ctue-learn-english-api'   
+                    sh 'port=$(grep "^PORT=" ${ENV_FILE} | cut -d "=" -f2)'
+                    sh 'docker container run -d --rm --env-file ${ENV_FILE} -p ${port}:8000 --name ctue-nestjs-app --network dev imghostcode/ctue-learn-english-api'   
+                }
             }
         }
     }
