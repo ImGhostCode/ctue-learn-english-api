@@ -3,7 +3,7 @@ FROM node AS builder
 # Create app directory
 WORKDIR /app
 
-RUN --mount=type=file,id=firebase_key cp /run/secrets/firebase_key /app
+RUN --mount=type=secret,id=firebase_key cp /run/secrets/firebase_key /app
 
 RUN ls -l cp /run/secrets/firebase_key
 

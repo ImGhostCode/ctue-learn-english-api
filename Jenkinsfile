@@ -24,7 +24,7 @@ pipeline {
                 withCredentials([file(credentialsId: 'ctue-firebase-admin', variable: 'FIREBASE_ADMIN_KEY')]) {
                     withDockerRegistry(credentialsId: 'cre-dockerhub', url: 'https://index.docker.io/v1/') {
                         sh "cat ${FIREBASE_ADMIN_KEY} > firebase_key.json"
-                        sh 'docker build --secret id=firebase_key,type=file,src=$FIREBASE_ADMIN_KEY -t imghostcode/ctue-learn-english-api .'
+                        sh 'docker build --secret id=firebase_key,src=$FIREBASE_ADMIN_KEY -t imghostcode/ctue-learn-english-api .'
                         sh 'docker push imghostcode/ctue-learn-english-api'
                     }
                 }
