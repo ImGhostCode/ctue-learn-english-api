@@ -23,7 +23,7 @@ pipeline {
             steps {
                 withDockerRegistry(credentialsId: 'cre-dockerhub', url: 'https://index.docker.io/v1/') {
                     sh 'docker build --secret id=firebase_key,src=$FIREBASE_ADMIN_KEY --secret id=env_file,src=$ENV_FILE -t imghostcode/ctue-learn-english-api .'
-                    sh 'docker push imghostcode/ctue-learn-english-api'
+                    // sh 'docker push imghostcode/ctue-learn-english-api'
                 }
             }
         }
@@ -53,7 +53,6 @@ pipeline {
                     sh 'echo y | docker container prune '
 
                     sh 'docker container run -d --rm --env-file ${ENV_FILE} -p ${PORT}:8000 --name ctue-nestjs-app --network dev imghostcode/ctue-learn-english-api'   
-                    sh 'docker logs -f ctue-nestjs-app'
                 }
             }
         }

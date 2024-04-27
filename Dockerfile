@@ -19,7 +19,7 @@ RUN npm run build
 FROM node
 
 COPY --from=builder /app/package*.json ./
-RUN npm install
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/firebase_key.json ./dist
 COPY --from=builder /app/prisma ./prisma
