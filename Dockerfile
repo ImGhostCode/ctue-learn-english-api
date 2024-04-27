@@ -5,6 +5,8 @@ WORKDIR /app
 
 RUN --mount=type=secret,id=firebase_key cp /run/secrets/firebase_key /app/firebase_key.json
 
+RUN --mount=type=secret,id=env_file cp /run/secrets/env_file /app/.env
+
 RUN ls -l /app
 
 # A wildcard is used to ensure both package.json AND package-lock.json are copied
@@ -26,6 +28,8 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/firebase_key.json ./dist
+COPY --from=builder /app/prisma ./prisma
 
 EXPOSE 8000
-CMD [ "npm", "run", "start:prod" ]
+
+CMD npx prisma migrate deploy ; npm run start:prod 
