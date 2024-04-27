@@ -23,7 +23,7 @@ pipeline {
             steps {
                 withDockerRegistry(credentialsId: 'cre-dockerhub', url: 'https://index.docker.io/v1/') {
                     sh 'docker build --secret id=firebase_key,src=$FIREBASE_ADMIN_KEY --secret id=env_file,src=$ENV_FILE -t imghostcode/ctue-learn-english-api .'
-                    // sh 'docker push imghostcode/ctue-learn-english-api'
+                    sh 'docker push imghostcode/ctue-learn-english-api'
                 }
             }
         }
