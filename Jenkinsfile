@@ -57,6 +57,7 @@ pipeline {
 
                     // sh "cat ${FIREBASE_ADMIN_KEY} > firebase_key.json"
                     sh 'docker container run -d --rm --env-file ${ENV_FILE} -p 8000:8000 --name ctue-nestjs-app --network dev imghostcode/ctue-learn-english-api'
+                    sh 'docker logs -f ctue-nestjs-app'
                 }
             }
         }
