@@ -53,6 +53,7 @@ pipeline {
                     sh 'echo y | docker container prune '
 
                     sh 'docker container run -d --rm --env-file ${ENV_FILE} -p ${PORT}:8000 --name ctue-nestjs-app --network dev imghostcode/ctue-learn-english-api'   
+                    sh 'docker logs -f ctue-nestjs-app'
                 }
             }
         }
