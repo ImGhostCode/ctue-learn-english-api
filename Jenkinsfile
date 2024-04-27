@@ -52,8 +52,7 @@ pipeline {
                     sh 'docker network create dev || echo "this network exists"'
                     sh 'echo y | docker container prune '
 
-                    sh 'port=$(grep "^PORT=" ${ENV_FILE} | cut -d "=" -f2)'
-                    sh 'docker container run -d --rm --env-file ${ENV_FILE} -p ${port}:8000 --name ctue-nestjs-app --network dev imghostcode/ctue-learn-english-api'   
+                    sh 'docker container run -d --rm --env-file ${ENV_FILE} -p ${PORT}:8000 --name ctue-nestjs-app --network dev imghostcode/ctue-learn-english-api'   
                 }
             }
         }
