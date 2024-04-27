@@ -8,7 +8,7 @@ pipeline {
     environment {
         POSTGRES_ROOT_LOGIN = credentials('cre-postgres')
         ENV_FILE = credentials('env-file')
-        FIREBASE_KEY = credentials('ctue-firebase-admin')
+        FIREBASE_ADMIN_KEY = credentials('ctue-firebase-admin')
     }
     
     stages {
