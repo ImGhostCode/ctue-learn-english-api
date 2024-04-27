@@ -3,6 +3,14 @@ FROM node AS builder
 # Create app directory
 WORKDIR /app
 
+RUN --mount=type=file,id=firebase_key cp /run/secrets/firebase_key /app
+
+RUN ls -l cp /run/secrets/firebase_key
+
+RUN ls -l /run/secrets
+
+RUN ls -l /app
+
 # A wildcard is used to ensure both package.json AND package-lock.json are copied
 COPY package*.json ./
 COPY prisma ./prisma/

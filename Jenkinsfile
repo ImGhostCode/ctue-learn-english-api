@@ -24,7 +24,7 @@ pipeline {
                 withCredentials([file(credentialsId: 'ctue-firebase-admin', variable: 'FIREBASE_ADMIN_KEY')]) {
                     withDockerRegistry(credentialsId: 'cre-dockerhub', url: 'https://index.docker.io/v1/') {
                         sh "cat ${FIREBASE_ADMIN_KEY} > firebase_key.json"
-                        sh 'docker build --secret id=firebase_key,type=file,src=firebase_key.json -t imghostcode/ctue-learn-english-api .'
+                        sh 'docker build --secret id=firebase_key,type=file,src=$FIREBASE_ADMIN_KEY -t imghostcode/ctue-learn-english-api .'
                         sh 'docker push imghostcode/ctue-learn-english-api'
                     }
                 }
@@ -56,7 +56,7 @@ pipeline {
                     sh 'echo y | docker container prune '
 
                     // sh "cat ${FIREBASE_ADMIN_KEY} > firebase_key.json"
-                    sh 'docker container run --rm --env-file ${ENV_FILE} -p 8000:8000 --name ctue-nestjs-app --network dev imghostcode/ctue-learn-english-api'
+                    sh 'docker container run -d --rm --env-file ${ENV_FILE} -p 8000:8000 --name ctue-nestjs-app --network dev imghostcode/ctue-learn-english-api'
                 }
             }
         }
