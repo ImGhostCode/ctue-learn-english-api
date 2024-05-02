@@ -111,4 +111,10 @@ export class WordController {
   lookUpDictionary(@Query('key') key: string) {
     return this.wordServive.lookUpDictionary(key);
   }
+
+  @Version('1')
+  @Get('content')
+  getWordByContent(@Query('key') key: string) {
+    return this.wordServive.getWordByContent(key);
+  }
 }

@@ -194,6 +194,7 @@ export class PronunciationAssessmentService {
 
       const suggestWordsToImprove = await this.prismaService.word.findMany({
         where: {
+        isDeleted: false,
           OR: lablesNeedToBeImprove.map(item => ({
             phonetic: {
               contains: item.label

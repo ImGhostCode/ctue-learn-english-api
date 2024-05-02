@@ -75,7 +75,7 @@ export class WordService {
             };
             if (key) whereCondition.OR = [
                 { content: { contains: key, mode: 'insensitive' } },
-               // { meanings: { some: { contains: key, mode: 'insensitive' } }}
+                // { meanings: { some: { contains: key, mode: 'insensitive' } }}
             ]
             if (level) whereCondition.levelId = Number(level);
             if (specialization) whereCondition.specializationId = Number(specialization);
@@ -358,6 +358,33 @@ export class WordService {
             //return new ResponseData<Word>([], 400, 'Không tìm thấy từ trong từ điển');
             // }
             return new ResponseData<any>({ results: words }, HttpStatus.OK, 'Tra từ điển thành công');
+        } catch (error) {
+            throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    async getWordByContent(content: string) {
+        try {
+            const word = await this.prismaService.word.findFirst({
+                where: {
+                    content: {
+                        equals: content,
+                        mode: 'insensitive'
+                    }
+                },
+                include: {
+                    Topic: true,
+                    meanings: {
+                        include: {
+                            Type: true
+                        }
+                    },
+                    Level: true,
+                    Specialization: true
+                }
+            })
+            if (!word) throw new HttpException('Từ không tồn tại', HttpStatus.NOT_FOUND)
+            return new ResponseData<Word>(word, HttpStatus.OK, 'Tìm thành công')
         } catch (error) {
             throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
