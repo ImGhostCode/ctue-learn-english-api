@@ -30,9 +30,7 @@ export class VocabularyPackService {
                 },
             }
 
-            if (account.accountType == ACCOUNT_TYPES.USER) {
-                data.userId = account.userId
-            }
+            data.userId = account.userId
 
             if (topicId) data.topicId = topicId
             if (specId) data.specId = specId
@@ -47,7 +45,6 @@ export class VocabularyPackService {
                         words: true,
 
                     },
-
                 })
 
                 if (account.accountType === ACCOUNT_TYPES.USER) {
@@ -59,8 +56,6 @@ export class VocabularyPackService {
                     })
                 }
             });
-
-
             return new ResponseData<VocabularyPack>(createdVocabPack, HttpStatus.CREATED, 'Tạo bộ từ thành công')
         } catch (error) {
             throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
@@ -218,9 +213,25 @@ export class VocabularyPackService {
                         where: {
                             isDeleted: false
                         }
-
                     },
                 }
+            })
+
+            const createdVocabPackIds = createdVocabPacks.CreatedVocabularyPack
+                .map(set => set.id)
+                .filter(id => id !== undefined);
+
+            createdVocabPacks.CreatedVocabularyPack = await this.prismaService.userVocabularyPack.findMany({
+                where: {
+                    isDeleted: false,
+                    userId: userId,
+                    vocabularyPackId: {
+                        in: createdVocabPackIds
+                    }
+                },
+                select: {
+                    VocabularyPack: true
+                },
             })
 
             const downloadedVocabPacks: any = await this.prismaService.userVocabularyPack.findMany({
@@ -228,7 +239,7 @@ export class VocabularyPackService {
                     isDeleted: false,
                     userId: userId,
                     vocabularyPackId: {
-                        notIn: createdVocabPacks.CreatedVocabularyPack.map(set => set.id)
+                        notIn: createdVocabPacks.CreatedVocabularyPack.map(set => set.VocabularyPack.id)
                     },
                     VocabularyPack: {
                         isDeleted: false
@@ -242,7 +253,6 @@ export class VocabularyPackService {
             return new ResponseData<{ results: VocabularyPack[] }>({ results: [...createdVocabPacks.CreatedVocabularyPack, ...downloadedVocabPacks.map(set => set.VocabularyPack)] }, HttpStatus.OK, 'Tìm thành công')
         } catch (error) {
             console.log(error);
-
             throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -290,7 +300,6 @@ export class VocabularyPackService {
     }
     async update(id: number, updateVocabPackDto: UpdateVocabPackDto, newPictureFile: Express.Multer.File, account: Account) {
         try {
-
             let { title, topicId = null, specId = null, words, oldWords, picture = null, oldPicture = null, isPublic = false } = updateVocabPackDto
             if (account.accountType === ACCOUNT_TYPES.USER) {
                 const isOwner = await this.prismaService.vocabularyPack.findUnique({ where: { id, userId: account.userId, isDeleted: false } })
@@ -314,8 +323,15 @@ export class VocabularyPackService {
                 //connect: words.map(id => ({ id: Number(id) }))
                 //}
             }
-            if (topicId) dataUpdate.topicId = topicId;
-            if (specId) dataUpdate.specId = specId;
+
+            if (topicId != null && specId == null) {
+                dataUpdate.topicId = topicId;
+                dataUpdate.specId = null;
+            }
+            if (specId != null && topicId == null) {
+                dataUpdate.specId = specId;
+                dataUpdate.topicId = null;
+            }
             if (words) {
                 words = words.map(id => Number(id))
                 dataUpdate.words = {
