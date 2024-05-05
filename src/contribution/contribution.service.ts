@@ -63,12 +63,12 @@ export class ContributionService {
 
     try {
       let { page,
-         type,
-         status
+        type,
+        status
       } = option
       const totalCount = await this.prismaService.contribution.count({
         where: {
-           type, status: Number(status),
+          type, status: Number(status),
           isDeleted: false
         }
       })
@@ -80,7 +80,7 @@ export class ContributionService {
         skip: next,
         take: pageSize,
         where: {
-           type, status: Number(status),
+          type, status: Number(status),
           isDeleted: false
         }, include: {
           User: true
@@ -89,6 +89,52 @@ export class ContributionService {
           createdAt: 'desc'
         }
       })
+
+      const topics = await this.prismaService.topic.findMany()
+      const levels = await this.prismaService.level.findMany()
+      const specializations = await this.prismaService.specialization.findMany()
+      const types = await this.prismaService.type.findMany()
+
+      contributions = contributions.map(contribution => {
+        if (contribution.type === 'word') {
+          const { topicId = [], levelId, specializationId, content, meanings = [], note, phonetic, examples = [], synonyms = [], antonyms = [], pictures = [] } = JSON.parse(JSON.stringify(contribution.content));
+          return {
+            ...contribution,
+            content: {
+              topicId: topicId,
+              levelId: levelId,
+              specializationId: specializationId,
+              Topic: topicId.map(id => topics.find(topic => topic.id === id)),
+              Level: levels.find(level => level.id === levelId),
+              Specialization: specializations.find(specialization => specialization.id === specializationId),
+              content,
+              meanings: meanings.map(meaning => { return { ...meaning, Type: types.find(type => type.id === meaning.typeId) } }),
+              note,
+              phonetic,
+              examples,
+              synonyms,
+              antonyms,
+              pictures,
+
+            }
+          }
+        } else {
+          const { topicId = [], content, meaning, note, typeId } = JSON.parse(JSON.stringify(contribution.content))
+          return {
+            ...contribution,
+            content: {
+              topicId,
+              typeId,
+              Topic: topicId.map(id => topics.find(topic => topic.id === id)),
+              content,
+              meaning,
+              note,
+              Type: types.find(type => type.id === typeId)
+            }
+          }
+        }
+      })
+
       //contributions.forEach((contribution) => contribution.content = JSON.parse(contribution.content as string))
       return new ResponseData<any>({ data: contributions, totalPages, total: totalCount }, HttpStatus.OK, 'Tìm thành công')
     } catch (error) {

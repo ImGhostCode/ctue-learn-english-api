@@ -14,8 +14,8 @@ model Favorite {
   sentenceId Int?
   User       User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  Sentence Sentence? @relation(fields: [sentenceId], references: [id])
-  Word     Word?     @relation(fields: [wordId], references: [id])
+  Sentence Sentence? @relation(fields: [sentenceId], references: [id], onDelete: Cascade)
+  Word     Word?     @relation(fields: [wordId], references: [id], onDelete: Cascade)
 }
 
 model User {
@@ -121,7 +121,7 @@ model Word {
   UserLearnedWords UserLearnedWord[]
   Level            Level             @relation(fields: [levelId], references: [id])
   Specialization   Specialization    @relation(fields: [specializationId], references: [id])
-  User             User?             @relation(fields: [userId], references: [id])
+  User             User?             @relation(fields: [userId], references: [id], onDelete: SetNull)
   Favorite         Favorite[]
   Practice         Practice[]        @relation("PracticeToWord")
   ReviewReminder   ReviewReminder[]  @relation("ReviewReminderToWord")
@@ -227,7 +227,7 @@ model PronunciationAssessment {
   score              Int
   createdAt          DateTime            @default(now())
   phonemeAssessments PhonemeAssessment[]
-  User               User?               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  User               User?               @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@map("pronunciationAssessments")
 }
@@ -278,7 +278,7 @@ model VocabularyPack {
   UserVocabularyPacks UserVocabularyPack[]
   Specialization      Specialization?      @relation(fields: [specId], references: [id])
   Topic               Topic?               @relation(fields: [topicId], references: [id])
-  User                User                 @relation(fields: [userId], references: [id])
+  User                User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
   words               Word[]               @relation("VocabularyPackToWord")
 
   @@map("vocabularyPacks")
@@ -290,8 +290,8 @@ model UserVocabularyPack {
   createdAt        DateTime          @default(now())
   isDeleted        Boolean           @default(false)
   UserLearnedWord  UserLearnedWord[]
-  User             User              @relation(fields: [userId], references: [id])
-  VocabularyPack   VocabularyPack    @relation(fields: [vocabularyPackId], references: [id])
+  User             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  VocabularyPack   VocabularyPack    @relation(fields: [vocabularyPackId], references: [id], onDelete: Cascade)
 
   @@id([userId, vocabularyPackId])
   @@unique([userId, vocabularyPackId])
@@ -307,7 +307,7 @@ model ReviewReminder {
   vocabularyPackId Int            @default(1)
   updatedAt        DateTime       @default(now()) @updatedAt
   isDeleted        Boolean        @default(false)
-  User             User           @relation(fields: [userId], references: [id])
+  User             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   VocabularyPack   VocabularyPack @relation(fields: [vocabularyPackId], references: [id])
   words            Word[]         @relation("ReviewReminderToWord")
 
@@ -322,5 +322,5 @@ model Notification {
   data      Json
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
-  User      User     @relation(fields: [userId], references: [id])
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

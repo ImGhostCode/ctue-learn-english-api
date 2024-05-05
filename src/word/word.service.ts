@@ -136,6 +136,7 @@ export class WordService {
 
     async update(id: number, updateWordDto: UpdateWordDto, newPictureFiles: Express.Multer.File[]) {
         try {
+
             let { topicId = [], levelId, specializationId, content, meanings = [], note, phonetic, examples = [], antonyms = [], synonyms = [], oldPictures = [] } = updateWordDto
 
             const word = await this.findById(id)
@@ -160,20 +161,26 @@ export class WordService {
             // if (antonyms) antonyms = antonyms.filter(antonym => antonym !== '')
             // if (synonyms) synonyms = synonyms.filter(synonym => synonym !== '')
 
+            const jobs: any[] = [];
+
+
             if (topicId) {
-                await this.prismaService.word.update({
-                    where: { id: id },
-                    data: {
-                        Topic: { disconnect: word.Topic.map((id) => id) }
-                    }
-                })
+                jobs.push(
+                    this.prismaService.word.update({
+                        where: { id: id },
+                        data: {
+                            Topic: { disconnect: word.Topic.map((id) => id) }
+                        }
+                    }))
             }
 
             let meaningsToCreate: any[] = []
             if (meanings) {
-                await this.prismaService.wordMeaning.deleteMany({
-                    where: { wordId: id }
-                });
+
+                jobs.push(
+                    this.prismaService.wordMeaning.deleteMany({
+                        where: { wordId: id }
+                    }))
 
                 meaningsToCreate = meanings.map(mean => ({
                     // wordId: id,
@@ -198,8 +205,7 @@ export class WordService {
                 pictures,
             }
 
-
-            const newWord = await this.prismaService.word.update({
+            jobs.push(this.prismaService.word.update({
                 where: { id: Number(id) }, // Specify the primary key for identifying the record
                 data: data,
                 include: {
@@ -208,10 +214,13 @@ export class WordService {
                     Specialization: true,
                     Level: true
                 }
-            });
+            }))
+
+            const [job1, job2, newWord] = await this.prismaService.$transaction(jobs)
 
             return new ResponseData<Word>(newWord, HttpStatus.OK, 'Cập nhật thành công')
         } catch (error) {
+            console.log(error)
             throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -220,7 +229,22 @@ export class WordService {
         try {
             const word = await this.findById(id)
             if (!word) throw new HttpException('Từ không tồn tại', HttpStatus.NOT_FOUND)
-            return new ResponseData<Word>(await this.prismaService.word.delete({ where: { id: id } }), HttpStatus.OK, 'Xóa thành công')
+
+            const [res1, res2, res3, res4, res5, res6] = await this.prismaService.$transaction([
+                this.prismaService.$queryRaw`DELETE FROM "_VocabularyPackToWord" WHERE "B" = ${id}`,
+                this.prismaService.$queryRaw`DELETE FROM "_ReviewReminderToWord" WHERE "B" = ${id}`,
+                this.prismaService.$queryRaw`DELETE FROM "_TopicToWord" WHERE "B" = ${id}`,
+                this.prismaService.userLearnedWord.deleteMany({ where: { wordId: id } }),
+                this.prismaService.reviewReminder.deleteMany({
+                    where: {
+                        words: {
+                            none: {}
+                        }
+                    }
+                }),
+                this.prismaService.word.delete({ where: { id: id } })
+            ])
+            return new ResponseData<Word>(res6, HttpStatus.OK, 'Xóa thành công')
         } catch (error) {
             throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }

@@ -11,7 +11,7 @@ export class VocabularyPackService {
 
     constructor(private readonly prismaService: PrismaService, private readonly cloudinaryService: CloudinaryService) { }
 
-    async create(userId: number, createVocabPackDto: CreateVocabPackDto, pictureFile: Express.Multer.File) {
+    async create(account: Account, createVocabPackDto: CreateVocabPackDto, pictureFile: Express.Multer.File) {
         try {
             let { title, topicId = null, specId = null, picture = null, words = [] } = createVocabPackDto
 
@@ -25,10 +25,15 @@ export class VocabularyPackService {
             }
             let createdVocabPack: VocabularyPack | null = null
             const data: any = {
-                title, userId, isPublic: false, words: {
+                title, isPublic: false, words: {
                     connect: words.map(id => ({ id }))
                 },
             }
+
+            if (account.accountType == ACCOUNT_TYPES.USER) {
+                data.userId = account.userId
+            }
+
             if (topicId) data.topicId = topicId
             if (specId) data.specId = specId
             if (picture) data.picture = picture
@@ -45,12 +50,14 @@ export class VocabularyPackService {
 
                 })
 
-                await this.prismaService.userVocabularyPack.create({
-                    data: {
-                        userId,
-                        vocabularyPackId: createdVocabPack.id
-                    }
-                })
+                if (account.accountType === ACCOUNT_TYPES.USER) {
+                    await this.prismaService.userVocabularyPack.create({
+                        data: {
+                            userId: account.userId,
+                            vocabularyPackId: createdVocabPack.id
+                        }
+                    })
+                }
             });
 
 

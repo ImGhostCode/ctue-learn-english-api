@@ -21,7 +21,7 @@ export class VocabularyPackController {
   @ApiConsumes('multipart/form-data')
   @Post()
   create(@Body() createVocabPackDto: CreateVocabPackDto, @GetAccount() account: Account, @UploadedFile() picture: Express.Multer.File) {
-    return this.vocabularyPackService.create(account.userId, createVocabPackDto, picture);
+    return this.vocabularyPackService.create(account, createVocabPackDto, picture);
   }
 
   @Version('1')

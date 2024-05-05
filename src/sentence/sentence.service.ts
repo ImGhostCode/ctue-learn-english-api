@@ -151,7 +151,11 @@ export class SentenceService {
         try {
             const sentence = await this.findById(id)
             if (!sentence) throw new HttpException('Câu không tồn tại', HttpStatus.NOT_FOUND);
-            return new ResponseData<Sentence>(await this.prismaService.sentence.delete({ where: { id: id } }), HttpStatus.OK, 'Xóa thành công')
+            const [res1, res2] = await this.prismaService.$transaction([
+                this.prismaService.$queryRaw`DELETE FROM "_SentenceToTopic" WHERE "A" = ${id}`,
+                this.prismaService.sentence.delete({ where: { id: id } })
+            ])
+            return new ResponseData<Sentence>(res2, HttpStatus.OK, 'Xóa thành công')
         } catch (error) {
             throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
         }
