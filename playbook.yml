@@ -6,6 +6,9 @@
   vars:
     env_file_path: "{{ env_file }}"
   tasks:
+    - name: Print env file path
+      debug:
+        msg: "The env file path is {{ env_file_path }}"
     - name: update
       apt:
         upgrade: yes
@@ -76,7 +79,8 @@
       docker_container:
         name: ctue-nestjs-app
         image: imghostcode/ctue-learn-english-api
-        env: "{{ env_file_path }}"
+        env_file:
+          - "{{ env_file_path }}"
         networks:
           - name: test
             aliases:
