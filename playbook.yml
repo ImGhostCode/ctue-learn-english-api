@@ -3,6 +3,8 @@
   become: yes
   become_user: root
   become_method: sudo
+  vars:
+    env_file_path: "{{ env_file }}"
   tasks:
     - name: update
       apt:
@@ -74,6 +76,7 @@
       docker_container:
         name: ctue-nestjs-app
         image: imghostcode/ctue-learn-english-api
+        env: "{{ env_file_path }}"
         networks:
           - name: test
             aliases:
