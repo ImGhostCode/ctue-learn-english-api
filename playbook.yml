@@ -7,7 +7,7 @@
     - name: update
       apt:
         upgrade: yes
-        # update_cache: yes
+        update_cache: false
         cache_valid_time: 86400
     - name: Install required system packages
       apt:
