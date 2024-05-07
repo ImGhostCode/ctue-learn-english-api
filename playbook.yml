@@ -1,0 +1,95 @@
+- name: azure-playbook
+  hosts: host
+  become: yes
+  become_user: azureuser
+  become_method: sudo
+  tasks:
+    - name: update
+      apt:
+        upgrade: yes
+        update_cache: yes
+        cache_valid_time: 86400
+    - name: Install required system packages
+      apt:
+        pkg:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+          - python3-pip
+          - virtualenv
+          - python3-setuptools
+        state: latest
+        update_cache: true
+    - name: Add Docker GPG apt Key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker Repository
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu focal stable
+        state: present
+
+    - name: Update apt and install docker-ce
+      apt:
+        name: docker-ce
+        state: latest
+        update_cache: true
+
+    - name: Create a docker network
+      docker_network:
+        name: test
+    - name: Re-create a Postgres container
+      docker_container:
+        name: ctue-postgres
+        image: postgres
+        networks:
+          - name: test
+            aliases:
+              - test
+        env:
+          PGPASSWORD: test123456
+          POSTGRES_USER: postgres
+          POSTGRES_DB: ctue_db
+          POSTGRES_PASSWORD: test123456
+        detach: true
+        state: started
+        recreate: yes
+        exposed_ports:
+          - 5432
+        pull: true
+        comparisons:
+          image: strict
+    - name: Copy file with owner and permissions
+      ansible.builtin.copy:
+        src: ./script
+        dest: /home/azureuser/script
+        owner: azureuser
+        group: azureuser
+    - name: SLEEP now !!!
+      shell: sleep 15 && sudo docker exec -i -e PGPASSWORD=test123456 ctue-postgres psql -h ctue-postgres -U postgres --dbname=ctue_db < script
+# docker exec -i -e PGPASSWORD=test123456 ctue-postgres psql -h ctue-postgres -U postgres --dbname=ctue_db < script
+    - name: Re-create a NestJS container
+      docker_container:
+        name: ctue-nestjs-app
+        image: imghostcode/ctue-learn-english-api
+        networks:
+          - name: test
+            aliases:
+              - test
+        state: started
+        recreate: yes
+        exposed_ports:
+          - 8000
+        detach: true
+        published_ports:
+          - 8000:8000
+        pull: true
+        comparisons:
+          image: strict
+
+    - name: Prune everything
+      community.docker.docker_prune:
+        containers: true
+        images: true

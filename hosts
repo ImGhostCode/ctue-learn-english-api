@@ -1,0 +1,3 @@
+[host]
+20.41.73.150   ansible_user=azureuser
+52.155.123.202	 ansible_user=azureuser

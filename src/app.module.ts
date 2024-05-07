@@ -21,9 +21,10 @@ import { PronunciationAssessmentModule } from './pronunciation-assessment/pronun
 import { LearnModule } from './learn/learn.module';
 import { NotificationModule } from './notification/notification.module';
 import { StatisticsModule } from './statistics/statistics.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }), PrismaModule, AuthModule, UserModule, SentenceModule, WordModule, TypeModule, LevelModule, TopicModule, SpecializationModule, ContributionModule, IrregularVerbModule, FavoriteModule, CloudinaryModule, MailingModule, PracticeModule, VocabularyPackModule, PronunciationAssessmentModule, LearnModule, NotificationModule, StatisticsModule]
+  imports: [ConfigModule.forRoot({ isGlobal: true }), ScheduleModule.forRoot(), PrismaModule, AuthModule, UserModule, SentenceModule, WordModule, TypeModule, LevelModule, TopicModule, SpecializationModule, ContributionModule, IrregularVerbModule, FavoriteModule, CloudinaryModule, MailingModule, PracticeModule, VocabularyPackModule, PronunciationAssessmentModule, LearnModule, NotificationModule, StatisticsModule]
 })
 export class AppModule {
   static port: number

@@ -93,4 +93,10 @@ export class LearnController {
   remove(@Param('id') id: string) {
     return this.learnService.remove(+id);
   }
+
+  sendNotiRemindToReview() {
+    return this.learnService.sendNotiRemindToReview();
+  }
+
+
 }

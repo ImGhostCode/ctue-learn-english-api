@@ -18,13 +18,15 @@ export class AuthService {
             })
             if (user) throw new HttpException('Email đã được sử dụng', HttpStatus.CONFLICT);
 
-            const newUser = await this.prismaService.user.create({
-                data: {
-                    name: registerDto.name,
-                    interestTopics: {
-                        connect: registerDto.interestTopics?.map((id) => ({ id }))
-                    }
+            const dataCreate: any = { name: registerDto.name }
+            if (registerDto.interestTopics) {
+                dataCreate.interestTopics = {
+                    connect: registerDto.interestTopics.map((id) => ({ id }))
                 }
+            }
+
+            const newUser = await this.prismaService.user.create({
+                data: dataCreate
             })
             if (!newUser) throw new HttpException('Tạo tài khoản thất bại, thử lại', HttpStatus.BAD_REQUEST);
 
@@ -64,6 +66,12 @@ export class AuthService {
             if (account.isBanned) return new ResponseData<any>({ feedback: account.feedback }, HttpStatus.FORBIDDEN, 'Tài khoản đã bị khóa')
 
             const data = await this.signJwtToken(account.userId, account.email)
+
+            await this.prismaService.user.update({
+                where: { id: account.userId, }, data: {
+                    fcmToken: loginDto.fcmToken
+                }
+            })
 
             return new ResponseData<any>(data, HttpStatus.OK, 'Đăng nhập thành công')
         } catch (error) {

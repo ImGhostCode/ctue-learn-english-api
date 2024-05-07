@@ -19,12 +19,14 @@ export class NotificationService {
           userId: createNotificationDto.userId,
           title: createNotificationDto.title,
           body: createNotificationDto.body,
-          data: JSON.parse(JSON.stringify(createNotificationDto.data))
+          data: createNotificationDto.data ? JSON.parse(JSON.stringify(createNotificationDto.data)) : {}
         }
       })
 
       return new ResponseData<Notification>(result, HttpStatus.CREATED, 'Tạo thông báo thành công')
     } catch (error) {
+      console.log(error);
+
       throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -135,7 +137,7 @@ export class NotificationService {
         // throw new HttpException('Registration Token không hợp lệ', HttpStatus.BAD_REQUEST);
         // } else {
         const message: any = {
-          data: { ...createNotificationDto.data, data: JSON.stringify(createNotificationDto.data.data) },
+          data: createNotificationDto.data ? { ...createNotificationDto.data, data: JSON.stringify(createNotificationDto.data.data) } : {},
           notification: {
             title: createNotificationDto.title,
             body: createNotificationDto.body,
@@ -156,4 +158,24 @@ export class NotificationService {
     }
   }
 
+  // async scheduleRemindNotification(userId: number, numberOfWord: number, reviewAt: Date) {
+  //   try {
+  //     const user = await this.prismaService.user.findUnique({ where: { id: userId, isDeleted: false }, select: { fcmToken: true, name: true } })
+  //     if (!user) return
+  //     const message: any = {
+  //       data: { title: 'Nhắc nhở học từ', body: 'Đã đến lúc học từ' },
+  //       notification: {
+  //         title: `Hey ${user.name},`,
+  //         body: `Bạn có ${numberOfWord} từ cần ôn tập!`,
+  //       },
+  //       sendAt: reviewAt.getTime(),
+  //       token: user.fcmToken
+  //     };
+  //     console.log(message);
+
+  //     await admin.messaging().send(message);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // }
 }

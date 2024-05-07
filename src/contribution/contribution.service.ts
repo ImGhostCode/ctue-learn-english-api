@@ -156,7 +156,7 @@ export class ContributionService {
       if (page > totalPages) page = totalPages
       let next = (page - 1) * pageSize
 
-      let contributions = await this.prismaService.contribution.findMany({
+      let contributions: any = await this.prismaService.contribution.findMany({
         skip: next,
         take: pageSize, where: { userId, isDeleted: false },
         include: {
@@ -164,6 +164,51 @@ export class ContributionService {
         },
         orderBy: {
           createdAt: 'desc'
+        }
+      })
+
+      const topics = await this.prismaService.topic.findMany()
+      const levels = await this.prismaService.level.findMany()
+      const specializations = await this.prismaService.specialization.findMany()
+      const types = await this.prismaService.type.findMany()
+
+      contributions = contributions.map(contribution => {
+        if (contribution.type === 'word') {
+          const { topicId = [], levelId, specializationId, content, meanings = [], note, phonetic, examples = [], synonyms = [], antonyms = [], pictures = [] } = JSON.parse(JSON.stringify(contribution.content));
+          return {
+            ...contribution,
+            content: {
+              topicId: topicId,
+              levelId: levelId,
+              specializationId: specializationId,
+              Topic: topicId.map(id => topics.find(topic => topic.id === id)),
+              Level: levels.find(level => level.id === levelId),
+              Specialization: specializations.find(specialization => specialization.id === specializationId),
+              content,
+              meanings: meanings.map(meaning => { return { ...meaning, Type: types.find(type => type.id === meaning.typeId) } }),
+              note,
+              phonetic,
+              examples,
+              synonyms,
+              antonyms,
+              pictures,
+
+            }
+          }
+        } else {
+          const { topicId = [], content, meaning, note, typeId } = JSON.parse(JSON.stringify(contribution.content))
+          return {
+            ...contribution,
+            content: {
+              topicId,
+              typeId,
+              Topic: topicId.map(id => topics.find(topic => topic.id === id)),
+              content,
+              meaning,
+              note,
+              Type: types.find(type => type.id === typeId)
+            }
+          }
         }
       })
       // contributions.forEach((contribution) => contribution.content = JSON.parse(String(contribution.content)))

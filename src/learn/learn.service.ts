@@ -7,11 +7,14 @@ import { SaveTheLearnedResultDto } from './dto/saveTheLearnedResult.dto';
 import { PAGE_SIZE, ResponseData } from 'src/global';
 import { UserLearnedWord } from '@prisma/client';
 import { UpdateReviewReminderDto } from './dto/update-reminder.dto';
+import { NotificationService } from 'src/notification/notification.service';
+import { CreateNotificationDto } from 'src/notification/dto/create-notification.dto';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class LearnService {
 
-  constructor(private readonly prismaService: PrismaService) { }
+  constructor(private readonly prismaService: PrismaService, private readonly notificationService: NotificationService,) { }
 
   async getLeaningHistory(option: { level?: number | undefined; page: number, sort?: string | undefined }, userId?: number | undefined) {
     let pageSize = PAGE_SIZE.PAGE_LEARN_HISTORY
@@ -37,7 +40,7 @@ export class LearnService {
         skip: next,
         take: pageSize,
         where: whereCondition, include: {
-          User:true,
+          User: true,
           Word: true
         },
         orderBy: {
@@ -144,6 +147,12 @@ export class LearnService {
             }
           }))
       ])
+
+
+      // handle schedule send notification when review
+      // res.forEach(async reminder => {
+      //   this.notificationService.scheduleRemindNotification(userId, reminder.words.length, reminder.reviewAt)
+      // })
 
       return new ResponseData<any>(res, HttpStatus.CREATED, 'Tạo nhắc nhở thành công')
     } catch (error) {
@@ -309,6 +318,132 @@ export class LearnService {
       throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
 
     }
+  }
+
+  // Auto send notification to remind user to review at 7:00 AM everyday
+  @Cron('0 7 * * *')
+  async sendNotiRemindToReview() {
+    const now = new Date()
+    const reminders = await this.prismaService.reviewReminder.findMany({
+      where: {
+        reviewAt: {
+          lte: now
+        },
+        isDeleted: false
+        , isDone: false,
+      },
+      include: {
+        User: {
+          select: {
+            fcmToken: true,
+            name: true,
+            id: true,
+          },
+        },
+        words: true
+      }
+    })
+
+    class RemindData {
+      id: number
+      name: string
+      fcmToken: string
+      numOfWord: number
+      constructor(fcmToken: string, numOfWord: number, name: string, id: number) {
+        this.fcmToken = fcmToken
+        this.numOfWord = numOfWord
+        this.name = name
+        this.id = id
+      }
+    }
+
+    const notificationData: any = {}
+    reminders.forEach(async reminder => {
+      if (!notificationData[reminder.User.id]) {
+        notificationData[reminder.User.id] = new RemindData(reminder.User.fcmToken, reminder.words.length, reminder.User.name, reminder.User.id)
+      } else {
+        notificationData[reminder.User.id].numOfWord += reminder.words.length
+      }
+    })
+
+    Object.values(notificationData).forEach(async (reminder: RemindData) => {
+      this.notificationService.sendNotification(reminder.fcmToken, { userId: reminder.id, title: `Hey ${reminder.name}`, body: `Bạn có ${reminder.numOfWord} cần ôn tập!` } as CreateNotificationDto)
+    })
+  }
+
+  // Auto analize learned words and update user's top 3 topics at weedly
+  @Cron('0 0 * * 0')
+  async analizeLearnedWords() {
+    // Fetch all learned words for all users
+    const learnedWords = await this.prismaService.userLearnedWord.findMany({
+      where: {
+        isDeleted: false,
+
+        // Get all words that have been updated in the last 7 days
+        updatedAt: {
+          gte: new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000)
+        }
+      },
+      include: {
+        Word: {
+          select: {
+            Topic: true
+          }
+        }
+      }
+    });
+
+    // Group learned words by userId and count the occurrence of each topic
+    const userTopicCounts = learnedWords.reduce((counts, learnedWord) => {
+      const userId = learnedWord.userId;
+      if (!counts[userId]) {
+        counts[userId] = {};
+      }
+
+      learnedWord.Word.Topic.forEach(topic => {
+        const topicId = topic.id;
+        if (!counts[userId][topicId]) {
+          counts[userId][topicId] = 0;
+        }
+        counts[userId][topicId]++;
+      });
+
+      return counts;
+    }, {});
+
+    // Sort topics by occurrence for each user
+    const userSortedTopics = Object.entries(userTopicCounts).map(([userId, topicCounts]) => {
+      const sortedTopics = Object.entries(topicCounts).sort((a, b) => b[1] - a[1]);
+      return {
+        userId: userId,
+        topics: sortedTopics
+      };
+    });
+
+    this.updateUserTopics(userSortedTopics);
+  }
+
+  async updateUserTopics(userSortedTopics) {
+    // Get the top 3 topics for each user
+    userSortedTopics.forEach(user => {
+      user.topics = user.topics.slice(0, 3);
+    });
+
+    // update the user's top 3 topics in the database
+    userSortedTopics.forEach(async (user) => {
+      const userId = parseInt(user.userId);
+      const topics = user.topics.map(topic => parseInt(topic[0]));
+      await this.prismaService.user.update({
+        where: {
+          id: userId
+        },
+        data: {
+          interestTopics: {
+            connect: topics.map(topicId => ({ id: topicId }))
+          }
+        }
+      });
+    });
   }
 
   create(createLearnDto: CreateLearnDto) {
