@@ -79,8 +79,8 @@
       docker_container:
         name: ctue-nestjs-app
         image: imghostcode/ctue-learn-english-api
-        env_file:
-          - "{{ env_file_path }}"
+        env:
+          ENV_FILE: "{{ env_file_path }}"
         networks:
           - name: test
             aliases:
