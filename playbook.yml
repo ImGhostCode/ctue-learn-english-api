@@ -19,6 +19,14 @@
         dest: /secret/.env
         owner: azureuser
         group: azureuser
+    - name: Check if environment file exists
+      stat:
+        path: /secret/.env
+        register: env_file_stat
+    - name: Fail if environment file does not exist
+      fail:
+        msg: "Environment file /secret/.env does not exist"
+      when: not env_file_stat.stat.exists
     - name: update
       apt:
         upgrade: yes
