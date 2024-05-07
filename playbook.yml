@@ -6,6 +6,13 @@
   vars:
     env_vars: "{{ lookup('file', env_file) }}"
   tasks:
+    - name: Ensure destination directory exists
+      file:
+        path: /secret
+        state: directory
+        owner: azureuser
+        group: azureuser
+        mode: '0755'
     - name: Write environment variables to a file
       copy:
         content: "{{ env_vars }}"
