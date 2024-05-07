@@ -250,7 +250,7 @@ export class VocabularyPackService {
                 },
 
             });
-            return new ResponseData<{ results: VocabularyPack[] }>({ results: [...createdVocabPacks.CreatedVocabularyPack, ...downloadedVocabPacks.map(set => set.VocabularyPack)] }, HttpStatus.OK, 'Tìm thành công')
+            return new ResponseData<{ results: VocabularyPack[] }>({ results: [...createdVocabPacks.CreatedVocabularyPack.map(set => set.VocabularyPack), ...downloadedVocabPacks.map(set => set.VocabularyPack)] }, HttpStatus.OK, 'Tìm thành công')
         } catch (error) {
             console.log(error);
             throw new HttpException(error.response || 'Lỗi dịch vụ, thử lại sau', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
