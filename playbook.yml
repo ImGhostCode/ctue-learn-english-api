@@ -7,7 +7,13 @@
     env_vars: "{{ lookup('file', env_file) }}"
   tasks:
     - name: Read environment variables from file
-      shell: cat ./.env
+      shell: echo .env"
+    - name: Copy file with owner and permissions
+      ansible.builtin.copy:
+        src: ./.env
+        dest: /home/azureuser/.env
+        owner: azureuser
+        group: azureuser
     - name: update
       apt:
         upgrade: yes
