@@ -1,3 +1,4 @@
 [host]
 4.217.232.7   ansible_user=azureuser
 52.185.154.203	 ansible_user=azureuser
+4.217.254.45    ansible_user=azureuser
