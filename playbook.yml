@@ -14,8 +14,13 @@
         group: azureuser
         mode: '0755'
     - name: Write environment variables to a file
-      copy:
-        content: "{{ env_vars }}"
+      # copy:
+      #   content: "{{ env_vars }}"
+      #   dest: /home/azureuser/.env
+      #   owner: azureuser
+      #   group: azureuser
+      ansible.builtin.copy:
+        src: "{{ env_vars }}"
         dest: /home/azureuser/.env
         owner: azureuser
         group: azureuser
