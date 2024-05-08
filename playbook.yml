@@ -24,6 +24,10 @@
         dest: /home/azureuser/.env
         owner: azureuser
         group: azureuser
+    - name: Read .env file
+      ansible.builtin.debug:
+        msg: "{{ lookup('file', '/home/azureuser/.env') }}"
+      
     - name: update
       apt:
         upgrade: yes
@@ -95,7 +99,7 @@
         name: ctue-nestjs-app
         image: imghostcode/ctue-learn-english-api
         env_file:
-          - /home/azureuser/.env
+          - "{{ lookup('file', '/home/azureuser/.env') }}"
         networks:
           - name: test
             aliases:
