@@ -20,7 +20,7 @@
       #   owner: azureuser
       #   group: azureuser
       ansible.builtin.copy:
-        src: "{{ env_vars }}"
+        content: "{{ env_vars }}"
         dest: /home/azureuser/.env
         owner: azureuser
         group: azureuser
