@@ -83,8 +83,7 @@
         name: ctue-nestjs-app
         image: imghostcode/ctue-learn-english-api
         # Pass environment variables to the container
-        env_file:
-          - /home/azureuser/.env
+        env_file: /home/azureuser/.env
           
         networks:
           - name: test
