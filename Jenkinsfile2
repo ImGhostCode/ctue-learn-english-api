@@ -16,14 +16,13 @@ pipeline {
             steps {
                 withCredentials([file(credentialsId: 'ansible_key', variable: 'ansible_key')]) {
                     sh 'cp $ENV_FILE ./.env'
-                    sh 'cat .env'
                     sh 'ls -la'
                     sh "cp /$ansible_key ansible_key"
                     sh 'cat ansible_key'
                     sh 'ansible --version'
                     sh 'ls -la'
                     sh 'chmod 400 ansible_key '
-                    sh 'ansible-playbook -i hosts --private-key ansible_key playbook.yml -e env_file=$ENV_FILE'
+                    sh 'ansible-playbook -i hosts --private-key ansible_key playbook.yml'
             }
             }
         }

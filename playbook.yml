@@ -6,7 +6,7 @@
   vars:
     env_vars: "{{ lookup('file', env_file) }}"
   tasks:
-    - name: Copy file with owner and permissions
+    - name: Copy .env file with owner and permissions
       ansible.builtin.copy:
         src: ./.env
         dest: /home/azureuser/.env
@@ -77,14 +77,11 @@
         group: azureuser
     - name: SLEEP now !!!
       shell: sleep 15 && sudo docker exec -i -e PGPASSWORD=test123456 ctue-postgres psql -h ctue-postgres -U postgres --dbname=ctue_db < script
-# docker exec -i -e PGPASSWORD=test123456 ctue-postgres psql -h ctue-postgres -U postgres --dbname=ctue_db < script
     - name: Re-create a NestJS container
       docker_container:
         name: ctue-nestjs-app
         image: imghostcode/ctue-learn-english-api
-        # Pass environment variables to the container
         env_file: /home/azureuser/.env
-          
         networks:
           - name: test
             aliases:
