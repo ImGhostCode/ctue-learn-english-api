@@ -6,8 +6,6 @@
   vars:
     env_vars: "{{ lookup('file', env_file) }}"
   tasks:
-    - name: Read environment variables from file
-      shell: echo .env"
     - name: Copy file with owner and permissions
       ansible.builtin.copy:
         src: ./.env
