@@ -66,6 +66,8 @@
         recreate: yes
         exposed_ports:
           - 5432
+        published_ports:
+          - 5432:5432
         pull: true
         comparisons:
           image: strict
