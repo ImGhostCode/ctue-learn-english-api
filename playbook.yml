@@ -6,6 +6,9 @@
   vars:
     env_vars: "{{ lookup('file', env_file) }}"
   tasks:
+    - name: Read environment variables from file
+      ansible.builtin.set_fact:
+        env_vars: "{{ lookup('file', env_file) }}"
     - name: update
       apt:
         upgrade: yes
@@ -76,8 +79,9 @@
       docker_container:
         name: ctue-nestjs-app
         image: imghostcode/ctue-learn-english-api
-        volumes:
-          - ./env_file:/.env
+        # Pass environment variables to the container
+        env: "{{ env_vars }}"
+          
         networks:
           - name: test
             aliases:
