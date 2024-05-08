@@ -6,28 +6,27 @@
   vars:
     env_vars: "{{ lookup('file', env_file) }}"
   tasks:
-    - name: Ensure destination directory exists
-      file:
-        path: /secret
-        state: directory
-        owner: azureuser
-        group: azureuser
-        mode: '0755'
-    - name: Write environment variables to a file
-      # copy:
-      #   content: "{{ env_vars }}"
-      #   dest: /home/azureuser/.env
-      #   owner: azureuser
-      #   group: azureuser
-      ansible.builtin.copy:
-        content: "{{ env_vars }}"
-        dest: /home/azureuser/.env
-        owner: azureuser
-        group: azureuser
+    # - name: Ensure destination directory exists
+    #   file:
+    #     path: /secret
+    #     state: directory
+    #     owner: azureuser
+    #     group: azureuser
+        # mode: '0755'
+    # - name: Write environment variables to a file
+    #   copy:
+    #     content: "{{ env_vars }}"
+    #     dest: /home/azureuser/.env
+    #     owner: azureuser
+    #     group: azureuser
     - name: Read .env file
-      ansible.builtin.debug:
-        msg: "{{ lookup('file', '/home/azureuser/.env') }}"
-      
+      slurp:
+        src: /home/azureuser/.env
+      register: env_file_slurp
+
+    - name: Decode .env file contents
+      set_fact:
+        env_file_contents: "{{ env_file_slurp['content'] | b64decode }}"
     - name: update
       apt:
         upgrade: yes
@@ -98,8 +97,10 @@
       docker_container:
         name: ctue-nestjs-app
         image: imghostcode/ctue-learn-english-api
-        env_file:
-          - "{{ lookup('file', '/home/azureuser/.env') }}"
+        # env_file:
+        #   - "{{ lookup('file', '/home/azureuser/.env') }}"
+        env:
+          "{{ env_file_contents | from_yaml }}"
         networks:
           - name: test
             aliases:
