@@ -19,14 +19,17 @@
     #     dest: /home/azureuser/.env
     #     owner: azureuser
     #     group: azureuser
-    - name: Read .env file
-      slurp:
-        src: /home/azureuser/.env
-      register: env_file_slurp
+    # - name: Read .env file
+    #   slurp:
+    #     src: /home/azureuser/.env
+    #   register: env_file_slurp
 
-    - name: Decode .env file contents
-      set_fact:
-        env_file_contents: "{{ env_file_slurp['content'] | b64decode }}"
+    # - name: Decode .env file contents
+    #   set_fact:
+    #     env_file_contents: "{{ env_file_slurp['content'] | b64decode }}"
+    - name: Display environment variables
+      command: env
+      environment: "{{ env_vars }}"
     - name: update
       apt:
         upgrade: yes
@@ -94,11 +97,10 @@
       shell: sleep 15 && sudo docker exec -i -e PGPASSWORD=test123456 ctue-postgres psql -h ctue-postgres -U postgres --dbname=ctue_db < script
 # docker exec -i -e PGPASSWORD=test123456 ctue-postgres psql -h ctue-postgres -U postgres --dbname=ctue_db < script
     - name: Re-create a NestJS container
+      environment: "{{ env_vars }}"
       docker_container:
         name: ctue-nestjs-app
         image: imghostcode/ctue-learn-english-api
-        env_file:
-          - "{{ env_vars }}"
         networks:
           - name: test
             aliases:
