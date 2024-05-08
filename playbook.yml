@@ -99,8 +99,7 @@
         image: imghostcode/ctue-learn-english-api
         # env_file:
         #   - "{{ lookup('file', '/home/azureuser/.env') }}"
-        env:
-          "{{ env_file_contents | from_yaml }}"
+        env: "{{ env_file_contents | from_yaml }}"
         networks:
           - name: test
             aliases:
