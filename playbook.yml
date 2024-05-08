@@ -7,8 +7,7 @@
     env_vars: "{{ lookup('file', env_file) }}"
   tasks:
     - name: Read environment variables from file
-      ansible.builtin.set_fact:
-        env_vars: "{{ lookup('file', env_file) }}"
+      shell: cat ./.env
     - name: update
       apt:
         upgrade: yes
@@ -81,7 +80,7 @@
         image: imghostcode/ctue-learn-english-api
         # Pass environment variables to the container
         env_file:
-          - .env
+          - ./.env
           
         networks:
           - name: test
