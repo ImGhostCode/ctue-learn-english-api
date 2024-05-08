@@ -80,7 +80,8 @@
         name: ctue-nestjs-app
         image: imghostcode/ctue-learn-english-api
         # Pass environment variables to the container
-        env: "{{ env_vars }}"
+        env_file:
+          - .env
           
         networks:
           - name: test
