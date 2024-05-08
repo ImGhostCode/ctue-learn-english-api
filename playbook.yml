@@ -97,9 +97,8 @@
       docker_container:
         name: ctue-nestjs-app
         image: imghostcode/ctue-learn-english-api
-        # env_file:
-        #   - "{{ lookup('file', '/home/azureuser/.env') }}"
-        env: "{{ env_file_contents | from_yaml }}"
+        env_file:
+          - "{{ env_vars }}"
         networks:
           - name: test
             aliases:
