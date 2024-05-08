@@ -273,6 +273,9 @@ export class StatisticsService {
                 this.prisma.vocabularyPack.groupBy({
                     by: ['specId'],
                     where: {
+                        specId: {
+                            not: null,
+                        },
                         isDeleted: false,
                         createdAt: selectedTime,
                     },
@@ -283,6 +286,9 @@ export class StatisticsService {
                 this.prisma.vocabularyPack.groupBy({
                     by: ['topicId'],
                     where: {
+                        topicId: {
+                            not: null,
+                        },
                         isDeleted: false,
                         createdAt: selectedTime,
                     },
