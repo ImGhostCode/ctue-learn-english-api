@@ -278,6 +278,7 @@ export class StatisticsService {
                         },
                         isDeleted: false,
                         createdAt: selectedTime,
+                        isPublic: true
                     },
                     _count: {
                         _all: true,
@@ -291,6 +292,7 @@ export class StatisticsService {
                         },
                         isDeleted: false,
                         createdAt: selectedTime,
+                        isPublic: true
                     },
                     _count: {
                         _all: true,
