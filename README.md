@@ -64,6 +64,9 @@ Explain how to run the automated tests for this system.
 npm test
 ```
 
+### Installing mobile app
+https://github.com/ImGhostCode/ctue-mobile-app
+
 ## Deployment
 <h3 align="center">
   <br>
